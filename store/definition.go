@@ -18,5 +18,6 @@ type StoreProduct struct {
 	Brand     string
 	Price     decimal.Decimal
 	Available bool
+	ImageLink string
 	Link      string
 }

@@ -1,9 +1,9 @@
 package pingodoce
 
 import (
-	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/brunofjesus/pricetracker/store"
 )
@@ -41,22 +41,25 @@ func (s *PingoDoceStore) Crawl(productChannel chan store.StoreProduct) {
 		index = index + 100
 
 		for _, product := range response.Sections.Null.Products {
-			fmt.Printf("%s: %f\n", product.Source.ShortDescription, product.Source.UnitPrice)
+			storeProduct := mapPingoDoceProductToStoreProduct(product.Source)
+			productChannel <- storeProduct
 		}
+
+		time.Sleep(1 * time.Second) // be polite
 	}
 }
 
 // Id implements store.Store.
 func (s *PingoDoceStore) Id() string {
-	panic("unimplemented")
+	return "pingodoce"
 }
 
 // Name implements store.Store.
 func (s *PingoDoceStore) Name() string {
-	panic("unimplemented")
+	return "Pingo Doce"
 }
 
 // Website implements store.Store.
 func (*PingoDoceStore) Website() string {
-	panic("unimplemented")
+	return "https://mercadao.pt/store/pingo-doce"
 }
