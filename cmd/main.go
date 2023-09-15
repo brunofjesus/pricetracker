@@ -2,20 +2,23 @@ package main
 
 import (
 	"fmt"
+	"time"
 
-	"github.com/brunofjesus/pricetracker/store"
+	"github.com/brunofjesus/pricetracker/management"
 	"github.com/brunofjesus/pricetracker/store/pingodoce"
 )
 
 func main() {
 	fmt.Println("Hello world")
 
-	productChannel := make(chan store.StoreProduct, 10)
+	listener := management.GetListener()
 
 	var store = pingodoce.Instance()
-	go store.Crawl(productChannel)
+	go store.Crawl(listener.ProductChannel)
 
-	for storeProduct := range productChannel {
-		fmt.Printf("%v\n", storeProduct)
+	listener.Start()
+
+	for {
+		time.Sleep(1 * time.Second)
 	}
 }
