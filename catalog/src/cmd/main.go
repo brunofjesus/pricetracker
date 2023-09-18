@@ -9,11 +9,13 @@ import (
 )
 
 func main() {
-	//TODO
-	// https://github.com/glebarez/go-sqlite
-	// https://github.com/golang-migrate/migrate/tree/master/database/sqlite
-
 	fmt.Println("Hello world")
+
+	dsn := "host=localhost port=5432 user=postgres password=price dbname=postgres sslmode=disable timezone=UTC connect_timeout=5"
+
+	db := databaseConnect(dsn, 5)
+
+	fmt.Println(db.Stats().OpenConnections)
 
 	listener := management.GetListener()
 
