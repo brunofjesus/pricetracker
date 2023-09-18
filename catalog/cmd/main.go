@@ -9,6 +9,10 @@ import (
 )
 
 func main() {
+	//TODO
+	// https://github.com/glebarez/go-sqlite
+	// https://github.com/golang-migrate/migrate/tree/master/database/sqlite
+
 	fmt.Println("Hello world")
 
 	listener := management.GetListener()
