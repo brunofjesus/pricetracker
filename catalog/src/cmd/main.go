@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/management"
-	"github.com/brunofjesus/pricetracker/store/pingodoce"
+	"github.com/brunofjesus/pricetracker/catalog/src/management"
+	"github.com/brunofjesus/pricetracker/catalog/src/store/pingodoce"
 )
 
 func main() {

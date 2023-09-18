@@ -3,7 +3,7 @@ package pingodoce
 import (
 	"fmt"
 
-	"github.com/brunofjesus/pricetracker/store"
+	"github.com/brunofjesus/pricetracker/catalog/src/store"
 	"github.com/shopspring/decimal"
 )
 

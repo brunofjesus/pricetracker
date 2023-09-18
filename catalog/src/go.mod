@@ -1,4 +1,4 @@
-module github.com/brunofjesus/pricetracker
+module github.com/brunofjesus/pricetracker/catalog/src
 
 go 1.20
 

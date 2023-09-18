@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/store"
+	"github.com/brunofjesus/pricetracker/catalog/src/store"
 )
 
 var once sync.Once
