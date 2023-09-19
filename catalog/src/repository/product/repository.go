@@ -20,10 +20,10 @@ type productRepository struct {
 	qb *squirrel.StatementBuilderType
 }
 
-func NewProductRepository(db *sql.DB, qb *squirrel.StatementBuilderType) ProductRepository {
+func NewProductRepository(db *sql.DB) ProductRepository {
 	return &productRepository{
 		db: db,
-		qb: qb,
+		qb: repository.QueryBuilder(db),
 	}
 }
 

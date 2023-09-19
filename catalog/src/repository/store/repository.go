@@ -18,10 +18,10 @@ type storeRepository struct {
 	qb *squirrel.StatementBuilderType
 }
 
-func NewStoreRepository(db *sql.DB, qb *squirrel.StatementBuilderType) StoreRepository {
+func NewStoreRepository(db *sql.DB) StoreRepository {
 	return &storeRepository{
 		db: db,
-		qb: qb,
+		qb: repository.QueryBuilder(db),
 	}
 }
 
