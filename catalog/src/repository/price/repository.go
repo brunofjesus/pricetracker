@@ -22,10 +22,10 @@ type priceRepository struct {
 	qb *squirrel.StatementBuilderType
 }
 
-func NewPriceRepository(db *sql.DB, qb *squirrel.StatementBuilderType) PriceRepository {
+func NewPriceRepository(db *sql.DB) PriceRepository {
 	return &priceRepository{
 		db: db,
-		qb: qb,
+		qb: repository.QueryBuilder(db),
 	}
 }
 
