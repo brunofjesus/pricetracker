@@ -1,4 +1,4 @@
-package datastruct
+package model
 
 import "github.com/shopspring/decimal"
 

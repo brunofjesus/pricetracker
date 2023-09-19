@@ -1,2 +1,3 @@
 database:
-  DSN: "host=localhost port=5432 user=postgres password=price dbname=postgres sslmode=disable timezone=UTC connect_timeout=5"
+  dsn: "host=localhost port=5432 user=postgres password=price dbname=postgres sslmode=disable timezone=UTC connect_timeout=5"
+  attempts: 5

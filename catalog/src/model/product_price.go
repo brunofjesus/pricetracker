@@ -1,4 +1,4 @@
-package datastruct
+package model
 
 import (
 	"time"

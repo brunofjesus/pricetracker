@@ -16,10 +16,6 @@ func main() {
 
 	fmt.Printf("Connecting: %s\n", appConfig.Database.DSN)
 
-	db := databaseConnect(appConfig.Database.DSN, 5)
-
-	fmt.Println(db.Stats().OpenConnections)
-
 	listener := management.GetListener()
 
 	var store = pingodoce.Instance()
