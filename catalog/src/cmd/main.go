@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/brunofjesus/pricetracker/catalog/src/config"
 	"github.com/brunofjesus/pricetracker/catalog/src/management"
 	"github.com/brunofjesus/pricetracker/catalog/src/store/pingodoce"
 )
@@ -11,9 +12,11 @@ import (
 func main() {
 	fmt.Println("Hello world")
 
-	dsn := "host=localhost port=5432 user=postgres password=price dbname=postgres sslmode=disable timezone=UTC connect_timeout=5"
+	appConfig := config.GetApplicationConfiguration()
 
-	db := databaseConnect(dsn, 5)
+	fmt.Printf("Connecting: %s\n", appConfig.Database.DSN)
+
+	db := databaseConnect(appConfig.Database.DSN, 5)
 
 	fmt.Println(db.Stats().OpenConnections)
 
