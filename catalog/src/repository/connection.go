@@ -7,6 +7,8 @@ import (
 	"time"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/config"
+
+	_ "github.com/lib/pq"
 )
 
 var once sync.Once

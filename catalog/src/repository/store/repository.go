@@ -18,7 +18,8 @@ type storeRepository struct {
 	qb *squirrel.StatementBuilderType
 }
 
-func NewStoreRepository(db *sql.DB) StoreRepository {
+func NewStoreRepository() StoreRepository {
+	db := repository.GetDatabaseConnection()
 	return &storeRepository{
 		db: db,
 		qb: repository.QueryBuilder(db),
