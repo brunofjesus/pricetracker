@@ -3,10 +3,14 @@ package store
 import (
 	"database/sql"
 	"errors"
+	"sync"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository/store"
 )
+
+var once sync.Once
+var instance StoreEnroller
 
 type StoreEnroller interface {
 	Enroll(store datasource.Store) error
@@ -16,10 +20,13 @@ type enroller struct {
 	storeRepository store.StoreRepository
 }
 
-func NewStoreEnroller(storeRepository store.StoreRepository) StoreEnroller {
-	return &enroller{
-		storeRepository: storeRepository,
-	}
+func GetStoreEnroller() StoreEnroller {
+	once.Do(func() {
+		instance = &enroller{
+			storeRepository: store.GetStoreRepository(),
+		}
+	})
+	return instance
 }
 
 // Enroll implements StoreEnroller.

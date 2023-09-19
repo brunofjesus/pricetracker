@@ -1,35 +1,29 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"time"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
 	"github.com/brunofjesus/pricetracker/catalog/src/datasource/pingodoce"
-	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
-	"github.com/brunofjesus/pricetracker/catalog/src/service/product"
+	product_listener "github.com/brunofjesus/pricetracker/catalog/src/service/product/listener"
 	store_service "github.com/brunofjesus/pricetracker/catalog/src/service/store"
 )
 
 func main() {
-	fmt.Println("Hello world")
-
-	storeRepository := store_repository.NewStoreRepository()
-	storeEnroller := store_service.NewStoreEnroller(storeRepository)
-
-	listener := product.GetListener()
+	productListener := product_listener.GetListener()
 
 	stores := listStores()
+	storeEnroller := store_service.GetStoreEnroller()
 	for _, store := range stores {
 		if err := storeEnroller.Enroll(store); err != nil {
 			log.Printf("Cannot enroll %s: %v\n", store.Name(), err)
 		} else {
-			go store.Crawl(listener.ProductChannel)
+			go store.Crawl(productListener.Channel())
 		}
 	}
 
-	listener.Start()
+	productListener.Listen()
 
 	for {
 		time.Sleep(1 * time.Second)

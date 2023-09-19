@@ -2,11 +2,15 @@ package store
 
 import (
 	"database/sql"
+	"sync"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/src/model"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 )
+
+var once sync.Once
+var instance StoreRepository
 
 type StoreRepository interface {
 	FindStoreBySlug(slug string, tx *sql.Tx) (*model.Store, error)
@@ -18,12 +22,17 @@ type storeRepository struct {
 	qb *squirrel.StatementBuilderType
 }
 
-func NewStoreRepository() StoreRepository {
-	db := repository.GetDatabaseConnection()
-	return &storeRepository{
-		db: db,
-		qb: repository.QueryBuilder(db),
-	}
+func GetStoreRepository() StoreRepository {
+	once.Do(func() {
+		db := repository.GetDatabaseConnection()
+
+		instance = &storeRepository{
+			db: db,
+			qb: repository.QueryBuilder(db),
+		}
+	})
+
+	return instance
 }
 
 func (r *storeRepository) FindStoreBySlug(slug string, tx *sql.Tx) (*model.Store, error) {
