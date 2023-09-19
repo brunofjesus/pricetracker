@@ -13,6 +13,7 @@ import (
 
 type PriceRepository interface {
 	GetPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]model.ProductPrice, error)
+	CountPrices(productId int64, tx *sql.Tx) (int64, error)
 	CreatePrice(productId int64, price decimal.Decimal, timestamp time.Time, tx *sql.Tx) error
 }
 
@@ -61,6 +62,18 @@ func (r *priceRepository) GetPrices(productId int64, offset int64, limit int, or
 	}
 
 	return prices, nil
+}
+
+// CountPrices implements PriceRepository.
+func (r *priceRepository) CountPrices(productId int64, tx *sql.Tx) (int64, error) {
+	qb := repository.QueryBuilderOrDefault(tx, r.qb)
+	q := qb.Select("COUNT(*)").
+		From(model.ProductPriceTableName).
+		Where(squirrel.Eq{"product_id": productId})
+
+	var count int64
+	err := q.QueryRow().Scan(&count)
+	return count, err
 }
 
 // CreatePrice implements PriceRepository.
