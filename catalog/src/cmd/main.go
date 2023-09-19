@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/config"
+	"github.com/brunofjesus/pricetracker/catalog/src/datasource/pingodoce"
 	"github.com/brunofjesus/pricetracker/catalog/src/management"
-	"github.com/brunofjesus/pricetracker/catalog/src/store/pingodoce"
 )
 
 func main() {

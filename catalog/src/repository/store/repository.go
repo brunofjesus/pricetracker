@@ -9,7 +9,8 @@ import (
 )
 
 type StoreRepository interface {
-	CreateStore(slug, name, website string, transaction *sql.Tx) (int64, error)
+	FindStoreBySlug(slug string, tx *sql.Tx) (*model.Store, error)
+	CreateStore(slug, name, website string, tx *sql.Tx) (int64, error)
 }
 
 type storeRepository struct {
@@ -24,10 +25,32 @@ func NewStoreRepository(db *sql.DB, qb *squirrel.StatementBuilderType) StoreRepo
 	}
 }
 
-func (r *storeRepository) CreateStore(slug string, name string, website string, transaction *sql.Tx) (int64, error) {
+func (r *storeRepository) FindStoreBySlug(slug string, tx *sql.Tx) (*model.Store, error) {
 	qb := r.qb
-	if transaction != nil {
-		qb = repository.QueryBuilder(transaction)
+	if tx != nil {
+		qb = repository.QueryBuilder(tx)
+	}
+
+	q := qb.Select("store_id", "slug", "name", "website", "active").
+		From(model.StoreTableName).
+		Where(squirrel.Eq{"slug": slug})
+
+	var store model.Store
+	err := q.QueryRow().Scan(
+		&store.StoreId,
+		&store.Slug,
+		&store.Name,
+		&store.Website,
+		&store.Active,
+	)
+
+	return &store, err
+}
+
+func (r *storeRepository) CreateStore(slug string, name string, website string, tx *sql.Tx) (int64, error) {
+	qb := r.qb
+	if tx != nil {
+		qb = repository.QueryBuilder(tx)
 	}
 
 	q := qb.Insert(model.StoreTableName).

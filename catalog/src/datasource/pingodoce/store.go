@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/store"
+	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
 )
 
 var once sync.Once
@@ -14,7 +14,7 @@ var instance PingoDoceStore
 type PingoDoceStore struct {
 }
 
-func Instance() store.Store {
+func Instance() datasource.Store {
 	once.Do(
 		func() {
 			instance = PingoDoceStore{}
@@ -25,7 +25,7 @@ func Instance() store.Store {
 }
 
 // Crawl implements store.Store.
-func (s *PingoDoceStore) Crawl(productChannel chan store.StoreProduct) {
+func (s *PingoDoceStore) Crawl(productChannel chan datasource.StoreProduct) {
 
 	index := 0
 	total := 100
@@ -49,9 +49,9 @@ func (s *PingoDoceStore) Crawl(productChannel chan store.StoreProduct) {
 	}
 }
 
-// Id implements store.Store.
-func (s *PingoDoceStore) Id() string {
-	return "pingodoce"
+// Slug implements store.Store.
+func (s *PingoDoceStore) Slug() string {
+	return "pingo-doce"
 }
 
 // Name implements store.Store.

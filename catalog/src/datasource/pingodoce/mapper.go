@@ -3,13 +3,13 @@ package pingodoce
 import (
 	"fmt"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/store"
+	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
 	"github.com/shopspring/decimal"
 )
 
-func mapPingoDoceProductToStoreProduct(in PingoDoceProduct) store.StoreProduct {
-	return store.StoreProduct{
-		StoreId:   "pingodoce",
+func mapPingoDoceProductToStoreProduct(in PingoDoceProduct) datasource.StoreProduct {
+	return datasource.StoreProduct{
+		StoreSlug: "pingodoce",
 		StoreName: "Pingo Doce",
 		Name:      in.ShortDescription,
 		EAN:       in.Eans,

@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/store"
+	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
 )
 
 var once sync.Once
@@ -14,7 +14,7 @@ var instance Listener
 var lock sync.Mutex
 
 type Listener struct {
-	ProductChannel        chan store.StoreProduct
+	ProductChannel        chan datasource.StoreProduct
 	listening             bool
 	listenerSignalChannel chan bool
 }
@@ -22,7 +22,7 @@ type Listener struct {
 func GetListener() *Listener {
 	once.Do(func() {
 		instance = Listener{
-			ProductChannel:        make(chan store.StoreProduct, 10),
+			ProductChannel:        make(chan datasource.StoreProduct, 10),
 			listening:             false,
 			listenerSignalChannel: make(chan bool),
 		}

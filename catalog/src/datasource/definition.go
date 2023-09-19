@@ -1,16 +1,16 @@
-package store
+package datasource
 
 import "github.com/shopspring/decimal"
 
 type Store interface {
-	Id() string
+	Slug() string
 	Name() string
 	Website() string
 	Crawl(productChannel chan StoreProduct)
 }
 
 type StoreProduct struct {
-	StoreId   string
+	StoreSlug string
 	StoreName string
 	EAN       []string
 	SKU       []string
