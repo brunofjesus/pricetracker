@@ -4,6 +4,10 @@ import (
 	"sync"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
+	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
+	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
+	product_meta_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product/meta"
+	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
 )
 
 var once sync.Once
@@ -14,11 +18,20 @@ type ProductReceiver interface {
 }
 
 type productReceiver struct {
+	storeRepository       store_repository.StoreRepository
+	productRepository     product_repository.ProductRepository
+	productMetaRepository product_meta_repository.ProductMetaRepository
+	priceRepository       price_repository.PriceRepository
 }
 
-func GetReceiver() ProductReceiver {
+func GetProductReceiver() ProductReceiver {
 	once.Do(func() {
-		instance = &productReceiver{}
+		instance = &productReceiver{
+			storeRepository:       store_repository.GetStoreRepository(),
+			productRepository:     product_repository.GetProductRepository(),
+			productMetaRepository: product_meta_repository.GetProductMetaRepository(),
+			priceRepository:       price_repository.GetPriceRepository(),
+		}
 	})
 	return instance
 }

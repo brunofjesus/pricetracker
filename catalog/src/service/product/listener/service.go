@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
+	"github.com/brunofjesus/pricetracker/catalog/src/service/product/receiver"
 )
 
 var once sync.Once
@@ -23,6 +24,7 @@ type productListener struct {
 	productChannel        chan datasource.StoreProduct
 	listening             bool
 	listenerSignalChannel chan bool
+	productReceiver       receiver.ProductReceiver
 }
 
 func GetListener() ProductListener {
@@ -31,6 +33,7 @@ func GetListener() ProductListener {
 			productChannel:        make(chan datasource.StoreProduct, 10),
 			listening:             false,
 			listenerSignalChannel: make(chan bool),
+			productReceiver:       receiver.GetProductReceiver(),
 		}
 	})
 
@@ -76,7 +79,7 @@ func (l *productListener) listen() {
 		case <-l.listenerSignalChannel:
 			return
 		case storeProduct := <-l.productChannel:
-			fmt.Printf("%v\n", storeProduct.Name)
+			l.productReceiver.Receive(storeProduct)
 		default:
 			time.Sleep(100 * time.Millisecond)
 		}

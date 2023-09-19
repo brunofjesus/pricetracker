@@ -2,12 +2,16 @@ package product
 
 import (
 	"database/sql"
+	"sync"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/src/model"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 	"github.com/shopspring/decimal"
 )
+
+var once sync.Once
+var instance ProductRepository
 
 type ProductRepository interface {
 	FindProductById(id int64, tx *sql.Tx) (*model.Product, error)
@@ -20,11 +24,16 @@ type productRepository struct {
 	qb *squirrel.StatementBuilderType
 }
 
-func NewProductRepository(db *sql.DB) ProductRepository {
-	return &productRepository{
-		db: db,
-		qb: repository.QueryBuilder(db),
-	}
+func GetProductRepository() ProductRepository {
+	once.Do(func() {
+		db := repository.GetDatabaseConnection()
+
+		instance = &productRepository{
+			db: db,
+			qb: repository.QueryBuilder(db),
+		}
+	})
+	return instance
 }
 
 // FindProductById implements ProductRepository.

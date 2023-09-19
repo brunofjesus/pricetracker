@@ -3,11 +3,15 @@ package meta
 import (
 	"database/sql"
 	"log"
+	"sync"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/src/model"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 )
+
+var once sync.Once
+var instance ProductMetaRepository
 
 type ProductMetaRepository interface {
 	CreateSKUs(productId int64, skus []string, tx *sql.Tx) error
@@ -21,11 +25,16 @@ type productMetaRepository struct {
 	qb *squirrel.StatementBuilderType
 }
 
-func NewProductMetaRepository(db *sql.DB) ProductMetaRepository {
-	return &productMetaRepository{
-		db: db,
-		qb: repository.QueryBuilder(db),
-	}
+func GetProductMetaRepository() ProductMetaRepository {
+	once.Do(func() {
+		db := repository.GetDatabaseConnection()
+
+		instance = &productMetaRepository{
+			db: db,
+			qb: repository.QueryBuilder(db),
+		}
+	})
+	return instance
 }
 
 // CreateEANs implements ProductMetaRepository.

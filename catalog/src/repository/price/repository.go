@@ -3,6 +3,7 @@ package price
 import (
 	"database/sql"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -10,6 +11,9 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 	"github.com/shopspring/decimal"
 )
+
+var once sync.Once
+var instance PriceRepository
 
 type PriceRepository interface {
 	GetPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]model.ProductPrice, error)
@@ -22,11 +26,17 @@ type priceRepository struct {
 	qb *squirrel.StatementBuilderType
 }
 
-func NewPriceRepository(db *sql.DB) PriceRepository {
-	return &priceRepository{
-		db: db,
-		qb: repository.QueryBuilder(db),
-	}
+func GetPriceRepository() PriceRepository {
+	once.Do(func() {
+		db := repository.GetDatabaseConnection()
+
+		instance = &priceRepository{
+			db: db,
+			qb: repository.QueryBuilder(db),
+		}
+	})
+
+	return instance
 }
 
 // GetPrices implements PriceRepository.
