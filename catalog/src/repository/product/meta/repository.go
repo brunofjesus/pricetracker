@@ -14,6 +14,8 @@ var once sync.Once
 var instance ProductMetaRepository
 
 type ProductMetaRepository interface {
+	FindProductIdBySKU(sku string, tx *sql.Tx) (int64, error)
+	FindProductIdByEAN(ean int64, tx *sql.Tx) (int64, error)
 	CreateSKUs(productId int64, skus []string, tx *sql.Tx) error
 	DeleteSKUs(productId int64, skus []string, tx *sql.Tx) error
 	CreateEANs(productId int64, eans []int64, tx *sql.Tx) error
@@ -35,6 +37,16 @@ func GetProductMetaRepository() ProductMetaRepository {
 		}
 	})
 	return instance
+}
+
+// FindProductIdBySKU implements ProductMetaRepository.
+func (r *productMetaRepository) FindProductIdBySKU(sku string, tx *sql.Tx) (int64, error) {
+	return r.findOne(tx, squirrel.Eq{"sku": sku})
+}
+
+// FindProductIdByEAN implements ProductMetaRepository.
+func (r *productMetaRepository) FindProductIdByEAN(ean int64, tx *sql.Tx) (int64, error) {
+	return r.findOne(tx, squirrel.Eq{"ean": ean})
 }
 
 // CreateEANs implements ProductMetaRepository.
@@ -135,6 +147,25 @@ func (r *productMetaRepository) DeleteSKUs(productId int64, skus []string, tx *s
 		return err
 	}
 	return nil
+}
+
+func (r *productMetaRepository) findOne(tx *sql.Tx, where any, args ...any) (int64, error) {
+	qb := r.qb
+	if tx != nil {
+		qb = repository.QueryBuilder(tx)
+	}
+
+	q := qb.Select("product_id").
+		From(model.ProductTableName).
+		Where(where, args...)
+
+	var productId int64
+
+	if err := q.QueryRow().Scan(&productId); err != nil {
+		return -1, err
+	}
+
+	return productId, nil
 }
 
 func (r *productMetaRepository) createEan(productId int64, ean int64, tx *sql.Tx) error {
