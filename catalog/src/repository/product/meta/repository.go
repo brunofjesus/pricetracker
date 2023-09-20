@@ -14,8 +14,8 @@ var once sync.Once
 var instance ProductMetaRepository
 
 type ProductMetaRepository interface {
-	FindProductIdBySKU(sku string, tx *sql.Tx) (int64, error)
-	FindProductIdByEAN(ean int64, tx *sql.Tx) (int64, error)
+	FindProductIdBySKU(sku []string, tx *sql.Tx) (int64, error)
+	FindProductIdByEAN(ean []int64, tx *sql.Tx) (int64, error)
 	CreateSKUs(productId int64, skus []string, tx *sql.Tx) error
 	DeleteSKUs(productId int64, skus []string, tx *sql.Tx) error
 	CreateEANs(productId int64, eans []int64, tx *sql.Tx) error
@@ -40,12 +40,12 @@ func GetProductMetaRepository() ProductMetaRepository {
 }
 
 // FindProductIdBySKU implements ProductMetaRepository.
-func (r *productMetaRepository) FindProductIdBySKU(sku string, tx *sql.Tx) (int64, error) {
+func (r *productMetaRepository) FindProductIdBySKU(sku []string, tx *sql.Tx) (int64, error) {
 	return r.findOne(tx, squirrel.Eq{"sku": sku})
 }
 
 // FindProductIdByEAN implements ProductMetaRepository.
-func (r *productMetaRepository) FindProductIdByEAN(ean int64, tx *sql.Tx) (int64, error) {
+func (r *productMetaRepository) FindProductIdByEAN(ean []int64, tx *sql.Tx) (int64, error) {
 	return r.findOne(tx, squirrel.Eq{"ean": ean})
 }
 

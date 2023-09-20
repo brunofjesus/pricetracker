@@ -4,10 +4,9 @@ import (
 	"sync"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
-	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
-	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
-	product_meta_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product/meta"
-	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
+	"github.com/brunofjesus/pricetracker/catalog/src/service/product/creator"
+	"github.com/brunofjesus/pricetracker/catalog/src/service/product/finder"
+	"github.com/brunofjesus/pricetracker/catalog/src/service/product/updater"
 )
 
 var once sync.Once
@@ -18,25 +17,27 @@ type ProductReceiver interface {
 }
 
 type productReceiver struct {
-	storeRepository       store_repository.StoreRepository
-	productRepository     product_repository.ProductRepository
-	productMetaRepository product_meta_repository.ProductMetaRepository
-	priceRepository       price_repository.PriceRepository
+	productFinder  finder.ProductFinder
+	productCreator creator.ProductCreator
+	productUpdater updater.ProductUpdater
 }
 
 func GetProductReceiver() ProductReceiver {
 	once.Do(func() {
 		instance = &productReceiver{
-			storeRepository:       store_repository.GetStoreRepository(),
-			productRepository:     product_repository.GetProductRepository(),
-			productMetaRepository: product_meta_repository.GetProductMetaRepository(),
-			priceRepository:       price_repository.GetPriceRepository(),
+			productFinder:  finder.GetProductFinder(),
+			productCreator: creator.GetProductCreator(),
+			productUpdater: updater.GetProductUpdater(),
 		}
 	})
 	return instance
 }
 
 // Receive implements Receiver.
-func (*productReceiver) Receive(storeProduct datasource.StoreProduct) {
-	panic("unimplemented")
+func (s *productReceiver) Receive(storeProduct datasource.StoreProduct) {
+	if productId := s.productFinder.Find(storeProduct); productId > 0 {
+		s.productUpdater.Update(storeProduct)
+	} else {
+		s.productCreator.Create(storeProduct)
+	}
 }
