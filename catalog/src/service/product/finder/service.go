@@ -97,4 +97,6 @@ func (s *productFinder) findByProductUrl(storeProduct datasource.StoreProduct) i
 	} else if err == nil {
 		return product.ProductId
 	}
+
+	return -1
 }
