@@ -70,7 +70,7 @@ func (s *productFinder) findByEan(storeProduct datasource.StoreProduct) int64 {
 	if len(validEans) > 0 {
 		productId, err := s.productMetaRepository.FindProductIdByEAN(validEans, nil)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
-			log.Printf("ERROR finding by ean %v: %v", validEans, err)
+			log.Printf("error finding by ean %v: %v", validEans, err)
 		} else if err == nil {
 			return productId
 		}
@@ -82,7 +82,7 @@ func (s *productFinder) findByEan(storeProduct datasource.StoreProduct) int64 {
 func (s *productFinder) findBySku(storeProduct datasource.StoreProduct) int64 {
 	productId, err := s.productMetaRepository.FindProductIdBySKU(storeProduct.SKU, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Printf("ERROR finding by sku %v: %v", storeProduct.SKU, err)
+		log.Printf("error finding by sku %v: %v", storeProduct.SKU, err)
 	} else if err == nil {
 		return productId
 	}
@@ -93,7 +93,7 @@ func (s *productFinder) findBySku(storeProduct datasource.StoreProduct) int64 {
 func (s *productFinder) findByProductUrl(storeProduct datasource.StoreProduct) int64 {
 	product, err := s.productRepository.FindProductByUrl(storeProduct.Link, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
-		log.Printf("ERROR finding by url %v: %v", storeProduct.Link, err)
+		log.Printf("error finding by url %v: %v", storeProduct.Link, err)
 	} else if err == nil {
 		return product.ProductId
 	}

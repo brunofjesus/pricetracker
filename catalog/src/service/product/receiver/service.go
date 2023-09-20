@@ -1,6 +1,7 @@
 package receiver
 
 import (
+	"log"
 	"sync"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
@@ -35,9 +36,14 @@ func GetProductReceiver() ProductReceiver {
 
 // Receive implements Receiver.
 func (s *productReceiver) Receive(storeProduct datasource.StoreProduct) {
+	var err error
 	if productId := s.productFinder.Find(storeProduct); productId > 0 {
-		s.productUpdater.Update(storeProduct)
+		err = s.productUpdater.Update(storeProduct)
 	} else {
-		s.productCreator.Create(storeProduct)
+		err = s.productCreator.Create(storeProduct)
+	}
+
+	if err != nil {
+		log.Printf("error on receiver handler: %v", err)
 	}
 }

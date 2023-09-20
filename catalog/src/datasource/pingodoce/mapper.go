@@ -9,7 +9,7 @@ import (
 
 func mapPingoDoceProductToStoreProduct(in PingoDoceProduct) datasource.StoreProduct {
 	return datasource.StoreProduct{
-		StoreSlug: "pingodoce",
+		StoreSlug: "pingo-doce",
 		StoreName: "Pingo Doce",
 		Name:      in.ShortDescription,
 		EAN:       in.Eans,

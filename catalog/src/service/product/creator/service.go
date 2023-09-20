@@ -1,9 +1,13 @@
 package creator
 
 import (
+	"database/sql"
+	"strconv"
 	"sync"
+	"time"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
+	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 
 	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
@@ -19,6 +23,7 @@ type ProductCreator interface {
 }
 
 type productCreator struct {
+	db                    *sql.DB
 	storeRepository       store_repository.StoreRepository
 	productRepository     product_repository.ProductRepository
 	productMetaRepository product_meta_repository.ProductMetaRepository
@@ -28,6 +33,7 @@ type productCreator struct {
 func GetProductCreator() ProductCreator {
 	once.Do(func() {
 		instance = &productCreator{
+			db:                    repository.GetDatabaseConnection(),
 			storeRepository:       store_repository.GetStoreRepository(),
 			productRepository:     product_repository.GetProductRepository(),
 			productMetaRepository: product_meta_repository.GetProductMetaRepository(),
@@ -38,6 +44,73 @@ func GetProductCreator() ProductCreator {
 }
 
 // Create implements ProductUpdater.
-func (*productCreator) Create(storeProduct datasource.StoreProduct) error {
-	panic("unimplemented")
+func (s *productCreator) Create(storeProduct datasource.StoreProduct) error {
+	tx, err := s.db.Begin()
+
+	if err != nil {
+		return err
+	}
+
+	defer func() {
+		if err != nil {
+			tx.Rollback()
+		}
+	}()
+
+	store, err := s.storeRepository.FindStoreBySlug(storeProduct.StoreSlug, tx)
+	if err != nil {
+		return err
+	}
+
+	productId, err := s.productRepository.CreateProduct(
+		store.StoreId,
+		storeProduct.Name,
+		storeProduct.Brand,
+		storeProduct.ImageLink,
+		storeProduct.Link,
+		storeProduct.Price,
+		storeProduct.Available,
+		tx,
+	)
+
+	if err != nil {
+		return err
+	}
+
+	if len(storeProduct.EAN) > 0 {
+		s.productMetaRepository.CreateEANs(
+			productId,
+			filterEANs(storeProduct),
+			tx,
+		)
+	}
+
+	if len(storeProduct.SKU) > 0 {
+		s.productMetaRepository.CreateSKUs(
+			productId,
+			storeProduct.SKU,
+			tx,
+		)
+	}
+
+	err = s.priceRepository.CreatePrice(productId, storeProduct.Price, time.Now(), tx)
+
+	if err != nil {
+		return err
+	}
+
+	tx.Commit()
+
+	return nil
+}
+
+func filterEANs(storeProduct datasource.StoreProduct) []int64 {
+	var validEans []int64
+	for _, ean := range storeProduct.EAN {
+		if eanInt, err := strconv.Atoi(ean); err == nil {
+			validEans = append(validEans, int64(eanInt))
+		}
+	}
+
+	return validEans
 }

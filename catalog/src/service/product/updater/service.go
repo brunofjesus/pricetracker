@@ -1,6 +1,7 @@
 package updater
 
 import (
+	"errors"
 	"sync"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
@@ -39,5 +40,5 @@ func GetProductUpdater() ProductUpdater {
 
 // Update implements ProductUpdater.
 func (*productUpdater) Update(storeProduct datasource.StoreProduct) error {
-	panic("unimplemented")
+	return errors.New("updater not implemented yet")
 }

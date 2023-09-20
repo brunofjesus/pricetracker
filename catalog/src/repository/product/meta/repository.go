@@ -41,20 +41,21 @@ func GetProductMetaRepository() ProductMetaRepository {
 
 // FindProductIdBySKU implements ProductMetaRepository.
 func (r *productMetaRepository) FindProductIdBySKU(sku []string, tx *sql.Tx) (int64, error) {
-	return r.findOne(tx, squirrel.Eq{"sku": sku})
+	return r.findOne(tx, model.ProductSkuTableName, squirrel.Eq{"sku": sku})
 }
 
 // FindProductIdByEAN implements ProductMetaRepository.
 func (r *productMetaRepository) FindProductIdByEAN(ean []int64, tx *sql.Tx) (int64, error) {
-	return r.findOne(tx, squirrel.Eq{"ean": ean})
+	return r.findOne(tx, model.ProductEanTableName, squirrel.Eq{"ean": ean})
 }
 
 // CreateEANs implements ProductMetaRepository.
 func (r *productMetaRepository) CreateEANs(productId int64, eans []int64, tx *sql.Tx) error {
+	var transaction *sql.Tx = tx
 	var err error
 
-	if tx == nil {
-		tx, err = r.db.Begin()
+	if transaction == nil {
+		transaction, err = r.db.Begin()
 		if err != nil {
 			return err
 		}
@@ -63,25 +64,30 @@ func (r *productMetaRepository) CreateEANs(productId int64, eans []int64, tx *sq
 	defer func() {
 		if err != nil {
 			log.Println(err)
-			tx.Rollback()
+			transaction.Rollback()
 		}
 	}()
 
 	for _, ean := range eans {
-		if err = r.createEan(productId, ean, tx); err != nil {
+		if err = r.createEan(productId, ean, transaction); err != nil {
 			return err
 		}
 	}
 
-	return tx.Commit()
+	// only commit if the transaction was created by this method
+	if tx == nil {
+		err = transaction.Commit()
+	}
+	return err
 }
 
 // CreateSKUs implements ProductMetaRepository.
 func (r *productMetaRepository) CreateSKUs(productId int64, skus []string, tx *sql.Tx) error {
+	var transaction *sql.Tx = tx
 	var err error
 
-	if tx == nil {
-		tx, err = r.db.Begin()
+	if transaction == nil {
+		transaction, err = r.db.Begin()
 		if err != nil {
 			return err
 		}
@@ -90,7 +96,7 @@ func (r *productMetaRepository) CreateSKUs(productId int64, skus []string, tx *s
 	defer func() {
 		if err != nil {
 			log.Println(err)
-			tx.Rollback()
+			transaction.Rollback()
 		}
 	}()
 
@@ -100,7 +106,11 @@ func (r *productMetaRepository) CreateSKUs(productId int64, skus []string, tx *s
 		}
 	}
 
-	return tx.Commit()
+	// only commit if the transaction was created by this method
+	if tx == nil {
+		err = transaction.Commit()
+	}
+	return err
 }
 
 // DeleteEANs implements ProductMetaRepository.
@@ -149,14 +159,14 @@ func (r *productMetaRepository) DeleteSKUs(productId int64, skus []string, tx *s
 	return nil
 }
 
-func (r *productMetaRepository) findOne(tx *sql.Tx, where any, args ...any) (int64, error) {
+func (r *productMetaRepository) findOne(tx *sql.Tx, tableName string, where any, args ...any) (int64, error) {
 	qb := r.qb
 	if tx != nil {
 		qb = repository.QueryBuilder(tx)
 	}
 
 	q := qb.Select("product_id").
-		From(model.ProductTableName).
+		From(tableName).
 		Where(where, args...)
 
 	var productId int64
