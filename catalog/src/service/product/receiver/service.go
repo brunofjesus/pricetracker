@@ -38,7 +38,7 @@ func GetProductReceiver() ProductReceiver {
 func (s *productReceiver) Receive(storeProduct datasource.StoreProduct) {
 	var err error
 	if productId := s.productFinder.Find(storeProduct); productId > 0 {
-		err = s.productUpdater.Update(storeProduct)
+		err = s.productUpdater.Update(productId, storeProduct)
 	} else {
 		err = s.productCreator.Create(storeProduct)
 	}

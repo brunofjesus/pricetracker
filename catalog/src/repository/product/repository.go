@@ -17,6 +17,7 @@ type ProductRepository interface {
 	FindProductById(id int64, tx *sql.Tx) (*model.Product, error)
 	FindProductByUrl(url string, tx *sql.Tx) (*model.Product, error)
 	CreateProduct(storeId int64, name, brand, imageUrl, productUrl string, price decimal.Decimal, available bool, tx *sql.Tx) (int64, error)
+	UpdateProduct(productId int64, name, brand, imageUrl, productUrl string, price decimal.Decimal, available bool, tx *sql.Tx) error
 }
 
 type productRepository struct {
@@ -51,10 +52,7 @@ func (r *productRepository) CreateProduct(
 	storeId int64, name string, brand string, imageUrl string, productUrl string,
 	price decimal.Decimal, available bool, tx *sql.Tx,
 ) (int64, error) {
-	qb := r.qb
-	if tx != nil {
-		qb = repository.QueryBuilder(tx)
-	}
+	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Insert(model.ProductTableName).
 		Columns("store_id", "name", "brand", "price", "available", "image_url", "product_url").
@@ -68,6 +66,29 @@ func (r *productRepository) CreateProduct(
 	}
 
 	return id, nil
+}
+
+// UpdateProduct implements ProductRepository.
+func (r *productRepository) UpdateProduct(
+	productId int64, name string, brand string, imageUrl string, productUrl string,
+	price decimal.Decimal, available bool, tx *sql.Tx,
+) error {
+	qb := repository.QueryBuilderOrDefault(tx, r.qb)
+
+	q := qb.Update(model.ProductTableName).
+		SetMap(map[string]any{
+			"name":        name,
+			"brand":       brand,
+			"image_url":   imageUrl,
+			"product_url": productUrl,
+			"price":       price,
+			"available":   available,
+		}).
+		Where(squirrel.Eq{"productId": productId})
+
+	_, err := q.Exec()
+
+	return err
 }
 
 func (r *productRepository) findOne(tx *sql.Tx, where any, args ...any) (*model.Product, error) {

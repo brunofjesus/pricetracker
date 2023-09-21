@@ -16,6 +16,7 @@ var once sync.Once
 var instance PriceRepository
 
 type PriceRepository interface {
+	GetLatestPrice(productId int64, tx *sql.Tx) (*model.ProductPrice, error)
 	GetPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]model.ProductPrice, error)
 	CountPrices(productId int64, tx *sql.Tx) (int64, error)
 	CreatePrice(productId int64, price decimal.Decimal, timestamp time.Time, tx *sql.Tx) error
@@ -37,6 +38,26 @@ func GetPriceRepository() PriceRepository {
 	})
 
 	return instance
+}
+
+// GetLatestPrice implements PriceRepository.
+func (r *priceRepository) GetLatestPrice(productId int64, tx *sql.Tx) (*model.ProductPrice, error) {
+	qb := repository.QueryBuilderOrDefault(tx, r.qb)
+
+	q := qb.Select("product_id", "date_time", "price").
+		From(model.ProductPriceTableName).
+		Where(squirrel.Eq{"product_id": productId}).
+		OrderBy("date_time desc").
+		Offset(0).Limit(1)
+
+	var productPrice model.ProductPrice
+	err := q.QueryRow().Scan(
+		&productPrice.ProductId,
+		&productPrice.DateTime,
+		&productPrice.Price,
+	)
+
+	return &productPrice, err
 }
 
 // GetPrices implements PriceRepository.

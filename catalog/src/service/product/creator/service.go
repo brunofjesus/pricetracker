@@ -51,11 +51,7 @@ func (s *productCreator) Create(storeProduct datasource.StoreProduct) error {
 		return err
 	}
 
-	defer func() {
-		if err != nil {
-			tx.Rollback()
-		}
-	}()
+	defer tx.Rollback()
 
 	store, err := s.storeRepository.FindStoreBySlug(storeProduct.StoreSlug, tx)
 	if err != nil {
