@@ -59,6 +59,7 @@ func (s *productFinder) Find(storeProduct datasource.StoreProduct) int64 {
 	return -1
 }
 
+// FIXME: we need to consider the store slug as well
 func (s *productFinder) findByEan(storeProduct datasource.StoreProduct) int64 {
 	var validEans []int64
 	for _, ean := range storeProduct.EAN {
@@ -79,6 +80,7 @@ func (s *productFinder) findByEan(storeProduct datasource.StoreProduct) int64 {
 	return -1
 }
 
+// FIXME: we need to consider the store slug as well
 func (s *productFinder) findBySku(storeProduct datasource.StoreProduct) int64 {
 	productId, err := s.productMetaRepository.FindProductIdBySKU(storeProduct.SKU, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {

@@ -84,7 +84,7 @@ func (r *productRepository) UpdateProduct(
 			"price":       price,
 			"available":   available,
 		}).
-		Where(squirrel.Eq{"productId": productId})
+		Where(squirrel.Eq{"product_id": productId})
 
 	_, err := q.Exec()
 

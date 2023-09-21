@@ -2,11 +2,15 @@ package updater
 
 import (
 	"database/sql"
+	"errors"
+	"strconv"
 	"sync"
 	"time"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
+	"github.com/brunofjesus/pricetracker/catalog/src/model"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
+	"github.com/brunofjesus/pricetracker/catalog/src/util/list"
 
 	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
@@ -68,7 +72,13 @@ func (s *productUpdater) Update(productId int64, storeProduct datasource.StorePr
 		return err
 	}
 
-	// TODO: update SKUs and EANs
+	if err = s.updateSkus(productId, storeProduct, tx); err != nil {
+		return err
+	}
+
+	if err = s.updateEans(productId, storeProduct, tx); err != nil {
+		return err
+	}
 
 	latestPrice, err := s.priceRepository.GetLatestPrice(productId, tx)
 	if err != nil {
@@ -92,4 +102,83 @@ func (s *productUpdater) Update(productId int64, storeProduct datasource.StorePr
 	}
 
 	return nil
+}
+
+func (s *productUpdater) updateSkus(productId int64, storeProduct datasource.StoreProduct, tx *sql.Tx) error {
+	dbProductSku, err := s.productMetaRepository.GetProductSKUs(productId, tx)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		// unexpected error
+		return err
+	}
+
+	if err == nil {
+		// update
+		previousSkus := list.Map[model.ProductSku, string](dbProductSku, func(m model.ProductSku) string {
+			return m.Sku
+		})
+
+		toCreate := list.FindMissing[string](storeProduct.SKU, previousSkus)
+		toDelete := list.FindMissing[string](previousSkus, storeProduct.SKU)
+
+		if err = s.productMetaRepository.CreateSKUs(productId, toCreate, tx); err != nil {
+			return err
+		}
+
+		if err = s.productMetaRepository.DeleteSKUs(productId, toDelete, tx); err != nil {
+			return err
+		}
+
+	} else if err = s.productMetaRepository.CreateSKUs(productId, storeProduct.SKU, tx); err != nil {
+		// no records, create
+		return err
+	}
+
+	return nil
+}
+
+func (s *productUpdater) updateEans(productId int64, storeProduct datasource.StoreProduct, tx *sql.Tx) error {
+	dbProductEan, err := s.productMetaRepository.GetProductEANs(productId, tx)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		// unexpected error
+		return err
+	}
+
+	currentEans := filterEANs(storeProduct)
+
+	if err == nil {
+		// update
+		previousEans := list.Map[model.ProductEan, int64](dbProductEan, func(m model.ProductEan) int64 {
+			return m.Ean
+		})
+
+		toCreate := list.FindMissing[int64](currentEans, previousEans)
+		toDelete := list.FindMissing[int64](previousEans, currentEans)
+
+		if err = s.productMetaRepository.CreateEANs(productId, toCreate, tx); err != nil {
+			return err
+		}
+
+		if err = s.productMetaRepository.DeleteEANs(productId, toDelete, tx); err != nil {
+			return err
+		}
+
+	} else if err = s.productMetaRepository.CreateEANs(productId, currentEans, tx); err != nil {
+		// no records, create
+		return err
+	}
+
+	return nil
+}
+
+func filterEANs(storeProduct datasource.StoreProduct) []int64 {
+	var validEans []int64
+	for _, ean := range storeProduct.EAN {
+		if eanInt, err := strconv.Atoi(ean); err == nil {
+			validEans = append(validEans, int64(eanInt))
+		}
+	}
+
+	return validEans
 }

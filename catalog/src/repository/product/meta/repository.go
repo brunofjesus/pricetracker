@@ -20,6 +20,8 @@ type ProductMetaRepository interface {
 	DeleteSKUs(productId int64, skus []string, tx *sql.Tx) error
 	CreateEANs(productId int64, eans []int64, tx *sql.Tx) error
 	DeleteEANs(productId int64, eans []int64, tx *sql.Tx) error
+	GetProductSKUs(productId int64, tx *sql.Tx) ([]model.ProductSku, error)
+	GetProductEANs(productId int64, tx *sql.Tx) ([]model.ProductEan, error)
 }
 
 type productMetaRepository struct {
@@ -159,11 +161,76 @@ func (r *productMetaRepository) DeleteSKUs(productId int64, skus []string, tx *s
 	return nil
 }
 
-func (r *productMetaRepository) findOne(tx *sql.Tx, tableName string, where any, args ...any) (int64, error) {
-	qb := r.qb
-	if tx != nil {
-		qb = repository.QueryBuilder(tx)
+// GetProductSKUs implements ProductMetaRepository.
+func (r *productMetaRepository) GetProductSKUs(productId int64, tx *sql.Tx) ([]model.ProductSku, error) {
+	qb := repository.QueryBuilderOrDefault(tx, r.qb)
+
+	q := qb.Select("product_id", "sku").
+		From(model.ProductSkuTableName).
+		Where(squirrel.Eq{"product_id": productId})
+
+	var skus []model.ProductSku
+	rows, err := q.Query()
+
+	if err != nil {
+		return nil, err
 	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var sku model.ProductSku
+		err := rows.Scan(
+			&sku.ProductId,
+			&sku.Sku,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		skus = append(skus, sku)
+	}
+
+	return skus, nil
+}
+
+// GetProductEANs implements ProductMetaRepository.
+func (r *productMetaRepository) GetProductEANs(productId int64, tx *sql.Tx) ([]model.ProductEan, error) {
+	qb := repository.QueryBuilderOrDefault(tx, r.qb)
+
+	q := qb.Select("product_id", "ean").
+		From(model.ProductEanTableName).
+		Where(squirrel.Eq{"product_id": productId})
+
+	var eans []model.ProductEan
+	rows, err := q.Query()
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var ean model.ProductEan
+		err := rows.Scan(
+			&ean.ProductId,
+			&ean.Ean,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		eans = append(eans, ean)
+	}
+
+	return eans, nil
+}
+
+func (r *productMetaRepository) findOne(tx *sql.Tx, tableName string, where any, args ...any) (int64, error) {
+	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id").
 		From(tableName).

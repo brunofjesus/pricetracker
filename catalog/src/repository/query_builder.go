@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"database/sql"
+
 	"github.com/Masterminds/squirrel"
 )
 
@@ -11,9 +13,9 @@ func QueryBuilder(runner squirrel.BaseRunner) *squirrel.StatementBuilderType {
 	return &qb
 }
 
-func QueryBuilderOrDefault(runner squirrel.BaseRunner, fallback *squirrel.StatementBuilderType) *squirrel.StatementBuilderType {
-	if runner != nil {
-		return QueryBuilder(runner)
+func QueryBuilderOrDefault(tx *sql.Tx, fallback *squirrel.StatementBuilderType) *squirrel.StatementBuilderType {
+	if tx != nil {
+		return QueryBuilder(tx)
 	}
 
 	return fallback
