@@ -2,6 +2,7 @@ package meta
 
 import (
 	"database/sql"
+	"fmt"
 	"log"
 	"sync"
 
@@ -14,8 +15,8 @@ var once sync.Once
 var instance ProductMetaRepository
 
 type ProductMetaRepository interface {
-	FindProductIdBySKU(sku []string, tx *sql.Tx) (int64, error)
-	FindProductIdByEAN(ean []int64, tx *sql.Tx) (int64, error)
+	FindProductIdBySKU(sku []string, storeSlug string, tx *sql.Tx) (int64, error)
+	FindProductIdByEAN(ean []int64, storeSlug string, tx *sql.Tx) (int64, error)
 	CreateSKUs(productId int64, skus []string, tx *sql.Tx) error
 	DeleteSKUs(productId int64, skus []string, tx *sql.Tx) error
 	CreateEANs(productId int64, eans []int64, tx *sql.Tx) error
@@ -42,13 +43,27 @@ func GetProductMetaRepository() ProductMetaRepository {
 }
 
 // FindProductIdBySKU implements ProductMetaRepository.
-func (r *productMetaRepository) FindProductIdBySKU(sku []string, tx *sql.Tx) (int64, error) {
-	return r.findOne(tx, model.ProductSkuTableName, squirrel.Eq{"sku": sku})
+func (r *productMetaRepository) FindProductIdBySKU(sku []string, storeSlug string, tx *sql.Tx) (int64, error) {
+	return r.findOne(
+		tx,
+		model.ProductSkuTableName,
+		squirrel.Eq{
+			"slug": storeSlug,
+			"sku":  sku,
+		},
+	)
 }
 
 // FindProductIdByEAN implements ProductMetaRepository.
-func (r *productMetaRepository) FindProductIdByEAN(ean []int64, tx *sql.Tx) (int64, error) {
-	return r.findOne(tx, model.ProductEanTableName, squirrel.Eq{"ean": ean})
+func (r *productMetaRepository) FindProductIdByEAN(ean []int64, storeSlug string, tx *sql.Tx) (int64, error) {
+	return r.findOne(
+		tx,
+		model.ProductEanTableName,
+		squirrel.Eq{
+			"slug": storeSlug,
+			"ean":  ean,
+		},
+	)
 }
 
 // CreateEANs implements ProductMetaRepository.
@@ -233,6 +248,8 @@ func (r *productMetaRepository) findOne(tx *sql.Tx, tableName string, where any,
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id").
+		InnerJoin(fmt.Sprintf("%s USING (product_id)", model.ProductTableName)).
+		InnerJoin(fmt.Sprintf("%s USING (store_id)", model.StoreTableName)).
 		From(tableName).
 		Where(where, args...)
 

@@ -59,7 +59,6 @@ func (s *productFinder) Find(storeProduct datasource.StoreProduct) int64 {
 	return -1
 }
 
-// FIXME: we need to consider the store slug as well
 func (s *productFinder) findByEan(storeProduct datasource.StoreProduct) int64 {
 	var validEans []int64
 	for _, ean := range storeProduct.EAN {
@@ -69,7 +68,7 @@ func (s *productFinder) findByEan(storeProduct datasource.StoreProduct) int64 {
 	}
 
 	if len(validEans) > 0 {
-		productId, err := s.productMetaRepository.FindProductIdByEAN(validEans, nil)
+		productId, err := s.productMetaRepository.FindProductIdByEAN(validEans, storeProduct.StoreSlug, nil)
 		if err != nil && !errors.Is(err, sql.ErrNoRows) {
 			log.Printf("error finding by ean %v: %v", validEans, err)
 		} else if err == nil {
@@ -80,9 +79,8 @@ func (s *productFinder) findByEan(storeProduct datasource.StoreProduct) int64 {
 	return -1
 }
 
-// FIXME: we need to consider the store slug as well
 func (s *productFinder) findBySku(storeProduct datasource.StoreProduct) int64 {
-	productId, err := s.productMetaRepository.FindProductIdBySKU(storeProduct.SKU, nil)
+	productId, err := s.productMetaRepository.FindProductIdBySKU(storeProduct.SKU, storeProduct.StoreSlug, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Printf("error finding by sku %v: %v", storeProduct.SKU, err)
 	} else if err == nil {

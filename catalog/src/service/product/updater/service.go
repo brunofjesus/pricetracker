@@ -101,7 +101,7 @@ func (s *productUpdater) Update(productId int64, storeProduct datasource.StorePr
 		}
 	}
 
-	return nil
+	return tx.Commit()
 }
 
 func (s *productUpdater) updateSkus(productId int64, storeProduct datasource.StoreProduct, tx *sql.Tx) error {
