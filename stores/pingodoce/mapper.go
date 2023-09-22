@@ -1,14 +1,13 @@
-package pingodoce
+package main
 
 import (
 	"fmt"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
 	"github.com/shopspring/decimal"
 )
 
-func mapPingoDoceProductToStoreProduct(in PingoDoceProduct) datasource.StoreProduct {
-	return datasource.StoreProduct{
+func mapPingoDoceProductToStoreProduct(in PingoDoceProduct) StoreProduct {
+	return StoreProduct{
 		StoreSlug: "pingo-doce",
 		StoreName: "Pingo Doce",
 		Name:      in.ShortDescription,

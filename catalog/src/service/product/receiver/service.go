@@ -4,7 +4,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
+	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	"github.com/brunofjesus/pricetracker/catalog/src/service/product/creator"
 	"github.com/brunofjesus/pricetracker/catalog/src/service/product/finder"
 	"github.com/brunofjesus/pricetracker/catalog/src/service/product/updater"
@@ -14,7 +14,7 @@ var once sync.Once
 var instance ProductReceiver
 
 type ProductReceiver interface {
-	Receive(storeProduct datasource.StoreProduct)
+	Receive(storeProduct integration.StoreProduct)
 }
 
 type productReceiver struct {
@@ -35,7 +35,7 @@ func GetProductReceiver() ProductReceiver {
 }
 
 // Receive implements Receiver.
-func (s *productReceiver) Receive(storeProduct datasource.StoreProduct) {
+func (s *productReceiver) Receive(storeProduct integration.StoreProduct) {
 	var err error
 	if productId := s.productFinder.Find(storeProduct); productId > 0 {
 		err = s.productUpdater.Update(productId, storeProduct)

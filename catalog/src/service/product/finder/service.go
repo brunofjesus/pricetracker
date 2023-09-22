@@ -7,8 +7,7 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
-
+	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
 	product_meta_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product/meta"
@@ -19,7 +18,7 @@ var once sync.Once
 var instance ProductFinder
 
 type ProductFinder interface {
-	Find(storeProduct datasource.StoreProduct) int64
+	Find(storeProduct integration.StoreProduct) int64
 }
 
 type productFinder struct {
@@ -42,8 +41,8 @@ func GetProductFinder() ProductFinder {
 }
 
 // Create implements ProductUpdater.
-func (s *productFinder) Find(storeProduct datasource.StoreProduct) int64 {
-	var searchFunctions []func(datasource.StoreProduct) int64
+func (s *productFinder) Find(storeProduct integration.StoreProduct) int64 {
+	var searchFunctions []func(integration.StoreProduct) int64
 	searchFunctions = append(searchFunctions, s.findByEan)
 	searchFunctions = append(searchFunctions, s.findBySku)
 	searchFunctions = append(searchFunctions, s.findByProductUrl)
@@ -59,7 +58,7 @@ func (s *productFinder) Find(storeProduct datasource.StoreProduct) int64 {
 	return -1
 }
 
-func (s *productFinder) findByEan(storeProduct datasource.StoreProduct) int64 {
+func (s *productFinder) findByEan(storeProduct integration.StoreProduct) int64 {
 	var validEans []int64
 	for _, ean := range storeProduct.EAN {
 		if eanInt, err := strconv.Atoi(ean); err == nil {
@@ -79,7 +78,7 @@ func (s *productFinder) findByEan(storeProduct datasource.StoreProduct) int64 {
 	return -1
 }
 
-func (s *productFinder) findBySku(storeProduct datasource.StoreProduct) int64 {
+func (s *productFinder) findBySku(storeProduct integration.StoreProduct) int64 {
 	productId, err := s.productMetaRepository.FindProductIdBySKU(storeProduct.SKU, storeProduct.StoreSlug, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Printf("error finding by sku %v: %v", storeProduct.SKU, err)
@@ -90,7 +89,7 @@ func (s *productFinder) findBySku(storeProduct datasource.StoreProduct) int64 {
 	return -1
 }
 
-func (s *productFinder) findByProductUrl(storeProduct datasource.StoreProduct) int64 {
+func (s *productFinder) findByProductUrl(storeProduct integration.StoreProduct) int64 {
 	product, err := s.productRepository.FindProductByUrl(storeProduct.Link, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Printf("error finding by url %v: %v", storeProduct.Link, err)

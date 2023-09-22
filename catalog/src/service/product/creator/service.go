@@ -6,9 +6,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 
+	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
 	product_meta_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product/meta"
@@ -19,7 +19,7 @@ var once sync.Once
 var instance ProductCreator
 
 type ProductCreator interface {
-	Create(storeProduct datasource.StoreProduct) error
+	Create(storeProduct integration.StoreProduct) error
 }
 
 type productCreator struct {
@@ -44,7 +44,7 @@ func GetProductCreator() ProductCreator {
 }
 
 // Create implements ProductUpdater.
-func (s *productCreator) Create(storeProduct datasource.StoreProduct) error {
+func (s *productCreator) Create(storeProduct integration.StoreProduct) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
@@ -100,7 +100,7 @@ func (s *productCreator) Create(storeProduct datasource.StoreProduct) error {
 	return nil
 }
 
-func filterEANs(storeProduct datasource.StoreProduct) []int64 {
+func filterEANs(storeProduct integration.StoreProduct) []int64 {
 	var validEans []int64
 	for _, ean := range storeProduct.EAN {
 		if eanInt, err := strconv.Atoi(ean); err == nil {

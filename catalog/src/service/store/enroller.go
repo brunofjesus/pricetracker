@@ -5,7 +5,7 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
+	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository/store"
 )
 
@@ -13,7 +13,7 @@ var once sync.Once
 var instance StoreEnroller
 
 type StoreEnroller interface {
-	Enroll(store datasource.Store) error
+	Enroll(store integration.Store) error
 }
 
 type enroller struct {
@@ -30,7 +30,7 @@ func GetStoreEnroller() StoreEnroller {
 }
 
 // Enroll implements StoreEnroller.
-func (s *enroller) Enroll(store datasource.Store) error {
+func (s *enroller) Enroll(store integration.Store) error {
 	_, err := s.storeRepository.FindStoreBySlug(store.Slug(), nil)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {

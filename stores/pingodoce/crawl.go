@@ -1,10 +1,36 @@
-package pingodoce
+package main
 
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
+	"time"
 )
+
+func Crawl(publishFunc func(StoreProduct)) {
+	index := 0
+	total := 100
+	for index < total {
+		response, err := search(index, 100)
+
+		if err != nil {
+			log.Default().Print(err)
+			break
+		}
+
+		total = response.Sections.Null.Total
+		index = index + 100
+
+		for _, product := range response.Sections.Null.Products {
+			publishFunc(
+				mapPingoDoceProductToStoreProduct(product.Source),
+			)
+		}
+
+		time.Sleep(1 * time.Second) // be polite
+	}
+}
 
 func search(offset, size int) (*PingoDoceSearchResult, error) {
 
