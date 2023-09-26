@@ -15,7 +15,7 @@ type ProductHandler interface {
 }
 
 type productHandler struct {
-	productFinder  ProductFinder
+	productMatcher ProductMatcher
 	productCreator ProductCreator
 	productUpdater ProductUpdater
 }
@@ -23,7 +23,7 @@ type productHandler struct {
 func GetProductHandler() ProductHandler {
 	handlerOnce.Do(func() {
 		handlerInstance = &productHandler{
-			productFinder:  GetProductFinder(),
+			productMatcher: GetProductMatcher(),
 			productCreator: GetProductCreator(),
 			productUpdater: GetProductUpdater(),
 		}
@@ -31,10 +31,9 @@ func GetProductHandler() ProductHandler {
 	return handlerInstance
 }
 
-// Handle implements Receiver.
 func (s *productHandler) Handle(storeProduct integration.StoreProduct) {
 	var err error
-	if productId := s.productFinder.Find(storeProduct); productId > 0 {
+	if productId := s.productMatcher.Match(storeProduct); productId > 0 {
 		err = s.productUpdater.Update(productId, storeProduct)
 	} else {
 		err = s.productCreator.Create(storeProduct)

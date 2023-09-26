@@ -15,22 +15,22 @@ import (
 )
 
 var finderOnce sync.Once
-var finderInstance ProductFinder
+var finderInstance ProductMatcher
 
-type ProductFinder interface {
-	Find(storeProduct integration.StoreProduct) int64
+type ProductMatcher interface {
+	Match(storeProduct integration.StoreProduct) int64
 }
 
-type productFinder struct {
+type productMatcher struct {
 	storeRepository       store_repository.StoreRepository
 	productRepository     product_repository.ProductRepository
 	productMetaRepository product_meta_repository.ProductMetaRepository
 	priceRepository       price_repository.PriceRepository
 }
 
-func GetProductFinder() ProductFinder {
+func GetProductMatcher() ProductMatcher {
 	finderOnce.Do(func() {
-		finderInstance = &productFinder{
+		finderInstance = &productMatcher{
 			storeRepository:       store_repository.GetStoreRepository(),
 			productRepository:     product_repository.GetProductRepository(),
 			productMetaRepository: product_meta_repository.GetProductMetaRepository(),
@@ -40,12 +40,11 @@ func GetProductFinder() ProductFinder {
 	return finderInstance
 }
 
-// Create implements ProductUpdater.
-func (s *productFinder) Find(storeProduct integration.StoreProduct) int64 {
+func (s *productMatcher) Match(storeProduct integration.StoreProduct) int64 {
 	var searchFunctions []func(integration.StoreProduct) int64
+	searchFunctions = append(searchFunctions, s.findByProductUrl)
 	searchFunctions = append(searchFunctions, s.findByEan)
 	searchFunctions = append(searchFunctions, s.findBySku)
-	searchFunctions = append(searchFunctions, s.findByProductUrl)
 
 	for _, searchFunction := range searchFunctions {
 		productId := searchFunction(storeProduct)
@@ -58,7 +57,7 @@ func (s *productFinder) Find(storeProduct integration.StoreProduct) int64 {
 	return -1
 }
 
-func (s *productFinder) findByEan(storeProduct integration.StoreProduct) int64 {
+func (s *productMatcher) findByEan(storeProduct integration.StoreProduct) int64 {
 	var validEans []int64
 	for _, ean := range storeProduct.EAN {
 		if eanInt, err := strconv.Atoi(ean); err == nil {
@@ -78,7 +77,7 @@ func (s *productFinder) findByEan(storeProduct integration.StoreProduct) int64 {
 	return -1
 }
 
-func (s *productFinder) findBySku(storeProduct integration.StoreProduct) int64 {
+func (s *productMatcher) findBySku(storeProduct integration.StoreProduct) int64 {
 	productId, err := s.productMetaRepository.FindProductIdBySKU(storeProduct.SKU, storeProduct.StoreSlug, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Printf("error finding by sku %v: %v", storeProduct.SKU, err)
@@ -89,7 +88,7 @@ func (s *productFinder) findBySku(storeProduct integration.StoreProduct) int64 {
 	return -1
 }
 
-func (s *productFinder) findByProductUrl(storeProduct integration.StoreProduct) int64 {
+func (s *productMatcher) findByProductUrl(storeProduct integration.StoreProduct) int64 {
 	product, err := s.productRepository.FindProductByUrl(storeProduct.Link, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Printf("error finding by url %v: %v", storeProduct.Link, err)
