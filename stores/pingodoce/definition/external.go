@@ -1,4 +1,4 @@
-package integration
+package definition
 
 import "github.com/shopspring/decimal"
 

@@ -1,9 +1,8 @@
-package updater
+package product
 
 import (
 	"database/sql"
 	"errors"
-	"strconv"
 	"sync"
 	"time"
 
@@ -18,8 +17,8 @@ import (
 	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
 )
 
-var once sync.Once
-var instance ProductUpdater
+var updaterOnce sync.Once
+var updaterInstance ProductUpdater
 
 type ProductUpdater interface {
 	Update(productId int64, storeProduct integration.StoreProduct) error
@@ -34,8 +33,8 @@ type productUpdater struct {
 }
 
 func GetProductUpdater() ProductUpdater {
-	once.Do(func() {
-		instance = &productUpdater{
+	updaterOnce.Do(func() {
+		updaterInstance = &productUpdater{
 			db:                    repository.GetDatabaseConnection(),
 			storeRepository:       store_repository.GetStoreRepository(),
 			productRepository:     product_repository.GetProductRepository(),
@@ -43,7 +42,7 @@ func GetProductUpdater() ProductUpdater {
 			priceRepository:       price_repository.GetPriceRepository(),
 		}
 	})
-	return instance
+	return updaterInstance
 }
 
 // Update implements ProductUpdater.
@@ -170,15 +169,4 @@ func (s *productUpdater) updateEans(productId int64, storeProduct integration.St
 	}
 
 	return nil
-}
-
-func filterEANs(storeProduct integration.StoreProduct) []int64 {
-	var validEans []int64
-	for _, ean := range storeProduct.EAN {
-		if eanInt, err := strconv.Atoi(ean); err == nil {
-			validEans = append(validEans, int64(eanInt))
-		}
-	}
-
-	return validEans
 }

@@ -1,4 +1,4 @@
-package main
+package crawler
 
 import (
 	"encoding/json"
@@ -6,9 +6,11 @@ import (
 	"log"
 	"net/http"
 	"time"
+
+	"github.com/brunofjesus/pricetracker/stores/pingodoce/definition"
 )
 
-func Crawl(publishFunc func(StoreProduct)) {
+func Crawl(store definition.Store, publishFunc func(definition.StoreProduct)) {
 	index := 0
 	total := 100
 	for index < total {
@@ -24,7 +26,7 @@ func Crawl(publishFunc func(StoreProduct)) {
 
 		for _, product := range response.Sections.Null.Products {
 			publishFunc(
-				mapPingoDoceProductToStoreProduct(product.Source),
+				mapPingoDoceProductToStoreProduct(store, product.Source),
 			)
 		}
 
@@ -32,7 +34,7 @@ func Crawl(publishFunc func(StoreProduct)) {
 	}
 }
 
-func search(offset, size int) (*PingoDoceSearchResult, error) {
+func search(offset, size int) (*definition.PingoDoceSearchResult, error) {
 
 	urlFormat := "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?from=%d&size=%d&esPreference=0.7998979678255991"
 	url := fmt.Sprintf(urlFormat, offset, size)
@@ -63,7 +65,7 @@ func search(offset, size int) (*PingoDoceSearchResult, error) {
 	}
 	defer res.Body.Close()
 
-	var response PingoDoceSearchResult
+	var response definition.PingoDoceSearchResult
 	err = json.NewDecoder(res.Body).Decode(&response)
 
 	return &response, err

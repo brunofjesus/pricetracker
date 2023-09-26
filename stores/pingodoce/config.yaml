@@ -1,0 +1,2 @@
+messagequeue:
+  url: amqp://user:price@localhost:5672/

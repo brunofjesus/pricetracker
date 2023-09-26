@@ -1,65 +1,53 @@
 package main
 
 import (
-	"context"
-	"encoding/json"
+	"fmt"
 	"log"
-	"time"
 
-	amqp "github.com/rabbitmq/amqp091-go"
+	"github.com/brunofjesus/pricetracker/stores/pingodoce/config"
+	"github.com/brunofjesus/pricetracker/stores/pingodoce/crawler"
+	"github.com/brunofjesus/pricetracker/stores/pingodoce/definition"
+	"github.com/brunofjesus/pricetracker/stores/pingodoce/mq"
+)
+
+const (
+	StoreSlug    = "pingo-doce"
+	StoreName    = "Pingo Doce"
+	StoreWebSite = "https://mercadao.pt/store/pingo-doce"
 )
 
 func main() {
-	log.Println("Pingo Doce Store Crawler 1.0")
+	log.Printf("%s crawler\n", StoreName)
 
-	conn, err := amqp.Dial("amqp://user:price@localhost:5672/")
+	appConfig := config.GetApplicationConfiguration()
+
+	conn, ch, err := mq.Connect(appConfig.MessageQueue.URL)
+
 	if err != nil {
 		panic(err)
 	}
 
 	defer conn.Close()
-
-	ch, err := conn.Channel()
-	if err != nil {
-		panic(err)
-	}
 	defer ch.Close()
 
-	_, err = ch.QueueDeclare(
-		"product", // name
-		false,     // durable
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments
-	)
-
-	if err != nil {
-		panic(err)
+	store := definition.Store{
+		Slug:    StoreSlug,
+		Name:    StoreName,
+		Website: StoreWebSite,
 	}
 
-	Crawl(func(storeProduct StoreProduct) {
-		publish(ch, storeProduct)
+	err = mq.PublishStore(ch, store)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	crawler.Crawl(store, func(storeProduct definition.StoreProduct) {
+		err := mq.PublishProduct(ch, storeProduct)
+		if err != nil {
+			fmt.Printf("error: %v", err)
+		}
 	})
-}
 
-func publish(ch *amqp.Channel, product StoreProduct) error {
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	defer cancel()
-
-	messageBytes, err := json.Marshal(product)
-
-	if err != nil {
-		return err
-	}
-
-	return ch.PublishWithContext(ctx,
-		"",        // exchange
-		"product", // routing key
-		false,     // mandatory
-		false,     // immediate
-		amqp.Publishing{
-			ContentType: "application/json",
-			Body:        messageBytes,
-		})
+	log.Printf("Bye!")
 }

@@ -1,4 +1,4 @@
-package finder
+package product
 
 import (
 	"database/sql"
@@ -14,8 +14,8 @@ import (
 	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
 )
 
-var once sync.Once
-var instance ProductFinder
+var finderOnce sync.Once
+var finderInstance ProductFinder
 
 type ProductFinder interface {
 	Find(storeProduct integration.StoreProduct) int64
@@ -29,15 +29,15 @@ type productFinder struct {
 }
 
 func GetProductFinder() ProductFinder {
-	once.Do(func() {
-		instance = &productFinder{
+	finderOnce.Do(func() {
+		finderInstance = &productFinder{
 			storeRepository:       store_repository.GetStoreRepository(),
 			productRepository:     product_repository.GetProductRepository(),
 			productMetaRepository: product_meta_repository.GetProductMetaRepository(),
 			priceRepository:       price_repository.GetPriceRepository(),
 		}
 	})
-	return instance
+	return finderInstance
 }
 
 // Create implements ProductUpdater.

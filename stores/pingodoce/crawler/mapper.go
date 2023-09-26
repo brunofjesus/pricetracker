@@ -1,15 +1,15 @@
-package main
+package crawler
 
 import (
 	"fmt"
 
+	"github.com/brunofjesus/pricetracker/stores/pingodoce/definition"
 	"github.com/shopspring/decimal"
 )
 
-func mapPingoDoceProductToStoreProduct(in PingoDoceProduct) StoreProduct {
-	return StoreProduct{
-		StoreSlug: "pingo-doce",
-		StoreName: "Pingo Doce",
+func mapPingoDoceProductToStoreProduct(store definition.Store, in definition.PingoDoceProduct) definition.StoreProduct {
+	return definition.StoreProduct{
+		StoreSlug: store.Slug,
 		Name:      in.ShortDescription,
 		EAN:       in.Eans,
 		SKU:       []string{in.Sku},

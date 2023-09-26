@@ -1,26 +1,16 @@
 package main
 
-import "github.com/brunofjesus/pricetracker/catalog/src/service/product/consumer"
+import (
+	"github.com/brunofjesus/pricetracker/catalog/src/service/mq"
+)
 
 func main() {
 
-	productListener := consumer.GetListener()
+	listener := mq.GetListener()
 
-	productListener.Start()
+	err := listener.Listen()
 
-	// stores := listStores()
-	// storeEnroller := store_service.GetStoreEnroller()
-	// for _, store := range stores {
-	// 	if err := storeEnroller.Enroll(store); err != nil {
-	// 		log.Printf("Cannot enroll %s: %v\n", store.Name(), err)
-	// 	} else {
-	// 		go store.Crawl(productListener.Channel())
-	// 	}
-	// }
-
-	// productListener.Listen()
-
-	// for {
-	// 	time.Sleep(1 * time.Second)
-	// }
+	if err != nil {
+		panic(err)
+	}
 }

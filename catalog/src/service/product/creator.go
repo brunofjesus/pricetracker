@@ -1,8 +1,7 @@
-package creator
+package product
 
 import (
 	"database/sql"
-	"strconv"
 	"sync"
 	"time"
 
@@ -15,8 +14,8 @@ import (
 	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
 )
 
-var once sync.Once
-var instance ProductCreator
+var creatorOnce sync.Once
+var creatorInstance ProductCreator
 
 type ProductCreator interface {
 	Create(storeProduct integration.StoreProduct) error
@@ -31,8 +30,8 @@ type productCreator struct {
 }
 
 func GetProductCreator() ProductCreator {
-	once.Do(func() {
-		instance = &productCreator{
+	creatorOnce.Do(func() {
+		creatorInstance = &productCreator{
 			db:                    repository.GetDatabaseConnection(),
 			storeRepository:       store_repository.GetStoreRepository(),
 			productRepository:     product_repository.GetProductRepository(),
@@ -40,7 +39,7 @@ func GetProductCreator() ProductCreator {
 			priceRepository:       price_repository.GetPriceRepository(),
 		}
 	})
-	return instance
+	return creatorInstance
 }
 
 // Create implements ProductUpdater.
@@ -98,15 +97,4 @@ func (s *productCreator) Create(storeProduct integration.StoreProduct) error {
 	tx.Commit()
 
 	return nil
-}
-
-func filterEANs(storeProduct integration.StoreProduct) []int64 {
-	var validEans []int64
-	for _, ean := range storeProduct.EAN {
-		if eanInt, err := strconv.Atoi(ean); err == nil {
-			validEans = append(validEans, int64(eanInt))
-		}
-	}
-
-	return validEans
 }
