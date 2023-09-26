@@ -1,13 +1,12 @@
-package updater
+package product
 
 import (
 	"database/sql"
 	"errors"
-	"strconv"
 	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
+	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	"github.com/brunofjesus/pricetracker/catalog/src/model"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 	"github.com/brunofjesus/pricetracker/catalog/src/util/list"
@@ -18,11 +17,11 @@ import (
 	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
 )
 
-var once sync.Once
-var instance ProductUpdater
+var updaterOnce sync.Once
+var updaterInstance ProductUpdater
 
 type ProductUpdater interface {
-	Update(productId int64, storeProduct datasource.StoreProduct) error
+	Update(productId int64, storeProduct integration.StoreProduct) error
 }
 
 type productUpdater struct {
@@ -34,8 +33,8 @@ type productUpdater struct {
 }
 
 func GetProductUpdater() ProductUpdater {
-	once.Do(func() {
-		instance = &productUpdater{
+	updaterOnce.Do(func() {
+		updaterInstance = &productUpdater{
 			db:                    repository.GetDatabaseConnection(),
 			storeRepository:       store_repository.GetStoreRepository(),
 			productRepository:     product_repository.GetProductRepository(),
@@ -43,11 +42,11 @@ func GetProductUpdater() ProductUpdater {
 			priceRepository:       price_repository.GetPriceRepository(),
 		}
 	})
-	return instance
+	return updaterInstance
 }
 
 // Update implements ProductUpdater.
-func (s *productUpdater) Update(productId int64, storeProduct datasource.StoreProduct) error {
+func (s *productUpdater) Update(productId int64, storeProduct integration.StoreProduct) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
@@ -104,7 +103,7 @@ func (s *productUpdater) Update(productId int64, storeProduct datasource.StorePr
 	return tx.Commit()
 }
 
-func (s *productUpdater) updateSkus(productId int64, storeProduct datasource.StoreProduct, tx *sql.Tx) error {
+func (s *productUpdater) updateSkus(productId int64, storeProduct integration.StoreProduct, tx *sql.Tx) error {
 	dbProductSku, err := s.productMetaRepository.GetProductSKUs(productId, tx)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -137,7 +136,7 @@ func (s *productUpdater) updateSkus(productId int64, storeProduct datasource.Sto
 	return nil
 }
 
-func (s *productUpdater) updateEans(productId int64, storeProduct datasource.StoreProduct, tx *sql.Tx) error {
+func (s *productUpdater) updateEans(productId int64, storeProduct integration.StoreProduct, tx *sql.Tx) error {
 	dbProductEan, err := s.productMetaRepository.GetProductEANs(productId, tx)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -170,15 +169,4 @@ func (s *productUpdater) updateEans(productId int64, storeProduct datasource.Sto
 	}
 
 	return nil
-}
-
-func filterEANs(storeProduct datasource.StoreProduct) []int64 {
-	var validEans []int64
-	for _, ean := range storeProduct.EAN {
-		if eanInt, err := strconv.Atoi(ean); err == nil {
-			validEans = append(validEans, int64(eanInt))
-		}
-	}
-
-	return validEans
 }

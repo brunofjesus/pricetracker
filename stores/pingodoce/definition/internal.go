@@ -1,4 +1,4 @@
-package pingodoce
+package definition
 
 type PingoDoceSearchResult struct {
 	Sections struct {

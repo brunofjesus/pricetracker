@@ -1,25 +1,24 @@
-package creator
+package product
 
 import (
 	"database/sql"
-	"strconv"
 	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/datasource"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 
+	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
 	product_meta_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product/meta"
 	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
 )
 
-var once sync.Once
-var instance ProductCreator
+var creatorOnce sync.Once
+var creatorInstance ProductCreator
 
 type ProductCreator interface {
-	Create(storeProduct datasource.StoreProduct) error
+	Create(storeProduct integration.StoreProduct) error
 }
 
 type productCreator struct {
@@ -31,8 +30,8 @@ type productCreator struct {
 }
 
 func GetProductCreator() ProductCreator {
-	once.Do(func() {
-		instance = &productCreator{
+	creatorOnce.Do(func() {
+		creatorInstance = &productCreator{
 			db:                    repository.GetDatabaseConnection(),
 			storeRepository:       store_repository.GetStoreRepository(),
 			productRepository:     product_repository.GetProductRepository(),
@@ -40,11 +39,11 @@ func GetProductCreator() ProductCreator {
 			priceRepository:       price_repository.GetPriceRepository(),
 		}
 	})
-	return instance
+	return creatorInstance
 }
 
 // Create implements ProductUpdater.
-func (s *productCreator) Create(storeProduct datasource.StoreProduct) error {
+func (s *productCreator) Create(storeProduct integration.StoreProduct) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
@@ -98,15 +97,4 @@ func (s *productCreator) Create(storeProduct datasource.StoreProduct) error {
 	tx.Commit()
 
 	return nil
-}
-
-func filterEANs(storeProduct datasource.StoreProduct) []int64 {
-	var validEans []int64
-	for _, ean := range storeProduct.EAN {
-		if eanInt, err := strconv.Atoi(ean); err == nil {
-			validEans = append(validEans, int64(eanInt))
-		}
-	}
-
-	return validEans
 }
