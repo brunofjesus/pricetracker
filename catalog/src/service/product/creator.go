@@ -10,7 +10,6 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
-	product_meta_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product/meta"
 	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
 )
 
@@ -25,7 +24,7 @@ type productCreator struct {
 	db                    *sql.DB
 	storeRepository       store_repository.StoreRepository
 	productRepository     product_repository.ProductRepository
-	productMetaRepository product_meta_repository.ProductMetaRepository
+	productMetaRepository product_repository.ProductMetaRepository
 	priceRepository       price_repository.PriceRepository
 }
 
@@ -35,7 +34,7 @@ func GetProductCreator() ProductCreator {
 			db:                    repository.GetDatabaseConnection(),
 			storeRepository:       store_repository.GetStoreRepository(),
 			productRepository:     product_repository.GetProductRepository(),
-			productMetaRepository: product_meta_repository.GetProductMetaRepository(),
+			productMetaRepository: product_repository.GetProductMetaRepository(),
 			priceRepository:       price_repository.GetPriceRepository(),
 		}
 	})

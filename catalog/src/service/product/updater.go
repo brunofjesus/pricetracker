@@ -13,7 +13,6 @@ import (
 
 	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
-	product_meta_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product/meta"
 	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
 )
 
@@ -28,7 +27,7 @@ type productUpdater struct {
 	db                    *sql.DB
 	storeRepository       store_repository.StoreRepository
 	productRepository     product_repository.ProductRepository
-	productMetaRepository product_meta_repository.ProductMetaRepository
+	productMetaRepository product_repository.ProductMetaRepository
 	priceRepository       price_repository.PriceRepository
 }
 
@@ -38,7 +37,7 @@ func GetProductUpdater() ProductUpdater {
 			db:                    repository.GetDatabaseConnection(),
 			storeRepository:       store_repository.GetStoreRepository(),
 			productRepository:     product_repository.GetProductRepository(),
-			productMetaRepository: product_meta_repository.GetProductMetaRepository(),
+			productMetaRepository: product_repository.GetProductMetaRepository(),
 			priceRepository:       price_repository.GetPriceRepository(),
 		}
 	})
@@ -79,7 +78,7 @@ func (s *productUpdater) Update(productId int64, storeProduct integration.StoreP
 		return err
 	}
 
-	latestPrice, err := s.priceRepository.GetLatestPrice(productId, tx)
+	latestPrice, err := s.priceRepository.FindLatestPrice(productId, tx)
 	if err != nil {
 		return err
 	}

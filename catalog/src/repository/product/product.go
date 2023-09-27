@@ -10,8 +10,8 @@ import (
 	"github.com/shopspring/decimal"
 )
 
-var once sync.Once
-var instance ProductRepository
+var productOnce sync.Once
+var productInstance ProductRepository
 
 type ProductRepository interface {
 	FindProductById(id int64, tx *sql.Tx) (*model.Product, error)
@@ -26,15 +26,15 @@ type productRepository struct {
 }
 
 func GetProductRepository() ProductRepository {
-	once.Do(func() {
+	productOnce.Do(func() {
 		db := repository.GetDatabaseConnection()
 
-		instance = &productRepository{
+		productInstance = &productRepository{
 			db: db,
 			qb: repository.QueryBuilder(db),
 		}
 	})
-	return instance
+	return productInstance
 }
 
 // FindProductById implements ProductRepository.

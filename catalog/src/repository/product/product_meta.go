@@ -1,4 +1,4 @@
-package meta
+package product
 
 import (
 	"database/sql"
@@ -11,8 +11,8 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 )
 
-var once sync.Once
-var instance ProductMetaRepository
+var productMetaOnce sync.Once
+var productMetaInstance ProductMetaRepository
 
 type ProductMetaRepository interface {
 	FindProductIdBySKU(sku []string, storeSlug string, tx *sql.Tx) (int64, error)
@@ -31,15 +31,15 @@ type productMetaRepository struct {
 }
 
 func GetProductMetaRepository() ProductMetaRepository {
-	once.Do(func() {
+	productMetaOnce.Do(func() {
 		db := repository.GetDatabaseConnection()
 
-		instance = &productMetaRepository{
+		productMetaInstance = &productMetaRepository{
 			db: db,
 			qb: repository.QueryBuilder(db),
 		}
 	})
-	return instance
+	return productMetaInstance
 }
 
 // FindProductIdBySKU implements ProductMetaRepository.
