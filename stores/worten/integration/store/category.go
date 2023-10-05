@@ -2,39 +2,87 @@ package store
 
 import (
 	"bytes"
+	"encoding/csv"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
+	"log/slog"
 	"net/http"
+	"os"
+	"time"
 
+	"github.com/brunofjesus/pricetracker/stores/worten/config"
 	"github.com/brunofjesus/pricetracker/stores/worten/definition/store"
+	"github.com/brunofjesus/pricetracker/stores/worten/integration/sitemap"
 )
 
-func FindCategories() (map[string]string, error) {
-	requestBody := []store.WortenCategoriesRequest{
-		{
-			OperationName: "solveURL",
-			Variables: store.WortenCategoriesRequestVariables{
-				Debug:           true,
-				URI:             "/diretorio-de-categorias",
-				FetchFullEntity: false,
-			},
-			Query: store.WortenCategoriesRequestQuery,
+func FindCategories(logger *slog.Logger) (map[string]string, error) {
+	var result = make(map[string]string)
+
+	appConfig := config.GetApplicationConfiguration()
+
+	logger.Debug("loading sitemap", slog.String("url", appConfig.CategoriesSitemap))
+	sitemap, err := sitemap.GetSitemapGZ(appConfig.CategoriesSitemap)
+	if err != nil {
+		return result, err
+	}
+
+	logger.Debug("loading known categories")
+	knownCategoriesMap, err := loadKnownCategories()
+	if err != nil {
+		return result, err
+	}
+
+	for _, element := range sitemap.Elements {
+		if categoryId, exists := knownCategoriesMap[element.Loc]; exists {
+			logger.Debug("Known Category", slog.String("id", categoryId), slog.String("url", element.Loc))
+			result[categoryId] = element.Loc
+		} else {
+			categoryId, err := solveUrl(element.Loc)
+			if err != nil {
+				logger.Error("Cannot solve category", slog.String("url", element.Loc), slog.Any("error", err))
+				continue
+			}
+
+			logger.Debug("New Category", slog.String("id", categoryId), slog.String("url", element.Loc))
+			result[categoryId] = element.Loc
+
+			knownCategoriesMap[element.Loc] = categoryId
+			if err = addCategory(categoryId, element.Loc); err != nil {
+				logger.Error("Cannot persist in known categories", slog.Any("error", err))
+			}
+
+			time.Sleep(time.Millisecond * time.Duration(appConfig.PolitenessDelayMs))
+		}
+
+	}
+
+	return result, nil
+}
+
+func solveUrl(categoryUrl string) (string, error) {
+	requestBody := store.WortenSolveURLRequest{
+		OperationName: "solveURL",
+		Variables: store.WortenSolveURLRequestVariables{
+			Debug:           false,
+			URI:             categoryUrl,
+			FetchFullEntity: false,
 		},
+		Query: store.WortenSolveURLRequestQuery,
 	}
 
 	client := &http.Client{}
 
 	byteBody, err := json.Marshal(requestBody)
 	if err != nil {
-		return nil, errors.New("error creating payload")
+		return "", errors.New("error creating payload")
 	}
 
 	req, err := http.NewRequest("POST", "https://www.worten.pt/_/api/graphql?wOperationName=solveURL", bytes.NewBuffer(byteBody))
 
 	if err != nil {
-		fmt.Println(err)
-		return nil, err
+		return "", err
 	}
 
 	req.Header.Add("Content-Type", "application/json")
@@ -52,38 +100,73 @@ func FindCategories() (map[string]string, error) {
 
 	res, err := client.Do(req)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
 	defer res.Body.Close()
 
-	var response []store.WortenCategoriesResponse
+	var response store.WortenSolveURLResponse
 	err = json.NewDecoder(res.Body).Decode(&response)
 
 	if err != nil {
-		return nil, err
+		fmt.Printf("%+v\n", err)
+		return "", err
 	}
 
-	if len(response) == 0 {
-		return nil, errors.New("cannot fetch categories: empty response")
+	var categoryId = response.Data.SolveURL.Item.ID
+
+	return categoryId, nil
+}
+
+func loadKnownCategories() (map[string]string, error) {
+	var result = make(map[string]string)
+
+	_, err := os.Stat("categories.csv")
+	if err != nil {
+		if os.IsNotExist(err) {
+			err = nil
+		}
+		return result, err
 	}
 
-	var modules = response[0].Data.SolveURL.Layout.Modules
+	file, err := os.Open("categories.csv")
+	if err != nil {
+		return result, err
+	}
+	defer file.Close()
 
-	var result map[string]string = make(map[string]string)
+	reader := csv.NewReader(file)
 
-	for _, module := range modules {
-		if module.Targets == "pt-diretorio-categorias-category-links" {
-			for _, ref := range module.Refs {
-				if len(ref.URL) > 1 {
-					result[ref.ID] = ref.URL
-				}
-			}
+	for {
+
+		record, err := reader.Read()
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			fmt.Printf("%v", err)
+		}
+
+		if len(record) == 2 {
+			result[record[0]] = record[1]
+		} else {
+			fmt.Printf("Wrong length, expected 2, got %d", len(record))
 		}
 	}
 
-	if len(result) == 0 {
-		return result, errors.New("cannot find categories")
-	}
-
 	return result, nil
+}
+
+func addCategory(id string, url string) error {
+	file, err := os.OpenFile("categories.csv", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	w := csv.NewWriter(file)
+	defer w.Flush()
+
+	return w.Write([]string{url, id})
 }

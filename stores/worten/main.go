@@ -3,7 +3,6 @@ package main
 import (
 	"log/slog"
 	"os"
-	"time"
 
 	"github.com/brunofjesus/pricetracker/stores/worten/config"
 	"github.com/brunofjesus/pricetracker/stores/worten/definition/catalog"
@@ -20,7 +19,7 @@ const (
 func main() {
 
 	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
+		Level: slog.LevelInfo,
 	})
 
 	logger := slog.New(handler)
@@ -67,7 +66,6 @@ func main() {
 				slog.String("service", "crawler"),
 			}),
 		),
-		time.Second,
 		productHandler,
 	)
 }

@@ -3,21 +3,39 @@ package store
 import (
 	"log/slog"
 	"time"
+
+	"github.com/brunofjesus/pricetracker/stores/worten/config"
 )
 
-func Crawl(logger *slog.Logger, pageSwitchDelay time.Duration, handler ProductHandler) {
+func Crawl(logger *slog.Logger, handler ProductHandler) {
+	appConfig := config.GetApplicationConfiguration()
 
-	categories, err := FindCategories()
+	categories, err := FindCategories(
+		slog.New(
+			logger.Handler().WithAttrs([]slog.Attr{
+				slog.String("service", "category"),
+			}),
+		),
+	)
+
 	if err != nil {
 		logger.Error("Error finding categories", slog.Any("error", err))
 		panic(err)
 	}
 
+	currentCategoryIdx := 0
+	totalCategories := len(categories)
+
 	for categoryId, slug := range categories {
 		hasNextPage := true
 		page := 0
+		currentCategoryIdx = currentCategoryIdx + 1
 
-		logger.Debug("Switching category",
+		logger.Info("Switching category",
+			slog.Group("progress",
+				slog.Int("current", currentCategoryIdx),
+				slog.Int("total", totalCategories),
+			),
 			slog.Group("category",
 				slog.String("id", categoryId),
 				slog.String("slug", slug),
@@ -47,10 +65,10 @@ func Crawl(logger *slog.Logger, pageSwitchDelay time.Duration, handler ProductHa
 				)
 			}
 
-			time.Sleep(pageSwitchDelay)
+			time.Sleep(time.Millisecond * time.Duration(appConfig.PolitenessDelayMs))
 		}
 
-		logger.Debug("Switching category",
+		logger.Info("Category done",
 			slog.Group("category",
 				slog.String("id", categoryId),
 				slog.String("slug", slug),

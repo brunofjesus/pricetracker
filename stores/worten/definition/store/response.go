@@ -2,34 +2,72 @@ package store
 
 import "time"
 
-type WortenCategoriesResponse struct {
+type WortenSolveURLResponse struct {
 	Data struct {
 		SolveURL struct {
-			Typename  string `json:"__typename"`
-			ID        string `json:"_id"`
-			Code      string `json:"code"`
-			Success   bool   `json:"success"`
-			Message   any    `json:"message"`
-			ContextID string `json:"contextId"`
-			Layout    struct {
-				Typename string `json:"__typename"`
-				ID       string `json:"_id"`
-				Modules  []struct {
-					Typename   string `json:"__typename"`
-					Order      int    `json:"order"`
-					Priority   int    `json:"priority"`
-					TargetedBy string `json:"targetedBy"`
-					Targets    string `json:"targets"`
-					Refs       []struct {
-						Typename string `json:"__typename"`
-						Key      string `json:"_key"`
-						Type     string `json:"_type"`
-						Valid    bool   `json:"valid"`
+			Typename string `json:"__typename"`
+			ID       string `json:"_id"`
+			Code     string `json:"code"`
+			Success  bool   `json:"success"`
+			Message  any    `json:"message"`
+			Item     struct {
+				Typename  string `json:"__typename"`
+				ID        string `json:"id"`
+				Canonical string `json:"canonical"`
+				Noindex   bool   `json:"noindex"`
+				Type      string `json:"type"`
+				Data      struct {
+					Config struct {
+						Children struct {
+							Sort []string `json:"sort"`
+						} `json:"children"`
+						Attributes []any `json:"attributes"`
+						Facebook   struct {
+							Description any `json:"description"`
+							Image       any `json:"image"`
+							Title       any `json:"title"`
+						} `json:"facebook"`
+						Image []struct {
+							ID            int    `json:"id"`
+							ProxyPathName string `json:"proxyPathName"`
+						} `json:"image"`
+						Menu struct {
+							Name any `json:"name"`
+						} `json:"menu"`
+						MetaDescription string `json:"meta_description"`
+						PageTitle       string `json:"page_title"`
+						Title           string `json:"title"`
+						Twitter         struct {
+							Description any `json:"description"`
+							Image       any `json:"image"`
+							Title       any `json:"title"`
+						} `json:"twitter"`
+					} `json:"config"`
+					Entity struct {
+						Type     string `json:"type"`
+						EntityID string `json:"entity_id"`
 						ID       string `json:"id"`
-						URL      string `json:"url"`
-					} `json:"refs"`
-				} `json:"modules"`
-			} `json:"layout"`
+					} `json:"entity"`
+					Meta struct {
+						Markets   []string `json:"markets"`
+						PageType  string   `json:"pageType"`
+						Tags      []string `json:"tags"`
+						Analytics struct {
+							Type string `json:"type"`
+						} `json:"analytics"`
+						DefaultCategory struct {
+							Priority any `json:"priority"`
+						} `json:"default_category"`
+						IsCategory bool `json:"is_category"`
+						Sitemap    struct {
+							Frequency any `json:"frequency"`
+							Priority  any `json:"priority"`
+						} `json:"sitemap"`
+					} `json:"meta"`
+					Refs []any `json:"refs"`
+				} `json:"data"`
+				Redirect any `json:"redirect"`
+			} `json:"item"`
 		} `json:"solveURL"`
 	} `json:"data"`
 }

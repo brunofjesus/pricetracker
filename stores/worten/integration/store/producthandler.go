@@ -23,5 +23,10 @@ func (h *ProductHandler) Handle(wph store.WortenProductHit) error {
 		return err
 	}
 
-	return mq.PublishProduct(h.MQChannel, storeProduct)
+	err = mq.PublishProduct(h.MQChannel, storeProduct)
+	if err != nil {
+		h.Logger.Error("Error publishing product", slog.Any("error", err))
+	}
+
+	return err
 }
