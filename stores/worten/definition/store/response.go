@@ -149,7 +149,7 @@ type WortenProductHit struct {
 		Tags      []string `json:"tags"`
 		Typename  string   `json:"__typename"`
 	} `json:"winningOffer"`
-	SecondOfferPrice struct {
+	SecondOfferPrice *struct {
 		Currency string `json:"currency"`
 		Value    string `json:"value"`
 		Typename string `json:"__typename"`

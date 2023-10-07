@@ -9,13 +9,21 @@ import (
 )
 
 func MapWortenProductToCatalogProduct(source store.WortenProductHit, destination *catalog.StoreProduct) error {
-	price, err := decimal.NewFromString(source.WinningOffer.Price.Value)
-
+	winningOffer, err := decimal.NewFromString(source.WinningOffer.Price.Value)
 	if err != nil {
-		return fmt.Errorf("cannot handle price (%v) %v", source.WinningOffer.Price, err)
+		return fmt.Errorf("cannot handle winning offer (%v) %v", source.WinningOffer.Price, err)
 	}
 
-	price = price.Div(decimal.NewFromInt(100))
+	var price = winningOffer.Div(decimal.NewFromInt(100))
+
+	if source.SecondOfferPrice != nil && source.SecondOfferPrice.Value != "0" {
+		secondOffer, err := decimal.NewFromString(source.SecondOfferPrice.Value)
+		if err != nil {
+			return fmt.Errorf("cannot handle second offer (%v) %v", source.WinningOffer.Price, err)
+		}
+
+		price = decimal.Min(winningOffer, secondOffer).Div(decimal.NewFromInt(100))
+	}
 
 	destination.StoreSlug = "worten"
 	destination.EAN = source.Product.Ean
