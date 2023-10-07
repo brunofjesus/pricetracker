@@ -55,6 +55,8 @@ func (c *consumer) Listen() error {
 	}
 	defer ch.Close()
 
+	ch.Qos(10, 0, false)
+
 	err = ch.ExchangeDeclare(
 		"catalog_ex", // name
 		"direct",     //kind
@@ -110,14 +112,16 @@ func (c *consumer) Listen() error {
 			"catalog", "catalog_ex", "store", err)
 	}
 
+	manualAck := c.applicationConfiguration.MessageQueue.ManualAck
+
 	msgs, err := ch.Consume(
-		q.Name, // queue
-		"",     // consumer
-		true,   // auto-ack
-		false,  // exclusive
-		false,  // no-local
-		false,  // no-wait
-		nil,    // args
+		q.Name,     // queue
+		"",         // consumer
+		!manualAck, // auto-ack
+		false,      // exclusive
+		false,      // no-local
+		false,      // no-wait
+		nil,        // args
 	)
 
 	if err != nil {
@@ -128,30 +132,38 @@ func (c *consumer) Listen() error {
 
 	go func() {
 		for d := range msgs {
+			var err error = nil
 			payloadType := d.RoutingKey
 
 			switch payloadType {
 			case "store":
 				var store integration.Store
-				err := json.Unmarshal(d.Body, &store)
+				err = json.Unmarshal(d.Body, &store)
 				if err != nil {
 					log.Printf("error unmarshalling store: %v", err)
 					continue
 				}
-				c.storeHandler.Handle(store)
-				continue
+				err = c.storeHandler.Handle(store)
 			case "product":
 				var storeProduct integration.StoreProduct
-				err := json.Unmarshal(d.Body, &storeProduct)
+				err = json.Unmarshal(d.Body, &storeProduct)
 				if err != nil {
 					log.Printf("error unmarshalling store product: %v", err)
 					continue
 				}
-				c.productHandler.Handle(storeProduct)
-				continue
+				err = c.productHandler.Handle(storeProduct)
 			}
 
-			log.Printf("cannot handler message of type: %s", payloadType)
+			if manualAck {
+				if err == nil {
+					err = d.Acknowledger.Ack(d.DeliveryTag, false)
+				} else {
+					err = d.Acknowledger.Nack(d.DeliveryTag, false, false)
+				}
+				if err != nil {
+					log.Printf("cannot send ack/nack to mq: %v", err)
+				}
+			}
 		}
 	}()
 

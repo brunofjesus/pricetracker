@@ -3,3 +3,5 @@ database:
   attempts: 5
 messagequeue:
   url: amqp://user:price@localhost:5672/
+  manualAck: false
+  threadCount: 5

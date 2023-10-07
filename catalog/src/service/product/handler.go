@@ -11,7 +11,7 @@ var handlerOnce sync.Once
 var handlerInstance ProductHandler
 
 type ProductHandler interface {
-	Handle(storeProduct integration.StoreProduct)
+	Handle(storeProduct integration.StoreProduct) error
 }
 
 type productHandler struct {
@@ -31,7 +31,7 @@ func GetProductHandler() ProductHandler {
 	return handlerInstance
 }
 
-func (s *productHandler) Handle(storeProduct integration.StoreProduct) {
+func (s *productHandler) Handle(storeProduct integration.StoreProduct) error {
 	var err error
 	if productId := s.productMatcher.Match(storeProduct); productId > 0 {
 		err = s.productUpdater.Update(productId, storeProduct)
@@ -40,6 +40,7 @@ func (s *productHandler) Handle(storeProduct integration.StoreProduct) {
 	}
 
 	if err != nil {
-		log.Printf("error on receiver handler: %v", err)
+		log.Printf("error on receiver handler: %v on %v", err, storeProduct)
 	}
+	return err
 }

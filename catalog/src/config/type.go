@@ -6,6 +6,8 @@ type ApplicationConfiguration struct {
 		Attempts int    `yaml:"attempts"`
 	} `yaml:"database"`
 	MessageQueue struct {
-		URL string `yaml:"url"`
+		URL         string `yaml:"url"`
+		ManualAck   bool   `yaml:"manualAck"`
+		ThreadCount int    `yaml:"threadCount"`
 	} `yaml:"messagequeue"`
 }
