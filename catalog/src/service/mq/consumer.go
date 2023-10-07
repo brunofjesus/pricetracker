@@ -2,19 +2,17 @@ package mq
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
-	"sync"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/config"
 	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	"github.com/brunofjesus/pricetracker/catalog/src/service/product"
 	"github.com/brunofjesus/pricetracker/catalog/src/service/store"
+	"github.com/rabbitmq/amqp091-go"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
-
-var once sync.Once
-var instance Consumer
 
 type Consumer interface {
 	Listen() error
@@ -26,26 +24,20 @@ type consumer struct {
 	applicationConfiguration *config.ApplicationConfiguration
 }
 
-func GetListener() Consumer {
-	once.Do(func() {
-		instance = &consumer{
-			productHandler:           product.GetProductHandler(),
-			storeHandler:             store.GetStoreHandler(),
-			applicationConfiguration: config.GetApplicationConfiguration(),
-		}
-	})
-
-	return instance
+func NewConsumer() Consumer {
+	return &consumer{
+		productHandler:           product.GetProductHandler(),
+		storeHandler:             store.GetStoreHandler(),
+		applicationConfiguration: config.GetApplicationConfiguration(),
+	}
 }
 
 // Listen implements ProductConsumer.
 func (c *consumer) Listen() error {
-	conn, err := amqp.Dial(c.applicationConfiguration.MessageQueue.URL)
-
+	conn, err := c.connect()
 	if err != nil {
-		return fmt.Errorf("error connecting to RabbitMQ: %w", err)
+		return err
 	}
-
 	defer conn.Close()
 
 	ch, err := conn.Channel()
@@ -55,67 +47,15 @@ func (c *consumer) Listen() error {
 	}
 	defer ch.Close()
 
-	ch.Qos(10, 0, false)
-
-	err = ch.ExchangeDeclare(
-		"catalog_ex", // name
-		"direct",     //kind
-		false,        // durable
-		false,        // auto delete,
-		false,        // internal
-		false,        // no-wait
-		nil,          // arguments
-	)
-
+	err = channelSetup(ch)
 	if err != nil {
-		return fmt.Errorf("error declaring exchange: %w", err)
-	}
-
-	q, err := ch.QueueDeclare(
-		"catalog", // name
-		false,     // durable
-		false,     // delete when unused
-		false,     // exclusive
-		false,     // no-wait
-		nil,       // arguments
-	)
-
-	if err != nil {
-		return fmt.Errorf("error declaring RabbitMQ queue: %w", err)
-	}
-
-	err = ch.QueueBind(
-		"catalog",    // queue name
-		"product",    // routing key
-		"catalog_ex", // exchange name,
-		false,        // no-wait
-		nil,          // arguments
-	)
-
-	if err != nil {
-		return fmt.Errorf(
-			"error binding queue '%s' to exchange '%s' on routing key '%s': %v",
-			"catalog", "catalog_ex", "product", err)
-	}
-
-	err = ch.QueueBind(
-		"catalog",    // queue name
-		"store",      // routing key
-		"catalog_ex", // exchange name,
-		false,        // no-wait
-		nil,          // arguments
-	)
-
-	if err != nil {
-		return fmt.Errorf(
-			"error binding queue '%s' to exchange '%s' on routing key '%s': %v",
-			"catalog", "catalog_ex", "store", err)
+		return err
 	}
 
 	manualAck := c.applicationConfiguration.MessageQueue.ManualAck
 
 	msgs, err := ch.Consume(
-		q.Name,     // queue
+		"catalog",  // queue
 		"",         // consumer
 		!manualAck, // auto-ack
 		false,      // exclusive
@@ -127,8 +67,6 @@ func (c *consumer) Listen() error {
 	if err != nil {
 		return fmt.Errorf("error registering RabbitMQ consumer: %w", err)
 	}
-
-	var forever chan struct{}
 
 	go func() {
 		for d := range msgs {
@@ -168,7 +106,80 @@ func (c *consumer) Listen() error {
 	}()
 
 	log.Printf("Connected to Message Queue.")
-	<-forever
+
+	<-conn.NotifyClose(make(chan *amqp.Error))
+
+	return errors.New("MQ Connection closed")
+}
+
+func (c *consumer) connect() (*amqp.Connection, error) {
+	conn, err := amqp.Dial(c.applicationConfiguration.MessageQueue.URL)
+
+	if err != nil {
+		return nil, fmt.Errorf("error connecting to RabbitMQ: %w", err)
+	}
+
+	return conn, nil
+}
+
+func channelSetup(ch *amqp091.Channel) error {
+	// Prefetch 10
+	ch.Qos(10, 0, false)
+
+	err := ch.ExchangeDeclare(
+		"catalog_ex", // name
+		"direct",     //kind
+		false,        // durable
+		false,        // auto delete,
+		false,        // internal
+		false,        // no-wait
+		nil,          // arguments
+	)
+
+	if err != nil {
+		return fmt.Errorf("error declaring exchange: %w", err)
+	}
+
+	_, err = ch.QueueDeclare(
+		"catalog", // name
+		false,     // durable
+		false,     // delete when unused
+		false,     // exclusive
+		false,     // no-wait
+		nil,       // arguments
+	)
+
+	if err != nil {
+		return fmt.Errorf("error declaring RabbitMQ queue: %w", err)
+	}
+
+	err = ch.QueueBind(
+		"catalog",    // queue name
+		"product",    // routing key
+		"catalog_ex", // exchange name,
+		false,        // no-wait
+		nil,          // arguments
+	)
+
+	if err != nil {
+		return fmt.Errorf(
+			"error binding queue '%s' to exchange '%s' on routing key '%s': %v",
+			"catalog", "catalog_ex", "product", err)
+	}
+
+	err = ch.QueueBind(
+		"catalog",    // queue name
+		"store",      // routing key
+		"catalog_ex", // exchange name,
+		false,        // no-wait
+		nil,          // arguments
+	)
+
+	if err != nil {
+		return fmt.Errorf(
+			"error binding queue '%s' to exchange '%s' on routing key '%s': %v",
+			"catalog", "catalog_ex", "store", err)
+	}
 
 	return nil
 }
