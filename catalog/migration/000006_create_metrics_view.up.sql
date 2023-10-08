@@ -1,16 +1,15 @@
-CREATE VIEW PRODUCT_METRICS AS (
-    SELECT p.product_id,
-        p.price,
-        (p.price - AVG(pp.price)) / p.price as discount_percent,
-        (p.price - AVG(pp.price)) as discount,
-        AVG(pp.price) average,
-        MAX(pp.price) maximum,
-        MIN(pp.price) minimum,
-        COUNT(pp.price) entries,
-        (now() - interval '30 day') metrics_since
-    FROM product_price pp
-        INNER JOIN public.product p on p.product_id = pp.product_id
-    WHERE pp.date_time > now() - interval '30 day'
-    GROUP BY p.product_id,
-        pp.product_id
-)
+CREATE VIEW product_metrics
+            (product_id, price, discount_percent, discount, average, maximum, minimum, entries, metrics_since) as
+SELECT p.product_id,
+       p.price,
+       (avg(pp.price) - p.price) / avg(p.price) AS discount_percent,
+       p.price - avg(pp.price)                  AS discount,
+       avg(pp.price)                            AS average,
+       max(pp.price)                            AS maximum,
+       min(pp.price)                            AS minimum,
+       count(pp.price)                          AS entries,
+       now() - '30 days'::interval              AS metrics_since
+FROM product_price pp
+         JOIN product p ON p.product_id = pp.product_id
+WHERE pp.date_time > (now() - '30 days'::interval)
+GROUP BY p.product_id, pp.product_id;
