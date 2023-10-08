@@ -9,3 +9,9 @@ migration_up:
 
 migration_drop:
 	migrate -database postgres://postgres:price@localhost:5432/postgres?sslmode=disable -path ./migration drop
+
+build:
+	mkdir -p ../dist
+	cp config.yaml ../dist/
+	cp docker-compose.yml ../dist/
+	cd src && go build -o ../../dist/catalog cmd/main.go

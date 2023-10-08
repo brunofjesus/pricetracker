@@ -6,4 +6,5 @@ type ApplicationConfiguration struct {
 	} `yaml:"messagequeue"`
 	CategoriesSitemap string `yaml:"categoriesSitemap"`
 	PolitenessDelayMs int64  `yaml:"politenessDelayMs"`
+	LoopIntervalMs    int64  `yaml:"loopIntervalMs"`
 }
