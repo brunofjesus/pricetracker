@@ -2,7 +2,9 @@ package main
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
+	"os"
+	"time"
 
 	"github.com/brunofjesus/pricetracker/stores/pingodoce/config"
 	"github.com/brunofjesus/pricetracker/stores/pingodoce/crawler"
@@ -17,37 +19,58 @@ const (
 )
 
 func main() {
-	log.Printf("%s crawler\n", StoreName)
+	applicationConfig := config.GetApplicationConfiguration()
 
-	appConfig := config.GetApplicationConfiguration()
+	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelInfo,
+	})
 
-	conn, ch, err := mq.Connect(appConfig.MessageQueue.URL)
+	logger := slog.New(handler.WithAttrs([]slog.Attr{
+		slog.String("service", "main"),
+		slog.String("store", StoreSlug),
+	}))
+
+	for {
+		logger.Info("Running store scrapper")
+		run(logger)
+		logger.Info("Scraping done waiting for next loop", slog.Int64("wait_time_ms", applicationConfig.LoopIntervalMs))
+		time.Sleep(time.Millisecond * time.Duration(applicationConfig.LoopIntervalMs))
+	}
+}
+
+func run(logger *slog.Logger) {
+	publisher, err := mq.NewPublisher(
+		slog.New(
+			logger.Handler().WithAttrs([]slog.Attr{
+				slog.String("service", "publisher"),
+			}),
+		),
+	)
 
 	if err != nil {
+		logger.Error("error connecting to MQ", slog.Any("error", err))
 		panic(err)
 	}
 
-	defer conn.Close()
-	defer ch.Close()
+	defer publisher.Close()
 
+	// Register store
 	store := definition.Store{
 		Slug:    StoreSlug,
 		Name:    StoreName,
 		Website: StoreWebSite,
 	}
 
-	err = mq.PublishStore(ch, store)
-
+	err = publisher.PublishStore(store)
 	if err != nil {
-		log.Fatal(err)
+		logger.Error("error publishing store to MQ", slog.Any("error", err))
+		panic(err)
 	}
 
 	crawler.Crawl(store, func(storeProduct definition.StoreProduct) {
-		err := mq.PublishProduct(ch, storeProduct)
+		err := publisher.PublishProduct(storeProduct)
 		if err != nil {
 			fmt.Printf("error: %v", err)
 		}
 	})
-
-	log.Printf("Bye!")
 }
