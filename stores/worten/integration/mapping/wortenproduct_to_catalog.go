@@ -16,15 +16,6 @@ func MapWortenProductToCatalogProduct(source store.WortenProductHit, destination
 
 	var price = winningOffer.Div(decimal.NewFromInt(100))
 
-	if source.SecondOfferPrice != nil && source.SecondOfferPrice.Value != "0" {
-		secondOffer, err := decimal.NewFromString(source.SecondOfferPrice.Value)
-		if err != nil {
-			return fmt.Errorf("cannot handle second offer (%v) %v", source.WinningOffer.Price, err)
-		}
-
-		price = decimal.Min(winningOffer, secondOffer).Div(decimal.NewFromInt(100))
-	}
-
 	destination.StoreSlug = "worten"
 	destination.EAN = source.Product.Ean
 	destination.SKU = []string{source.Product.Sku}

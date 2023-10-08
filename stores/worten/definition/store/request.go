@@ -27,11 +27,17 @@ type WortenBrowseProductsRequestVariables struct {
 }
 
 type WortenBrowseProductsRequestVariablesParams struct {
-	PageNumber int        `json:"pageNumber"`
-	PageSize   int        `json:"pageSize"`
-	Filters    []any      `json:"filters"`
-	Sort       WortenSort `json:"sort"`
-	Collapse   bool       `json:"collapse"`
+	PageNumber int                                                `json:"pageNumber"`
+	PageSize   int                                                `json:"pageSize"`
+	Filters    []WortenBrowseProductsRequestVariablesParamsFilter `json:"filters"`
+	Sort       WortenSort                                         `json:"sort"`
+	Collapse   bool                                               `json:"collapse"`
+}
+
+type WortenBrowseProductsRequestVariablesParamsFilter struct {
+	Key     string   `json:"key"`
+	Virtual bool     `json:"virtual"`
+	Value   []string `json:"value"`
 }
 
 type WortenSort struct {

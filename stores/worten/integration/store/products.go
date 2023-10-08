@@ -18,7 +18,13 @@ func FindProducts(pageNumber int, categoryId, slug string, callback func(store.W
 				Params: store.WortenBrowseProductsRequestVariablesParams{
 					PageNumber: pageNumber,
 					PageSize:   48,
-					Filters:    []any{},
+					Filters: []store.WortenBrowseProductsRequestVariablesParamsFilter{
+						{
+							Key:     "seller_name",
+							Virtual: false,
+							Value:   []string{"Worten"},
+						},
+					},
 					Sort: store.WortenSort{
 						Field: "rank1",
 						Order: "ASC",

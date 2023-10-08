@@ -1,4 +1,4 @@
 messagequeue:
   url: amqp://user:price@localhost:5672/
 categoriesSitemap: https://www.worten.pt/_/sitemap/sitemap-category-00.xml.gz
-politenessDelayMs: 310
+politenessDelayMs: 400
