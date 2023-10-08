@@ -4,7 +4,6 @@ import (
 	"log/slog"
 	"os"
 
-	"github.com/brunofjesus/pricetracker/stores/worten/config"
 	"github.com/brunofjesus/pricetracker/stores/worten/definition/catalog"
 	"github.com/brunofjesus/pricetracker/stores/worten/integration/mq"
 	wortenclient "github.com/brunofjesus/pricetracker/stores/worten/integration/store"
@@ -22,19 +21,21 @@ func main() {
 		Level: slog.LevelInfo,
 	})
 
+	publisher, err := mq.NewPublisher(
+		slog.New(
+			handler.WithAttrs([]slog.Attr{
+				slog.String("service", "publisher"),
+			}),
+		),
+	)
+
 	logger := slog.New(handler)
-
-	// Connect to the MQ
-	appConfig := config.GetApplicationConfiguration()
-	conn, ch, err := mq.Connect(appConfig.MessageQueue.URL)
-
 	if err != nil {
 		logger.Error("error connecting to MQ", slog.Any("error", err))
 		panic(err)
 	}
 
-	defer conn.Close()
-	defer ch.Close()
+	defer publisher.Close()
 
 	// Register store
 	store := catalog.Store{
@@ -43,7 +44,7 @@ func main() {
 		Website: StoreWebSite,
 	}
 
-	err = mq.PublishStore(ch, store)
+	err = publisher.PublishStore(store)
 	if err != nil {
 		logger.Error("error publishing store to MQ", slog.Any("error", err))
 		panic(err)
@@ -56,7 +57,7 @@ func main() {
 				slog.String("service", "productHandler"),
 			}),
 		),
-		MQChannel: ch,
+		Publisher: publisher,
 	}
 
 	// Start crawling

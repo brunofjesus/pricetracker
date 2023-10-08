@@ -18,7 +18,7 @@ func Connect(url string) (*amqp091.Connection, *amqp091.Channel, error) {
 		return nil, nil, err
 	}
 
-	err = setup(ch)
+	err = channelSetup(ch)
 	if err != nil {
 		defer conn.Close()
 		return nil, nil, err
@@ -27,8 +27,22 @@ func Connect(url string) (*amqp091.Connection, *amqp091.Channel, error) {
 	return conn, ch, nil
 }
 
-func setup(ch *amqp091.Channel) error {
-	_, err := ch.QueueDeclare(
+func channelSetup(ch *amqp091.Channel) error {
+	err := ch.ExchangeDeclare(
+		"catalog_ex", // name
+		"direct",     //kind
+		false,        // durable
+		false,        // auto delete,
+		false,        // internal
+		false,        // no-wait
+		nil,          // arguments
+	)
+
+	if err != nil {
+		return fmt.Errorf("error declaring exchange: %w", err)
+	}
+
+	_, err = ch.QueueDeclare(
 		"catalog", // name
 		false,     // durable
 		false,     // delete when unused

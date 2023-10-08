@@ -7,12 +7,11 @@ import (
 	"github.com/brunofjesus/pricetracker/stores/worten/definition/store"
 	"github.com/brunofjesus/pricetracker/stores/worten/integration/mapping"
 	"github.com/brunofjesus/pricetracker/stores/worten/integration/mq"
-	"github.com/rabbitmq/amqp091-go"
 )
 
 type ProductHandler struct {
 	Logger    *slog.Logger
-	MQChannel *amqp091.Channel
+	Publisher *mq.Publisher
 }
 
 func (h *ProductHandler) Handle(wph store.WortenProductHit) error {
@@ -23,7 +22,7 @@ func (h *ProductHandler) Handle(wph store.WortenProductHit) error {
 		return err
 	}
 
-	err = mq.PublishProduct(h.MQChannel, storeProduct)
+	err = h.Publisher.PublishProduct(storeProduct)
 	if err != nil {
 		h.Logger.Error("Error publishing product", slog.Any("error", err))
 	}
