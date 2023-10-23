@@ -94,3 +94,26 @@ type PingoDoceProduct struct {
 	BuyingNoVatPrice   float64 `json:"buyingNoVatPrice"`
 	LowestBuyingPrice  float64 `json:"lowestBuyingPrice"`
 }
+
+type PingoDoceCategories struct {
+	ID   string                       `json:"id"`
+	Name string                       `json:"name"`
+	Tree map[string]PingoDoceCategory `json:"tree"`
+}
+
+type PingoDoceCategory struct {
+	Number              string `json:"number"`
+	Slug                string `json:"slug"`
+	GeneratedNumber     string `json:"generatedNumber"`
+	Name                string `json:"name"`
+	Path                any    `json:"path"`
+	SortingNumber       int    `json:"sortingNumber"`
+	InStoreLocation     string `json:"inStoreLocation"`
+	Leaf                bool   `json:"leaf"`
+	RetailerCategoryIds []any  `json:"retailerCategoryIds"`
+	CatalogueID         string `json:"catalogueId"`
+	Icon                string `json:"icon"`
+	ParentID            any    `json:"parentId"`
+	ID                  string `json:"id"`
+	Children            map[string]PingoDoceCategory
+}

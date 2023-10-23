@@ -3,47 +3,106 @@ package crawler
 import (
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"time"
 
+	"github.com/brunofjesus/pricetracker/stores/pingodoce/config"
 	"github.com/brunofjesus/pricetracker/stores/pingodoce/definition"
 )
 
-func Crawl(store definition.Store, publishFunc func(definition.StoreProduct)) {
-	index := 0
-	total := 100
-	for index < total {
-		response, err := search(index, 100)
+func Crawl(logger *slog.Logger, store definition.Store, publishFunc func(definition.StoreProduct)) {
+	appConfig := config.GetApplicationConfiguration()
 
-		if err != nil {
-			log.Default().Print(err)
-			break
+	categories, err := fetchCategories()
+	if err != nil {
+		logger.Error("Cannot get categories", slog.Any("error", err))
+		return
+	}
+
+	currentCategoryIdx := 0
+	totalCategories := len(categories.Tree)
+
+	for _, v := range categories.Tree {
+		currentCategoryIdx = currentCategoryIdx + 1
+		slog.Info(
+			"Crawling category",
+			slog.Group("category",
+				slog.String("slug", v.Slug),
+				slog.String("id", v.ID),
+			),
+			slog.Group("progress",
+				slog.Int("current", currentCategoryIdx),
+				slog.Int("total", totalCategories),
+			),
+		)
+
+		index := 0
+		total := 100
+		for index < total {
+			response, err := search(v.ID, index, 100)
+
+			if err != nil {
+				logger.Error(
+					"Error searching",
+					slog.Group("category",
+						slog.String("slug", v.Slug),
+						slog.String("id", v.ID),
+					),
+					slog.Any("error", err),
+				)
+				break
+			}
+
+			total = response.Sections.Null.Total
+			index = index + 100
+
+			for _, product := range response.Sections.Null.Products {
+				publishFunc(
+					mapPingoDoceProductToStoreProduct(store, product.Source),
+				)
+			}
+
+			time.Sleep(time.Duration(appConfig.PolitenessDelay.PageMs) * time.Millisecond)
 		}
-
-		total = response.Sections.Null.Total
-		index = index + 100
-
-		for _, product := range response.Sections.Null.Products {
-			publishFunc(
-				mapPingoDoceProductToStoreProduct(store, product.Source),
-			)
-		}
-
-		time.Sleep(1 * time.Second) // be polite
+		time.Sleep(time.Duration(appConfig.PolitenessDelay.CategoryMs) * time.Millisecond)
 	}
 }
 
-func search(offset, size int) (*definition.PingoDoceSearchResult, error) {
+func search(category string, offset, size int) (*definition.PingoDoceSearchResult, error) {
+	urlFormat := "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=[\"%s\"]&from=%d&size=%d&esPreference=0.7998979678255991"
+	url := fmt.Sprintf(urlFormat, category, offset, size)
 
-	urlFormat := "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?from=%d&size=%d&esPreference=0.7998979678255991"
-	url := fmt.Sprintf(urlFormat, offset, size)
+	res, err := request(url)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
 
-	method := "GET"
+	var response definition.PingoDoceSearchResult
+	err = json.NewDecoder(res.Body).Decode(&response)
 
+	return &response, err
+}
+
+func fetchCategories() (*definition.PingoDoceCategories, error) {
+	url := "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/with-descendants"
+
+	res, err := request(url)
+	if err != nil {
+		return nil, err
+	}
+	defer res.Body.Close()
+
+	var response definition.PingoDoceCategories
+	err = json.NewDecoder(res.Body).Decode(&response)
+
+	return &response, err
+}
+
+func request(url string) (*http.Response, error) {
 	client := &http.Client{}
-	req, err := http.NewRequest(method, url, nil)
-
+	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -59,14 +118,5 @@ func search(offset, size int) (*definition.PingoDoceSearchResult, error) {
 	req.Header.Add("Sec-Fetch-Site", "same-origin")
 	req.Header.Add("TE", "trailers")
 
-	res, err := client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer res.Body.Close()
-
-	var response definition.PingoDoceSearchResult
-	err = json.NewDecoder(res.Body).Decode(&response)
-
-	return &response, err
+	return client.Do(req)
 }

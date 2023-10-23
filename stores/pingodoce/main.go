@@ -67,10 +67,17 @@ func run(logger *slog.Logger) {
 		panic(err)
 	}
 
-	crawler.Crawl(store, func(storeProduct definition.StoreProduct) {
-		err := publisher.PublishProduct(storeProduct)
-		if err != nil {
-			fmt.Printf("error: %v", err)
-		}
-	})
+	crawler.Crawl(
+		slog.New(
+			logger.Handler().WithAttrs([]slog.Attr{
+				slog.String("service", "crawler"),
+			}),
+		),
+		store,
+		func(storeProduct definition.StoreProduct) {
+			err := publisher.PublishProduct(storeProduct)
+			if err != nil {
+				fmt.Printf("error: %v", err)
+			}
+		})
 }
