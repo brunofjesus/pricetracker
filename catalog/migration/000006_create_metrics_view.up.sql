@@ -1,9 +1,9 @@
 CREATE VIEW product_metrics
-            (product_id, price, discount_percent, discount, average, maximum, minimum, entries, metrics_since) as
+            (product_id, price, discount_percent, diff, average, maximum, minimum, entries, metrics_since) as
 SELECT p.product_id,
        p.price,
        (avg(pp.price) - p.price) / avg(pp.price) AS discount_percent,
-       p.price - avg(pp.price)                  AS discount,
+       p.price - avg(pp.price)                  AS diff,
        avg(pp.price)                            AS average,
        max(pp.price)                            AS maximum,
        min(pp.price)                            AS minimum,

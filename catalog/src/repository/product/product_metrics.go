@@ -112,7 +112,7 @@ func (r *productMetricsRepository) scanFullRow(row squirrel.RowScanner, product 
 		product.ImageUrl,
 		product.ProductUrl,
 
-		product.Discount,
+		product.Difference,
 		product.DiscountPercent,
 		product.Average,
 		product.Maximum,
