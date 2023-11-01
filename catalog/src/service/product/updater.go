@@ -83,7 +83,7 @@ func (s *productUpdater) Update(productId int64, storeProduct integration.StoreP
 		return err
 	}
 
-	if !latestPrice.Price.Equal(storeProduct.Price) ||
+	if latestPrice.Price != storeProduct.Price ||
 		time.Since(latestPrice.DateTime) > time.Hour {
 
 		// Insert price update

@@ -7,7 +7,6 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/src/model"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
-	"github.com/shopspring/decimal"
 )
 
 var productOnce sync.Once
@@ -16,8 +15,8 @@ var productInstance ProductRepository
 type ProductRepository interface {
 	FindProductById(id int64, tx *sql.Tx) (*model.Product, error)
 	FindProductByUrl(url string, tx *sql.Tx) (*model.Product, error)
-	CreateProduct(storeId int64, name, brand, imageUrl, productUrl string, price decimal.Decimal, available bool, tx *sql.Tx) (int64, error)
-	UpdateProduct(productId int64, name, brand, imageUrl, productUrl string, price decimal.Decimal, available bool, tx *sql.Tx) error
+	CreateProduct(storeId int64, name, brand, imageUrl, productUrl string, price int, available bool, tx *sql.Tx) (int64, error)
+	UpdateProduct(productId int64, name, brand, imageUrl, productUrl string, price int, available bool, tx *sql.Tx) error
 }
 
 type productRepository struct {
@@ -50,7 +49,7 @@ func (r *productRepository) FindProductByUrl(url string, tx *sql.Tx) (*model.Pro
 // CreateProduct implements ProductRepository.
 func (r *productRepository) CreateProduct(
 	storeId int64, name string, brand string, imageUrl string, productUrl string,
-	price decimal.Decimal, available bool, tx *sql.Tx,
+	price int, available bool, tx *sql.Tx,
 ) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
@@ -71,7 +70,7 @@ func (r *productRepository) CreateProduct(
 // UpdateProduct implements ProductRepository.
 func (r *productRepository) UpdateProduct(
 	productId int64, name string, brand string, imageUrl string, productUrl string,
-	price decimal.Decimal, available bool, tx *sql.Tx,
+	price int, available bool, tx *sql.Tx,
 ) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 

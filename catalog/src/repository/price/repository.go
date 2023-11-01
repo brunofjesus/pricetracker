@@ -9,7 +9,6 @@ import (
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/src/model"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
-	"github.com/shopspring/decimal"
 )
 
 var once sync.Once
@@ -19,7 +18,7 @@ type PriceRepository interface {
 	FindLatestPrice(productId int64, tx *sql.Tx) (*model.ProductPrice, error)
 	FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]model.ProductPrice, error)
 	CountPrices(productId int64, tx *sql.Tx) (int64, error)
-	CreatePrice(productId int64, price decimal.Decimal, timestamp time.Time, tx *sql.Tx) error
+	CreatePrice(productId int64, price int, timestamp time.Time, tx *sql.Tx) error
 }
 
 type priceRepository struct {
@@ -108,7 +107,7 @@ func (r *priceRepository) CountPrices(productId int64, tx *sql.Tx) (int64, error
 }
 
 // CreatePrice implements PriceRepository.
-func (r *priceRepository) CreatePrice(productId int64, price decimal.Decimal, timestamp time.Time, tx *sql.Tx) error {
+func (r *priceRepository) CreatePrice(productId int64, price int, timestamp time.Time, tx *sql.Tx) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Insert(model.ProductPriceTableName).
