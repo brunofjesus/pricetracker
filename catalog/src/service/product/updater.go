@@ -84,7 +84,7 @@ func (s *productUpdater) Update(productId int64, storeProduct integration.StoreP
 	}
 
 	if latestPrice.Price != storeProduct.Price ||
-		time.Since(latestPrice.DateTime) > time.Hour {
+		time.Since(latestPrice.DateTime) > time.Hour*4 {
 
 		// Insert price update
 		err = s.priceRepository.CreatePrice(
