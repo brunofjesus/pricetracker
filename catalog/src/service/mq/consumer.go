@@ -11,7 +11,6 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	"github.com/brunofjesus/pricetracker/catalog/src/service/product"
 	"github.com/brunofjesus/pricetracker/catalog/src/service/store"
-	"github.com/rabbitmq/amqp091-go"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -128,7 +127,7 @@ func (c *consumer) connect() (*amqp.Connection, error) {
 	return conn, nil
 }
 
-func channelSetup(ctx context.Context, ch *amqp091.Channel) error {
+func channelSetup(ctx context.Context, ch *amqp.Channel) error {
 	logger := ctx.Value("logger").(*slog.Logger)
 
 	// Prefetch 10
