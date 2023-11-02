@@ -1,10 +1,11 @@
 package mq
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/config"
 	"github.com/brunofjesus/pricetracker/catalog/src/integration"
@@ -15,7 +16,7 @@ import (
 )
 
 type Consumer interface {
-	Listen() error
+	Listen(ctx context.Context) error
 }
 
 type consumer struct {
@@ -33,7 +34,10 @@ func NewConsumer() Consumer {
 }
 
 // Listen implements ProductConsumer.
-func (c *consumer) Listen() error {
+func (c *consumer) Listen(ctx context.Context) error {
+	logger := ctx.Value("logger").(*slog.Logger)
+
+	logger.Debug("connecting to MQ")
 	conn, err := c.connect()
 	if err != nil {
 		return err
@@ -47,13 +51,15 @@ func (c *consumer) Listen() error {
 	}
 	defer ch.Close()
 
-	err = channelSetup(ch)
+	logger.Debug("setup channel")
+	err = channelSetup(ctx, ch)
 	if err != nil {
 		return err
 	}
 
 	manualAck := c.applicationConfiguration.MessageQueue.ManualAck
 
+	logger.Debug("start consuming mq", slog.String("queue", "catalog"), slog.Bool("manualAck", manualAck))
 	msgs, err := ch.Consume(
 		"catalog",  // queue
 		"",         // consumer
@@ -78,7 +84,7 @@ func (c *consumer) Listen() error {
 				var store integration.Store
 				err = json.Unmarshal(d.Body, &store)
 				if err != nil {
-					log.Printf("error unmarshalling store: %v", err)
+					logger.Error("cannot unmarshall store", slog.Any("error", err))
 					continue
 				}
 				err = c.storeHandler.Handle(store)
@@ -86,7 +92,7 @@ func (c *consumer) Listen() error {
 				var storeProduct integration.StoreProduct
 				err = json.Unmarshal(d.Body, &storeProduct)
 				if err != nil {
-					log.Printf("error unmarshalling store product: %v", err)
+					logger.Error("cannot unmarshall store product", slog.Any("error", err))
 					continue
 				}
 				err = c.productHandler.Handle(storeProduct)
@@ -99,13 +105,13 @@ func (c *consumer) Listen() error {
 					err = d.Acknowledger.Nack(d.DeliveryTag, false, false)
 				}
 				if err != nil {
-					log.Printf("cannot send ack/nack to mq: %v", err)
+					logger.Error("cannot send ack/nack to mq", slog.Any("error", err))
 				}
 			}
 		}
 	}()
 
-	log.Printf("Connected to Message Queue.")
+	logger.Info("connected to mq")
 
 	<-conn.NotifyClose(make(chan *amqp.Error))
 
@@ -122,10 +128,21 @@ func (c *consumer) connect() (*amqp.Connection, error) {
 	return conn, nil
 }
 
-func channelSetup(ch *amqp091.Channel) error {
+func channelSetup(ctx context.Context, ch *amqp091.Channel) error {
+	logger := ctx.Value("logger").(*slog.Logger)
+
 	// Prefetch 10
 	ch.Qos(10, 0, false)
 
+	exchangeName := "catalog_ex"
+
+	logger.Debug(
+		"mq channel exchange declare",
+		slog.Group(
+			"exchange",
+			slog.String("name", exchangeName),
+		),
+	)
 	err := ch.ExchangeDeclare(
 		"catalog_ex", // name
 		"direct",     //kind
@@ -140,8 +157,17 @@ func channelSetup(ch *amqp091.Channel) error {
 		return fmt.Errorf("error declaring exchange: %w", err)
 	}
 
+	queueName := "catalog"
+
+	logger.Debug(
+		"mq channel queue declare",
+		slog.Group(
+			"queue",
+			slog.String("name", exchangeName),
+		),
+	)
 	_, err = ch.QueueDeclare(
-		"catalog", // name
+		queueName, // name
 		false,     // durable
 		false,     // delete when unused
 		false,     // exclusive
@@ -153,12 +179,23 @@ func channelSetup(ch *amqp091.Channel) error {
 		return fmt.Errorf("error declaring RabbitMQ queue: %w", err)
 	}
 
+	productRoutingKey := "product"
+
+	logger.Debug(
+		"mq channel queue bind",
+		slog.Group(
+			"bind",
+			slog.String("queue", queueName),
+			slog.String("exchange", exchangeName),
+			slog.String("routing_key", productRoutingKey),
+		),
+	)
 	err = ch.QueueBind(
-		"catalog",    // queue name
-		"product",    // routing key
-		"catalog_ex", // exchange name,
-		false,        // no-wait
-		nil,          // arguments
+		queueName,         // queue name
+		productRoutingKey, // routing key
+		exchangeName,      // exchange name,
+		false,             // no-wait
+		nil,               // arguments
 	)
 
 	if err != nil {
@@ -167,12 +204,23 @@ func channelSetup(ch *amqp091.Channel) error {
 			"catalog", "catalog_ex", "product", err)
 	}
 
+	storeRoutingKey := "store"
+
+	logger.Debug(
+		"mq channel queue bind",
+		slog.Group(
+			"bind",
+			slog.String("queue", queueName),
+			slog.String("exchange", exchangeName),
+			slog.String("routing_key", productRoutingKey),
+		),
+	)
 	err = ch.QueueBind(
-		"catalog",    // queue name
-		"store",      // routing key
-		"catalog_ex", // exchange name,
-		false,        // no-wait
-		nil,          // arguments
+		queueName,       // queue name
+		storeRoutingKey, // routing key
+		exchangeName,    // exchange name,
+		false,           // no-wait
+		nil,             // arguments
 	)
 
 	if err != nil {

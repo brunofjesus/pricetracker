@@ -13,4 +13,5 @@ require (
 	github.com/lann/ps v0.0.0-20150810152359-62de8c46ede0 // indirect
 	github.com/rabbitmq/amqp091-go v1.8.1
 	github.com/shopspring/decimal v1.3.1 // indirect
+	golang.org/x/exp v0.0.0-20231006140011-7918f672742d
 )
