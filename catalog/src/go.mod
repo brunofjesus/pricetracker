@@ -1,6 +1,6 @@
 module github.com/brunofjesus/pricetracker/catalog/src
 
-go 1.21.1
+go 1.21.3
 
 require (
 	github.com/Masterminds/squirrel v1.5.4

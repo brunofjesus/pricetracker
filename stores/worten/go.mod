@@ -1,6 +1,6 @@
 module github.com/brunofjesus/pricetracker/stores/worten
 
-go 1.21.1
+go 1.21.3
 
 require (
 	github.com/rabbitmq/amqp091-go v1.9.0
