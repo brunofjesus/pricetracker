@@ -1,12 +1,12 @@
-package integration
+package model
 
-type Store struct {
+type MqStore struct {
 	Slug    string
 	Name    string
 	Website string
 }
 
-type StoreProduct struct {
+type MqStoreProduct struct {
 	StoreSlug string
 	EAN       []string
 	SKU       []string

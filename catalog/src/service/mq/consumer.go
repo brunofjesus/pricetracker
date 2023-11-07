@@ -8,7 +8,7 @@ import (
 	"log/slog"
 
 	"github.com/brunofjesus/pricetracker/catalog/src/config"
-	"github.com/brunofjesus/pricetracker/catalog/src/integration"
+	"github.com/brunofjesus/pricetracker/catalog/src/model"
 	"github.com/brunofjesus/pricetracker/catalog/src/service/product"
 	"github.com/brunofjesus/pricetracker/catalog/src/service/store"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -80,7 +80,7 @@ func (c *consumer) Listen(ctx context.Context) error {
 
 			switch payloadType {
 			case "store":
-				var store integration.Store
+				var store model.MqStore
 				err = json.Unmarshal(d.Body, &store)
 				if err != nil {
 					logger.Error("cannot unmarshall store", slog.Any("error", err))
@@ -88,7 +88,7 @@ func (c *consumer) Listen(ctx context.Context) error {
 				}
 				err = c.storeHandler.Handle(store)
 			case "product":
-				var storeProduct integration.StoreProduct
+				var storeProduct model.MqStoreProduct
 				err = json.Unmarshal(d.Body, &storeProduct)
 				if err != nil {
 					logger.Error("cannot unmarshall store product", slog.Any("error", err))

@@ -5,9 +5,9 @@ import (
 	"sync"
 	"time"
 
+	"github.com/brunofjesus/pricetracker/catalog/src/model"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
 	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
@@ -17,7 +17,7 @@ var creatorOnce sync.Once
 var creatorInstance ProductCreator
 
 type ProductCreator interface {
-	Create(storeProduct integration.StoreProduct) error
+	Create(storeProduct model.MqStoreProduct) error
 }
 
 type productCreator struct {
@@ -42,7 +42,7 @@ func GetProductCreator() ProductCreator {
 }
 
 // Create implements ProductUpdater.
-func (s *productCreator) Create(storeProduct integration.StoreProduct) error {
+func (s *productCreator) Create(storeProduct model.MqStoreProduct) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {

@@ -6,7 +6,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/integration"
 	"github.com/brunofjesus/pricetracker/catalog/src/model"
 	"github.com/brunofjesus/pricetracker/catalog/src/repository"
 	"github.com/brunofjesus/pricetracker/catalog/src/util/list"
@@ -20,7 +19,7 @@ var updaterOnce sync.Once
 var updaterInstance ProductUpdater
 
 type ProductUpdater interface {
-	Update(productId int64, storeProduct integration.StoreProduct) error
+	Update(productId int64, storeProduct model.MqStoreProduct) error
 }
 
 type productUpdater struct {
@@ -45,7 +44,7 @@ func GetProductUpdater() ProductUpdater {
 }
 
 // Update implements ProductUpdater.
-func (s *productUpdater) Update(productId int64, storeProduct integration.StoreProduct) error {
+func (s *productUpdater) Update(productId int64, storeProduct model.MqStoreProduct) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
@@ -102,7 +101,7 @@ func (s *productUpdater) Update(productId int64, storeProduct integration.StoreP
 	return tx.Commit()
 }
 
-func (s *productUpdater) updateSkus(productId int64, storeProduct integration.StoreProduct, tx *sql.Tx) error {
+func (s *productUpdater) updateSkus(productId int64, storeProduct model.MqStoreProduct, tx *sql.Tx) error {
 	dbProductSku, err := s.productMetaRepository.GetProductSKUs(productId, tx)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -135,7 +134,7 @@ func (s *productUpdater) updateSkus(productId int64, storeProduct integration.St
 	return nil
 }
 
-func (s *productUpdater) updateEans(productId int64, storeProduct integration.StoreProduct, tx *sql.Tx) error {
+func (s *productUpdater) updateEans(productId int64, storeProduct model.MqStoreProduct, tx *sql.Tx) error {
 	dbProductEan, err := s.productMetaRepository.GetProductEANs(productId, tx)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
