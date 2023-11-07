@@ -1,6 +1,6 @@
 messagequeue:
   url: amqp://user:price@localhost:5672/
-loopIntervalMs: 21600000 # 6 hours
+loopIntervalMinutes: 360 # 6 hours
 politenessDelay:
   pageMs: 2000
   categoryMs: 10000 

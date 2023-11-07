@@ -33,8 +33,8 @@ func main() {
 	for {
 		logger.Info("Running store scrapper")
 		run(logger)
-		logger.Info("Scraping done waiting for next loop", slog.Int64("wait_time_ms", applicationConfig.LoopIntervalMs))
-		time.Sleep(time.Millisecond * time.Duration(applicationConfig.LoopIntervalMs))
+		logger.Info("Scraping done waiting for next loop", slog.Int64("wait_time_minutes", applicationConfig.LoopIntervalMinutes))
+		time.Sleep(time.Minute * time.Duration(applicationConfig.LoopIntervalMinutes))
 	}
 }
 
