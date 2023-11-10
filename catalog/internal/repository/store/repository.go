@@ -5,15 +5,24 @@ import (
 	"sync"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/brunofjesus/pricetracker/catalog/model"
-	"github.com/brunofjesus/pricetracker/catalog/repository"
+	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 )
 
 var once sync.Once
 var instance StoreRepository
 
+const StoreTableName = "store"
+
+type Store struct {
+	StoreId int64  `db:"store_id"`
+	Slug    string `db:"slug"`
+	Name    string `db:"name"`
+	Website string `db:"website"`
+	Active  bool   `db:"active"`
+}
+
 type StoreRepository interface {
-	FindStoreBySlug(slug string, tx *sql.Tx) (*model.Store, error)
+	FindStoreBySlug(slug string, tx *sql.Tx) (*Store, error)
 	CreateStore(slug, name, website string, tx *sql.Tx) (int64, error)
 }
 
@@ -35,17 +44,17 @@ func GetStoreRepository() StoreRepository {
 	return instance
 }
 
-func (r *storeRepository) FindStoreBySlug(slug string, tx *sql.Tx) (*model.Store, error) {
+func (r *storeRepository) FindStoreBySlug(slug string, tx *sql.Tx) (*Store, error) {
 	qb := r.qb
 	if tx != nil {
 		qb = repository.QueryBuilder(tx)
 	}
 
 	q := qb.Select("store_id", "slug", "name", "website", "active").
-		From(model.StoreTableName).
+		From(StoreTableName).
 		Where(squirrel.Eq{"slug": slug})
 
-	var store model.Store
+	var store Store
 	err := q.QueryRow().Scan(
 		&store.StoreId,
 		&store.Slug,
@@ -63,7 +72,7 @@ func (r *storeRepository) CreateStore(slug string, name string, website string, 
 		qb = repository.QueryBuilder(tx)
 	}
 
-	q := qb.Insert(model.StoreTableName).
+	q := qb.Insert(StoreTableName).
 		Columns("slug", "name", "website", "active").
 		Values(slug, name, website, true).
 		Suffix("RETURNING store_id")

@@ -7,16 +7,23 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/brunofjesus/pricetracker/catalog/model"
-	"github.com/brunofjesus/pricetracker/catalog/repository"
+	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 )
 
 var once sync.Once
 var instance PriceRepository
 
+const ProductPriceTableName = "product_price"
+
+type ProductPrice struct {
+	ProductId int64     `db:"product_id"`
+	DateTime  time.Time `db:"date_time"`
+	Price     int       `db:"price"`
+}
+
 type PriceRepository interface {
-	FindLatestPrice(productId int64, tx *sql.Tx) (*model.ProductPrice, error)
-	FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]model.ProductPrice, error)
+	FindLatestPrice(productId int64, tx *sql.Tx) (*ProductPrice, error)
+	FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]ProductPrice, error)
 	CountPrices(productId int64, tx *sql.Tx) (int64, error)
 	CreatePrice(productId int64, price int, timestamp time.Time, tx *sql.Tx) error
 }
@@ -40,16 +47,16 @@ func GetPriceRepository() PriceRepository {
 }
 
 // FindLatestPrice implements PriceRepository.
-func (r *priceRepository) FindLatestPrice(productId int64, tx *sql.Tx) (*model.ProductPrice, error) {
+func (r *priceRepository) FindLatestPrice(productId int64, tx *sql.Tx) (*ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id", "date_time", "price").
-		From(model.ProductPriceTableName).
+		From(ProductPriceTableName).
 		Where(squirrel.Eq{"product_id": productId}).
 		OrderBy("date_time desc").
 		Offset(0).Limit(1)
 
-	var productPrice model.ProductPrice
+	var productPrice ProductPrice
 	err := q.QueryRow().Scan(
 		&productPrice.ProductId,
 		&productPrice.DateTime,
@@ -60,16 +67,16 @@ func (r *priceRepository) FindLatestPrice(productId int64, tx *sql.Tx) (*model.P
 }
 
 // FindPrices implements PriceRepository.
-func (r *priceRepository) FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]model.ProductPrice, error) {
+func (r *priceRepository) FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id", "date_time", "price").
-		From(model.ProductPriceTableName).
+		From(ProductPriceTableName).
 		Where(squirrel.Eq{"product_id": productId}).
 		OrderBy(fmt.Sprintf("%s %s", orderBy, direction)).
 		Offset(uint64(offset)).Limit(uint64(limit))
 
-	var prices []model.ProductPrice
+	var prices []ProductPrice
 	rows, err := q.Query()
 
 	if err != nil {
@@ -79,7 +86,7 @@ func (r *priceRepository) FindPrices(productId int64, offset int64, limit int, o
 	defer rows.Close()
 
 	for rows.Next() {
-		var price model.ProductPrice
+		var price ProductPrice
 		err := rows.Scan(
 			&price.ProductId,
 			&price.DateTime,
@@ -98,7 +105,7 @@ func (r *priceRepository) FindPrices(productId int64, offset int64, limit int, o
 func (r *priceRepository) CountPrices(productId int64, tx *sql.Tx) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 	q := qb.Select("COUNT(*)").
-		From(model.ProductPriceTableName).
+		From(ProductPriceTableName).
 		Where(squirrel.Eq{"product_id": productId})
 
 	var count int64
@@ -110,7 +117,7 @@ func (r *priceRepository) CountPrices(productId int64, tx *sql.Tx) (int64, error
 func (r *priceRepository) CreatePrice(productId int64, price int, timestamp time.Time, tx *sql.Tx) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Insert(model.ProductPriceTableName).
+	q := qb.Insert(ProductPriceTableName).
 		Columns("product_id", "date_time", "price").
 		Values(productId, timestamp, price)
 

@@ -5,15 +5,14 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/brunofjesus/pricetracker/catalog/model"
-	"github.com/brunofjesus/pricetracker/catalog/repository/store"
+	"github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 )
 
 var once sync.Once
 var instance StoreHandler
 
 type StoreHandler interface {
-	Handle(store model.MqStore) error
+	Handle(store MqStore) error
 }
 
 type storeHandler struct {
@@ -30,7 +29,7 @@ func GetStoreHandler() StoreHandler {
 }
 
 // Handle implements StoreEnroller.
-func (s *storeHandler) Handle(store model.MqStore) error {
+func (s *storeHandler) Handle(store MqStore) error {
 	_, err := s.storeRepository.FindStoreBySlug(store.Slug, nil)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {

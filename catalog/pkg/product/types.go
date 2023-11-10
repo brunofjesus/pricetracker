@@ -1,10 +1,4 @@
-package model
-
-type MqStore struct {
-	Slug    string
-	Name    string
-	Website string
-}
+package product
 
 type MqStoreProduct struct {
 	StoreSlug string

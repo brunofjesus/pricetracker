@@ -7,12 +7,25 @@ import (
 	"sync"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/brunofjesus/pricetracker/catalog/model"
-	"github.com/brunofjesus/pricetracker/catalog/repository"
+	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
+	"github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 )
 
 var productMetaOnce sync.Once
 var productMetaInstance ProductMetaRepository
+
+const ProductEanTableName = "product_ean"
+const ProductSkuTableName = "product_sku"
+
+type ProductEan struct {
+	ProductId int64 `db:"product_id"`
+	Ean       int64 `db:"ean"`
+}
+
+type ProductSku struct {
+	ProductId int64  `db:"product_id"`
+	Sku       string `db:"sku"`
+}
 
 type ProductMetaRepository interface {
 	FindProductIdBySKU(sku []string, storeSlug string, tx *sql.Tx) (int64, error)
@@ -21,8 +34,8 @@ type ProductMetaRepository interface {
 	DeleteSKUs(productId int64, skus []string, tx *sql.Tx) error
 	CreateEANs(productId int64, eans []int64, tx *sql.Tx) error
 	DeleteEANs(productId int64, eans []int64, tx *sql.Tx) error
-	GetProductSKUs(productId int64, tx *sql.Tx) ([]model.ProductSku, error)
-	GetProductEANs(productId int64, tx *sql.Tx) ([]model.ProductEan, error)
+	GetProductSKUs(productId int64, tx *sql.Tx) ([]ProductSku, error)
+	GetProductEANs(productId int64, tx *sql.Tx) ([]ProductEan, error)
 }
 
 type productMetaRepository struct {
@@ -46,7 +59,7 @@ func GetProductMetaRepository() ProductMetaRepository {
 func (r *productMetaRepository) FindProductIdBySKU(sku []string, storeSlug string, tx *sql.Tx) (int64, error) {
 	return r.findOne(
 		tx,
-		model.ProductSkuTableName,
+		ProductSkuTableName,
 		squirrel.Eq{
 			"slug": storeSlug,
 			"sku":  sku,
@@ -58,7 +71,7 @@ func (r *productMetaRepository) FindProductIdBySKU(sku []string, storeSlug strin
 func (r *productMetaRepository) FindProductIdByEAN(ean []int64, storeSlug string, tx *sql.Tx) (int64, error) {
 	return r.findOne(
 		tx,
-		model.ProductEanTableName,
+		ProductEanTableName,
 		squirrel.Eq{
 			"slug": storeSlug,
 			"ean":  ean,
@@ -134,7 +147,7 @@ func (r *productMetaRepository) CreateSKUs(productId int64, skus []string, tx *s
 func (r *productMetaRepository) DeleteEANs(productId int64, eans []int64, tx *sql.Tx) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Delete(model.ProductEanTableName).
+	q := qb.Delete(ProductEanTableName).
 		Where(
 			squirrel.And{
 				squirrel.Eq{
@@ -157,7 +170,7 @@ func (r *productMetaRepository) DeleteEANs(productId int64, eans []int64, tx *sq
 func (r *productMetaRepository) DeleteSKUs(productId int64, skus []string, tx *sql.Tx) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Delete(model.ProductSkuTableName).
+	q := qb.Delete(ProductSkuTableName).
 		Where(
 			squirrel.And{
 				squirrel.Eq{
@@ -177,14 +190,14 @@ func (r *productMetaRepository) DeleteSKUs(productId int64, skus []string, tx *s
 }
 
 // GetProductSKUs implements ProductMetaRepository.
-func (r *productMetaRepository) GetProductSKUs(productId int64, tx *sql.Tx) ([]model.ProductSku, error) {
+func (r *productMetaRepository) GetProductSKUs(productId int64, tx *sql.Tx) ([]ProductSku, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id", "sku").
-		From(model.ProductSkuTableName).
+		From(ProductSkuTableName).
 		Where(squirrel.Eq{"product_id": productId})
 
-	var skus []model.ProductSku
+	var skus []ProductSku
 	rows, err := q.Query()
 
 	if err != nil {
@@ -194,7 +207,7 @@ func (r *productMetaRepository) GetProductSKUs(productId int64, tx *sql.Tx) ([]m
 	defer rows.Close()
 
 	for rows.Next() {
-		var sku model.ProductSku
+		var sku ProductSku
 		err := rows.Scan(
 			&sku.ProductId,
 			&sku.Sku,
@@ -211,14 +224,14 @@ func (r *productMetaRepository) GetProductSKUs(productId int64, tx *sql.Tx) ([]m
 }
 
 // GetProductEANs implements ProductMetaRepository.
-func (r *productMetaRepository) GetProductEANs(productId int64, tx *sql.Tx) ([]model.ProductEan, error) {
+func (r *productMetaRepository) GetProductEANs(productId int64, tx *sql.Tx) ([]ProductEan, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id", "ean").
-		From(model.ProductEanTableName).
+		From(ProductEanTableName).
 		Where(squirrel.Eq{"product_id": productId})
 
-	var eans []model.ProductEan
+	var eans []ProductEan
 	rows, err := q.Query()
 
 	if err != nil {
@@ -228,7 +241,7 @@ func (r *productMetaRepository) GetProductEANs(productId int64, tx *sql.Tx) ([]m
 	defer rows.Close()
 
 	for rows.Next() {
-		var ean model.ProductEan
+		var ean ProductEan
 		err := rows.Scan(
 			&ean.ProductId,
 			&ean.Ean,
@@ -248,8 +261,8 @@ func (r *productMetaRepository) findOne(tx *sql.Tx, tableName string, where any,
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id").
-		InnerJoin(fmt.Sprintf("%s USING (product_id)", model.ProductTableName)).
-		InnerJoin(fmt.Sprintf("%s USING (store_id)", model.StoreTableName)).
+		InnerJoin(fmt.Sprintf("%s USING (product_id)", ProductTableName)).
+		InnerJoin(fmt.Sprintf("%s USING (store_id)", store.StoreTableName)).
 		From(tableName).
 		Where(where, args...)
 
@@ -265,7 +278,7 @@ func (r *productMetaRepository) findOne(tx *sql.Tx, tableName string, where any,
 func (r *productMetaRepository) createEan(productId int64, ean int64, tx *sql.Tx) error {
 	qb := repository.QueryBuilder(tx)
 
-	q := qb.Insert(model.ProductEanTableName).
+	q := qb.Insert(ProductEanTableName).
 		Columns("product_id", "ean").
 		Values(productId, ean)
 
@@ -277,7 +290,7 @@ func (r *productMetaRepository) createEan(productId int64, ean int64, tx *sql.Tx
 func (r *productMetaRepository) createSku(productId int64, sku string, tx *sql.Tx) error {
 	qb := repository.QueryBuilder(tx)
 
-	q := qb.Insert(model.ProductSkuTableName).
+	q := qb.Insert(ProductSkuTableName).
 		Columns("product_id", "sku").
 		Values(productId, sku)
 

@@ -7,17 +7,16 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/brunofjesus/pricetracker/catalog/model"
-	price_repository "github.com/brunofjesus/pricetracker/catalog/repository/price"
-	product_repository "github.com/brunofjesus/pricetracker/catalog/repository/product"
-	store_repository "github.com/brunofjesus/pricetracker/catalog/repository/store"
+	price_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/price"
+	product_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+	store_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 )
 
 var finderOnce sync.Once
 var finderInstance ProductMatcher
 
 type ProductMatcher interface {
-	Match(storeProduct model.MqStoreProduct) int64
+	Match(storeProduct MqStoreProduct) int64
 }
 
 type productMatcher struct {
@@ -39,8 +38,8 @@ func GetProductMatcher() ProductMatcher {
 	return finderInstance
 }
 
-func (s *productMatcher) Match(storeProduct model.MqStoreProduct) int64 {
-	var searchFunctions []func(model.MqStoreProduct) int64
+func (s *productMatcher) Match(storeProduct MqStoreProduct) int64 {
+	var searchFunctions []func(MqStoreProduct) int64
 	searchFunctions = append(searchFunctions, s.findByProductUrl)
 	searchFunctions = append(searchFunctions, s.findByEan)
 	searchFunctions = append(searchFunctions, s.findBySku)
@@ -56,7 +55,7 @@ func (s *productMatcher) Match(storeProduct model.MqStoreProduct) int64 {
 	return -1
 }
 
-func (s *productMatcher) findByEan(storeProduct model.MqStoreProduct) int64 {
+func (s *productMatcher) findByEan(storeProduct MqStoreProduct) int64 {
 	var validEans []int64
 	for _, ean := range storeProduct.EAN {
 		if eanInt, err := strconv.Atoi(ean); err == nil {
@@ -76,7 +75,7 @@ func (s *productMatcher) findByEan(storeProduct model.MqStoreProduct) int64 {
 	return -1
 }
 
-func (s *productMatcher) findBySku(storeProduct model.MqStoreProduct) int64 {
+func (s *productMatcher) findBySku(storeProduct MqStoreProduct) int64 {
 	productId, err := s.productMetaRepository.FindProductIdBySKU(storeProduct.SKU, storeProduct.StoreSlug, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Printf("error finding by sku %v: %v", storeProduct.SKU, err)
@@ -87,7 +86,7 @@ func (s *productMatcher) findBySku(storeProduct model.MqStoreProduct) int64 {
 	return -1
 }
 
-func (s *productMatcher) findByProductUrl(storeProduct model.MqStoreProduct) int64 {
+func (s *productMatcher) findByProductUrl(storeProduct MqStoreProduct) int64 {
 	product, err := s.productRepository.FindProductByUrl(storeProduct.Link, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Printf("error finding by url %v: %v", storeProduct.Link, err)

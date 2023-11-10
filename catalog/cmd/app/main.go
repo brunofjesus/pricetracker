@@ -6,7 +6,7 @@ import (
 	"os"
 
 	"github.com/brunofjesus/pricetracker/catalog/config"
-	"github.com/brunofjesus/pricetracker/catalog/service/mq"
+	"github.com/brunofjesus/pricetracker/catalog/internal/mq"
 )
 
 func main() {

@@ -6,20 +6,19 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/catalog/model"
-	"github.com/brunofjesus/pricetracker/catalog/repository"
+	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 	"github.com/brunofjesus/pricetracker/catalog/util/list"
 
-	price_repository "github.com/brunofjesus/pricetracker/catalog/repository/price"
-	product_repository "github.com/brunofjesus/pricetracker/catalog/repository/product"
-	store_repository "github.com/brunofjesus/pricetracker/catalog/repository/store"
+	price_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/price"
+	product_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+	store_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 )
 
 var updaterOnce sync.Once
 var updaterInstance ProductUpdater
 
 type ProductUpdater interface {
-	Update(productId int64, storeProduct model.MqStoreProduct) error
+	Update(productId int64, storeProduct MqStoreProduct) error
 }
 
 type productUpdater struct {
@@ -44,7 +43,7 @@ func GetProductUpdater() ProductUpdater {
 }
 
 // Update implements ProductUpdater.
-func (s *productUpdater) Update(productId int64, storeProduct model.MqStoreProduct) error {
+func (s *productUpdater) Update(productId int64, storeProduct MqStoreProduct) error {
 	tx, err := s.db.Begin()
 
 	if err != nil {
@@ -101,7 +100,7 @@ func (s *productUpdater) Update(productId int64, storeProduct model.MqStoreProdu
 	return tx.Commit()
 }
 
-func (s *productUpdater) updateSkus(productId int64, storeProduct model.MqStoreProduct, tx *sql.Tx) error {
+func (s *productUpdater) updateSkus(productId int64, storeProduct MqStoreProduct, tx *sql.Tx) error {
 	dbProductSku, err := s.productMetaRepository.GetProductSKUs(productId, tx)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -111,7 +110,7 @@ func (s *productUpdater) updateSkus(productId int64, storeProduct model.MqStoreP
 
 	if err == nil {
 		// update
-		previousSkus := list.Map[model.ProductSku, string](dbProductSku, func(m model.ProductSku) string {
+		previousSkus := list.Map[product_repository.ProductSku, string](dbProductSku, func(m product_repository.ProductSku) string {
 			return m.Sku
 		})
 
@@ -134,7 +133,7 @@ func (s *productUpdater) updateSkus(productId int64, storeProduct model.MqStoreP
 	return nil
 }
 
-func (s *productUpdater) updateEans(productId int64, storeProduct model.MqStoreProduct, tx *sql.Tx) error {
+func (s *productUpdater) updateEans(productId int64, storeProduct MqStoreProduct, tx *sql.Tx) error {
 	dbProductEan, err := s.productMetaRepository.GetProductEANs(productId, tx)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
@@ -146,7 +145,7 @@ func (s *productUpdater) updateEans(productId int64, storeProduct model.MqStoreP
 
 	if err == nil {
 		// update
-		previousEans := list.Map[model.ProductEan, int64](dbProductEan, func(m model.ProductEan) int64 {
+		previousEans := list.Map[product_repository.ProductEan, int64](dbProductEan, func(m product_repository.ProductEan) int64 {
 			return m.Ean
 		})
 

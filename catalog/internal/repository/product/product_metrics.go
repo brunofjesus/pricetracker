@@ -6,16 +6,37 @@ import (
 	"sync"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/brunofjesus/pricetracker/catalog/model"
-	"github.com/brunofjesus/pricetracker/catalog/repository"
+	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
+	"github.com/shopspring/decimal"
 )
 
 var productMetricsOnce sync.Once
 var productMetricsInstance ProductMetricsRepository
 
+const ProductWithMetricsViewName = "product_metrics"
+
+type ProductWithMetrics struct {
+	ProductId  int64  `db:"product_id"`
+	StoreId    int64  `db:"store_id"`
+	Name       string `db:"name"`
+	Brand      string `db:"brand"`
+	Price      int    `db:"price"`
+	Available  bool   `db:"available"`
+	ImageUrl   string `db:"image_url"`
+	ProductUrl string `db:"product_url"`
+
+	Difference       decimal.Decimal `db:"diff"`
+	DiscountPercent  decimal.Decimal `db:"discount_percent"`
+	Average          decimal.Decimal `db:"average"`
+	Maximum          decimal.Decimal `db:"maximum"`
+	Minimum          decimal.Decimal `db:"minimum"`
+	MetricEntryCount decimal.Decimal `db:"entries"`
+	MetricDataSince  decimal.Decimal `db:"metrics_since"`
+}
+
 type ProductMetricsRepository interface {
-	FindProductById(productId int64, tx *sql.Tx) (*model.ProductWithMetrics, error)
-	FindProducts(offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]model.ProductWithMetrics, error)
+	FindProductById(productId int64, tx *sql.Tx) (*ProductWithMetrics, error)
+	FindProducts(offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]ProductWithMetrics, error)
 	CountProducts(tx *sql.Tx) (int64, error)
 }
 
@@ -37,17 +58,17 @@ func GetProductMetricsRepository() ProductMetricsRepository {
 }
 
 // FindProductById implements ProductMetricsRepository.
-func (r *productMetricsRepository) FindProductById(productId int64, tx *sql.Tx) (*model.ProductWithMetrics, error) {
+func (r *productMetricsRepository) FindProductById(productId int64, tx *sql.Tx) (*ProductWithMetrics, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select(
 		"product_id", "store_id", "name", "brand", "price", "available", "image_url", "product_url",
 		"discount", "discount_percent", "average", "maximum", "minimum", "entries", "entries_since",
 	).
-		From(model.ProductWithMetricsViewName).
+		From(ProductWithMetricsViewName).
 		Where(squirrel.Eq{"product_id": productId})
 
-	var product model.ProductWithMetrics
+	var product ProductWithMetrics
 
 	err := r.scanFullRow(q.QueryRow(), &product)
 
@@ -55,19 +76,19 @@ func (r *productMetricsRepository) FindProductById(productId int64, tx *sql.Tx) 
 }
 
 // FindProducts implements ProductMetricsRepository.
-func (r *productMetricsRepository) FindProducts(offset int64, limit int, orderBy string, direction string, tx *sql.Tx) ([]model.ProductWithMetrics, error) {
+func (r *productMetricsRepository) FindProducts(offset int64, limit int, orderBy string, direction string, tx *sql.Tx) ([]ProductWithMetrics, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select(
 		"product_id", "store_id", "name", "brand", "price", "available", "image_url", "product_url",
 		"discount", "discount_percent", "average", "maximum", "minimum", "entries", "entries_since",
 	).
-		From(model.ProductWithMetricsViewName).
+		From(ProductWithMetricsViewName).
 		OrderBy(fmt.Sprintf("%s %s", orderBy, direction)).
 		Offset(uint64(offset)).
 		Limit(uint64(limit))
 
-	var products []model.ProductWithMetrics
+	var products []ProductWithMetrics
 	rows, err := q.Query()
 
 	if err != nil {
@@ -77,7 +98,7 @@ func (r *productMetricsRepository) FindProducts(offset int64, limit int, orderBy
 	defer rows.Close()
 
 	for rows.Next() {
-		var product model.ProductWithMetrics
+		var product ProductWithMetrics
 
 		if err := r.scanFullRow(rows, &product); err != nil {
 			return nil, err
@@ -94,14 +115,14 @@ func (r *productMetricsRepository) CountProducts(tx *sql.Tx) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("COUNT(*)").
-		From(model.ProductWithMetricsViewName)
+		From(ProductWithMetricsViewName)
 
 	var count int64
 	err := q.QueryRow().Scan(&count)
 	return count, err
 }
 
-func (r *productMetricsRepository) scanFullRow(row squirrel.RowScanner, product *model.ProductWithMetrics) error {
+func (r *productMetricsRepository) scanFullRow(row squirrel.RowScanner, product *ProductWithMetrics) error {
 	return row.Scan(
 		product.ProductId,
 		product.StoreId,

@@ -3,15 +3,13 @@ package product
 import (
 	"log"
 	"sync"
-
-	"github.com/brunofjesus/pricetracker/catalog/model"
 )
 
 var handlerOnce sync.Once
 var handlerInstance ProductHandler
 
 type ProductHandler interface {
-	Handle(storeProduct model.MqStoreProduct) error
+	Handle(storeProduct MqStoreProduct) error
 }
 
 type productHandler struct {
@@ -31,7 +29,7 @@ func GetProductHandler() ProductHandler {
 	return handlerInstance
 }
 
-func (s *productHandler) Handle(storeProduct model.MqStoreProduct) error {
+func (s *productHandler) Handle(storeProduct MqStoreProduct) error {
 	var err error
 	if productId := s.productMatcher.Match(storeProduct); productId > 0 {
 		err = s.productUpdater.Update(productId, storeProduct)
