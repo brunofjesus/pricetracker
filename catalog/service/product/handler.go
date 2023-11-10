@@ -4,7 +4,7 @@ import (
 	"log"
 	"sync"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/model"
+	"github.com/brunofjesus/pricetracker/catalog/model"
 )
 
 var handlerOnce sync.Once

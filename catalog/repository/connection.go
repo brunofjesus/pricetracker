@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/config"
+	"github.com/brunofjesus/pricetracker/catalog/config"
 
 	_ "github.com/lib/pq"
 )

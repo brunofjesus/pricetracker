@@ -5,7 +5,7 @@ migration_create:
 	migrate create -ext sql -dir ./migration -seq $(name)
 
 migration_up:
-	go run ./src/cmd/migration
+	go run ./cmd/migration
 
 migration_drop:
 	migrate -database postgres://postgres:price@localhost:5432/postgres?sslmode=disable -path ./migration drop

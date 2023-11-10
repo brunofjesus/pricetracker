@@ -5,12 +5,12 @@ import (
 	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/model"
-	"github.com/brunofjesus/pricetracker/catalog/src/repository"
+	"github.com/brunofjesus/pricetracker/catalog/model"
+	"github.com/brunofjesus/pricetracker/catalog/repository"
 
-	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
-	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
-	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
+	price_repository "github.com/brunofjesus/pricetracker/catalog/repository/price"
+	product_repository "github.com/brunofjesus/pricetracker/catalog/repository/product"
+	store_repository "github.com/brunofjesus/pricetracker/catalog/repository/store"
 )
 
 var creatorOnce sync.Once

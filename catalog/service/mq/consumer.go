@@ -7,10 +7,10 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/config"
-	"github.com/brunofjesus/pricetracker/catalog/src/model"
-	"github.com/brunofjesus/pricetracker/catalog/src/service/product"
-	"github.com/brunofjesus/pricetracker/catalog/src/service/store"
+	"github.com/brunofjesus/pricetracker/catalog/config"
+	"github.com/brunofjesus/pricetracker/catalog/model"
+	"github.com/brunofjesus/pricetracker/catalog/service/product"
+	"github.com/brunofjesus/pricetracker/catalog/service/store"
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
@@ -24,7 +24,7 @@ type consumer struct {
 	applicationConfiguration *config.ApplicationConfiguration
 }
 
-func NewConsumer() Consumer {
+func newConsumer() Consumer {
 	return &consumer{
 		productHandler:           product.GetProductHandler(),
 		storeHandler:             store.GetStoreHandler(),

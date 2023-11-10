@@ -3,7 +3,7 @@ package product
 import (
 	"strconv"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/model"
+	"github.com/brunofjesus/pricetracker/catalog/model"
 )
 
 func filterEANs(storeProduct model.MqStoreProduct) []int64 {

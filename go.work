@@ -1,7 +1,7 @@
 go 1.21.3
 
 use (
-	./catalog/src
+	./catalog
 	./stores/pingodoce
 	./stores/worten
 )

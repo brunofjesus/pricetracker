@@ -7,8 +7,8 @@ import (
 	"time"
 
 	"github.com/Masterminds/squirrel"
-	"github.com/brunofjesus/pricetracker/catalog/src/model"
-	"github.com/brunofjesus/pricetracker/catalog/src/repository"
+	"github.com/brunofjesus/pricetracker/catalog/model"
+	"github.com/brunofjesus/pricetracker/catalog/repository"
 )
 
 var once sync.Once

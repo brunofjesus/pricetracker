@@ -7,10 +7,10 @@ import (
 	"strconv"
 	"sync"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/model"
-	price_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/price"
-	product_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/product"
-	store_repository "github.com/brunofjesus/pricetracker/catalog/src/repository/store"
+	"github.com/brunofjesus/pricetracker/catalog/model"
+	price_repository "github.com/brunofjesus/pricetracker/catalog/repository/price"
+	product_repository "github.com/brunofjesus/pricetracker/catalog/repository/product"
+	store_repository "github.com/brunofjesus/pricetracker/catalog/repository/store"
 )
 
 var finderOnce sync.Once

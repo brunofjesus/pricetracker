@@ -5,8 +5,8 @@ import (
 	"errors"
 	"sync"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/model"
-	"github.com/brunofjesus/pricetracker/catalog/src/repository/store"
+	"github.com/brunofjesus/pricetracker/catalog/model"
+	"github.com/brunofjesus/pricetracker/catalog/repository/store"
 )
 
 var once sync.Once

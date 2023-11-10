@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/brunofjesus/pricetracker/catalog/src/repository"
+	"github.com/brunofjesus/pricetracker/catalog/repository"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"

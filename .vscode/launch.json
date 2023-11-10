@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "cwd": "${workspaceFolder}/catalog",
-            "program": "${workspaceFolder}/catalog/src/cmd/main.go"
+            "program": "${workspaceFolder}/catalog/cmd/app/main.go"
         },
         {
             "name": "PingoDoce",

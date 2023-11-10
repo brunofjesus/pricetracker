@@ -9,7 +9,7 @@
             "type": "go",
             "request": "launch",
             "mode": "auto",
-            "program": "${workspaceFolder}/src/cmd/app",
+            "program": "${workspaceFolder}/cmd/app",
             "cwd": "${workspaceFolder}"
         }
     ]
