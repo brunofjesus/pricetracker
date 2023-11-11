@@ -7,6 +7,7 @@ import (
 
 	"github.com/brunofjesus/pricetracker/catalog/config"
 	"github.com/brunofjesus/pricetracker/catalog/internal/mq"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/rest"
 )
 
 func main() {
@@ -24,7 +25,8 @@ func main() {
 		go mq.SpawnWorker(workerCtx, i+1)
 	}
 
-	select {}
+	// select {}
+	rest.ListenAndServe(8080)
 }
 
 func newLogger() *slog.Logger {

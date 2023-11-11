@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"sync"
+	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
@@ -31,7 +32,7 @@ type ProductWithMetrics struct {
 	Maximum          decimal.Decimal `db:"maximum"`
 	Minimum          decimal.Decimal `db:"minimum"`
 	MetricEntryCount decimal.Decimal `db:"entries"`
-	MetricDataSince  decimal.Decimal `db:"metrics_since"`
+	MetricDataSince  time.Time       `db:"metrics_since"`
 }
 
 type ProductMetricsRepository interface {
@@ -63,7 +64,7 @@ func (r *productMetricsRepository) FindProductById(productId int64, tx *sql.Tx) 
 
 	q := qb.Select(
 		"product_id", "store_id", "name", "brand", "price", "available", "image_url", "product_url",
-		"discount", "discount_percent", "average", "maximum", "minimum", "entries", "entries_since",
+		"diff", "discount_percent", "average", "maximum", "minimum", "entries", "metrics_since",
 	).
 		From(ProductWithMetricsViewName).
 		Where(squirrel.Eq{"product_id": productId})
@@ -81,7 +82,7 @@ func (r *productMetricsRepository) FindProducts(offset int64, limit int, orderBy
 
 	q := qb.Select(
 		"product_id", "store_id", "name", "brand", "price", "available", "image_url", "product_url",
-		"discount", "discount_percent", "average", "maximum", "minimum", "entries", "entries_since",
+		"diff", "discount_percent", "average", "maximum", "minimum", "entries", "metrics_since",
 	).
 		From(ProductWithMetricsViewName).
 		OrderBy(fmt.Sprintf("%s %s", orderBy, direction)).
@@ -124,21 +125,21 @@ func (r *productMetricsRepository) CountProducts(tx *sql.Tx) (int64, error) {
 
 func (r *productMetricsRepository) scanFullRow(row squirrel.RowScanner, product *ProductWithMetrics) error {
 	return row.Scan(
-		product.ProductId,
-		product.StoreId,
-		product.Name,
-		product.Brand,
-		product.Price,
-		product.Available,
-		product.ImageUrl,
-		product.ProductUrl,
+		&product.ProductId,
+		&product.StoreId,
+		&product.Name,
+		&product.Brand,
+		&product.Price,
+		&product.Available,
+		&product.ImageUrl,
+		&product.ProductUrl,
 
-		product.Difference,
-		product.DiscountPercent,
-		product.Average,
-		product.Maximum,
-		product.Minimum,
-		product.MetricEntryCount,
-		product.MetricDataSince,
+		&product.Difference,
+		&product.DiscountPercent,
+		&product.Average,
+		&product.Maximum,
+		&product.Minimum,
+		&product.MetricEntryCount,
+		&product.MetricDataSince,
 	)
 }
