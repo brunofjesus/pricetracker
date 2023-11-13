@@ -1,6 +1,10 @@
 package pagination
 
-import "errors"
+import (
+	"errors"
+	"net/http"
+	"strconv"
+)
 
 type PaginatedQuery struct {
 	Page          int    `json:"page"`
@@ -29,6 +33,34 @@ func NewPaginatedQuery(page, pageSize int, sortField, sortDirection string) (*Pa
 		SortField:     sortField,
 		SortDirection: sortDirection,
 	}, nil
+}
+
+func FromHttpRequest(r *http.Request) (*PaginatedQuery, error) {
+	query := r.URL.Query()
+
+	var err error
+
+	page := 1
+	size := 10
+
+	if query.Get("page") != "" {
+		page, err = strconv.Atoi(query.Get("page"))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	if query.Get("size") != "" {
+		size, err = strconv.Atoi(query.Get("size"))
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	sortField := query.Get("sortField")
+	sortDirection := query.Get("sortDirection")
+
+	return NewPaginatedQuery(page, size, sortField, sortDirection)
 }
 
 func (p *PaginatedQuery) Offset() int64 {

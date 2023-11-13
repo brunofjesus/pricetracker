@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/rest/utils"
 	"github.com/go-chi/chi/v5"
 )
@@ -19,9 +19,8 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	metricsRepository := product.GetProductMetricsRepository()
-
-	productWithMetrics, err := metricsRepository.FindProductById(productId, nil)
+	productWithMetrics, err := product.GetMetricsFinder().
+		FindProductById(productId)
 
 	if err != nil {
 		utils.ErrorJSON(w, fmt.Errorf("cannot fetch product: %d", productId), http.StatusInternalServerError)

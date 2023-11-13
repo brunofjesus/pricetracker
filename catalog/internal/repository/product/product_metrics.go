@@ -8,6 +8,7 @@ import (
 
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
+	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 	"github.com/shopspring/decimal"
 )
 
@@ -33,6 +34,27 @@ type ProductWithMetrics struct {
 	Minimum          decimal.Decimal `db:"minimum"`
 	MetricEntryCount decimal.Decimal `db:"entries"`
 	MetricDataSince  time.Time       `db:"metrics_since"`
+}
+
+// TODO: use in query
+type ProductMetricsFilter struct {
+	MinPrice   float64
+	MaxPrice   float64
+	NameLike   string
+	BrandLike  string
+	Available  nulltype.NullBoolean
+	ProductUrl string
+
+	MinDifference      float64
+	MaxDifference      float64
+	MinDiscountPercent float64
+	MaxDiscountPercent float64
+	MinAveragePrice    float64
+	MaxAveragePrice    float64
+	MinMaximumPrice    float64
+	MaxMaximumPrice    float64
+	MinMinimumPrice    float64
+	MaxMinimumPrice    float64
 }
 
 type ProductMetricsRepository interface {
