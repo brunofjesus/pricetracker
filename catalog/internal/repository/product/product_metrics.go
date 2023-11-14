@@ -36,7 +36,6 @@ type ProductWithMetrics struct {
 	MetricDataSince  time.Time       `db:"metrics_since"`
 }
 
-// TODO: use in query
 type ProductMetricsFilter struct {
 	StoreId    int
 	MinPrice   float64
