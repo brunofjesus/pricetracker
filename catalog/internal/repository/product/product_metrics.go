@@ -38,6 +38,7 @@ type ProductWithMetrics struct {
 
 // TODO: use in query
 type ProductMetricsFilter struct {
+	StoreId    int
 	MinPrice   float64
 	MaxPrice   float64
 	NameLike   string
@@ -59,7 +60,7 @@ type ProductMetricsFilter struct {
 
 type ProductMetricsRepository interface {
 	FindProductById(productId int64, tx *sql.Tx) (*ProductWithMetrics, error)
-	FindProducts(offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]ProductWithMetrics, error)
+	FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductMetricsFilter, tx *sql.Tx) ([]ProductWithMetrics, error)
 	CountProducts(tx *sql.Tx) (int64, error)
 }
 
@@ -99,15 +100,48 @@ func (r *productMetricsRepository) FindProductById(productId int64, tx *sql.Tx) 
 }
 
 // FindProducts implements ProductMetricsRepository.
-func (r *productMetricsRepository) FindProducts(offset int64, limit int, orderBy string, direction string, tx *sql.Tx) ([]ProductWithMetrics, error) {
+func (r *productMetricsRepository) FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductMetricsFilter, tx *sql.Tx) ([]ProductWithMetrics, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select(
 		"product_id", "store_id", "name", "brand", "price", "available", "image_url", "product_url",
 		"diff", "discount_percent", "average", "maximum", "minimum", "entries", "metrics_since",
-	).
-		From(ProductWithMetricsViewName).
-		OrderBy(fmt.Sprintf("%s %s", orderBy, direction)).
+	).From(ProductWithMetricsViewName)
+
+	if filters != nil {
+		f := squirrel.And{}
+
+		if filters.StoreId > -1 {
+			f = append(f, squirrel.Eq{"store_id": filters.StoreId})
+		}
+
+		if len(filters.NameLike) > 0 {
+			f = append(f, squirrel.Like{"name": "%" + filters.NameLike + "%"})
+		}
+
+		if len(filters.BrandLike) > 0 {
+			f = append(f, squirrel.Like{"brand": "%" + filters.BrandLike + "%"})
+		}
+
+		if !nulltype.IsUndefined(filters.Available) {
+			f = append(f, squirrel.Eq{"available": nulltype.IsTrue(filters.Available)})
+		}
+
+		if len(filters.ProductUrl) > 0 {
+			f = append(f, squirrel.Eq{"product_url": filters.ProductUrl})
+		}
+
+		f = append(f, generateBetween("price", filters.MinPrice, filters.MaxPrice)...)
+		f = append(f, generateBetween("diff", filters.MinDifference, filters.MaxDifference)...)
+		f = append(f, generateBetween("discount_percent", filters.MinDiscountPercent, filters.MaxDiscountPercent)...)
+		f = append(f, generateBetween("average", filters.MinAveragePrice, filters.MaxAveragePrice)...)
+		f = append(f, generateBetween("maximum", filters.MinMaximumPrice, filters.MaxMaximumPrice)...)
+		f = append(f, generateBetween("minimum", filters.MinMinimumPrice, filters.MaxMinimumPrice)...)
+
+		q = q.Where(f)
+	}
+
+	q = q.OrderBy(fmt.Sprintf("%s %s", orderBy, direction)).
 		Offset(uint64(offset)).
 		Limit(uint64(limit))
 
@@ -164,4 +198,17 @@ func (r *productMetricsRepository) scanFullRow(row squirrel.RowScanner, product 
 		&product.MetricEntryCount,
 		&product.MetricDataSince,
 	)
+}
+
+func generateBetween(col string, minValue float64, maxValue float64) []squirrel.Sqlizer {
+	var result []squirrel.Sqlizer = make([]squirrel.Sqlizer, 0, 2)
+
+	if minValue > -1 {
+		result = append(result, squirrel.GtOrEq{col: minValue})
+	}
+	if maxValue > -1 {
+		result = append(result, squirrel.LtOrEq{col: maxValue})
+	}
+
+	return result
 }

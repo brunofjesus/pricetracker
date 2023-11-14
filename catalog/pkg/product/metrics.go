@@ -14,6 +14,7 @@ var metricsFinderOnce sync.Once
 var metricsFinderInstance *metricsFinder
 
 type ProductMetricsSearch struct {
+	StoreId    int
 	MinPrice   float64
 	MaxPrice   float64
 	NameLike   string
