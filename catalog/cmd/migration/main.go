@@ -10,6 +10,10 @@ import (
 )
 
 func main() {
+	doMigration()
+}
+
+func doMigration() {
 	db := repository.GetDatabaseConnection()
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
@@ -19,7 +23,7 @@ func main() {
 	}
 
 	migration, err := migrate.NewWithDatabaseInstance(
-		"file://migration", "postgres", driver,
+		"file://migrations", "postgres", driver,
 	)
 
 	if err != nil {

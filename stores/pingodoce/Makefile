@@ -1,4 +1,13 @@
+build_sys_arch:
+	mkdir -p ../../dist/$(system)_$(arch)/store/pingodoce/
+	go build -o ../../dist/$(system)_$(arch)/store/pingodoce/pingodoce$(extension) main.go
+	cp config.yaml ../../dist/$(system)_$(arch)/store/pingodoce/
+
 build:
-	mkdir -p ../../dist/store/pingodoce/
-	go build -o ../../dist/store/pingodoce/pingodoce main.go
-	cp config.yaml ../../dist/store/pingodoce/
+	make build_sys_arch system=windows arch=amd64 extension=.exe
+	make build_sys_arch system=windows arch=386 extension=.exe
+	make build_sys_arch system=darwin arch=amd64
+	make build_sys_arch system=darwin arch=arm64
+	make build_sys_arch system=linux arch=386
+	make build_sys_arch system=linux arch=amd64
+	make build_sys_arch system=linux arch=arm64
