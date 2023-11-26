@@ -18,25 +18,27 @@ var productMetricsInstance ProductMetricsRepository
 const ProductWithMetricsViewName = "product_metrics"
 
 type ProductWithMetrics struct {
-	ProductId  int64  `db:"product_id"`
-	StoreId    int64  `db:"store_id"`
-	Name       string `db:"name"`
-	Brand      string `db:"brand"`
-	Price      int    `db:"price"`
-	Available  bool   `db:"available"`
-	ImageUrl   string `db:"image_url"`
-	ProductUrl string `db:"product_url"`
+	ProductId  int64  `db:"product_id" json:"product_id"`
+	StoreId    int64  `db:"store_id" json:"store_id"`
+	Name       string `db:"name" json:"name"`
+	Brand      string `db:"brand" json:"brand"`
+	Price      int    `db:"price" json:"price"`
+	Available  bool   `db:"available" json:"available"`
+	ImageUrl   string `db:"image_url" json:"image_url"`
+	ProductUrl string `db:"product_url" json:"product_url"`
 
-	Difference       decimal.Decimal `db:"diff"`
-	DiscountPercent  decimal.Decimal `db:"discount_percent"`
-	Average          decimal.Decimal `db:"average"`
-	Maximum          decimal.Decimal `db:"maximum"`
-	Minimum          decimal.Decimal `db:"minimum"`
-	MetricEntryCount decimal.Decimal `db:"entries"`
-	MetricDataSince  time.Time       `db:"metrics_since"`
+	Difference       decimal.Decimal `db:"diff" json:"diff"`
+	DiscountPercent  decimal.Decimal `db:"discount_percent" json:"discount_percent"`
+	Average          decimal.Decimal `db:"average" json:"average"`
+	Minimum          decimal.Decimal `db:"minimum" json:"minimum"`
+	Maximum          decimal.Decimal `db:"maximum" json:"maximum"`
+	MetricEntryCount decimal.Decimal `db:"entries" json:"entries"`
+	MetricDataSince  time.Time       `db:"metrics_since" json:"since"`
 }
 
 type ProductMetricsFilter struct {
+	ProductId []int64
+
 	StoreId    int
 	MinPrice   float64
 	MaxPrice   float64
@@ -51,16 +53,16 @@ type ProductMetricsFilter struct {
 	MaxDiscountPercent float64
 	MinAveragePrice    float64
 	MaxAveragePrice    float64
-	MinMaximumPrice    float64
-	MaxMaximumPrice    float64
 	MinMinimumPrice    float64
 	MaxMinimumPrice    float64
+	MinMaximumPrice    float64
+	MaxMaximumPrice    float64
 }
 
 type ProductMetricsRepository interface {
 	FindProductById(productId int64, tx *sql.Tx) (*ProductWithMetrics, error)
 	FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductMetricsFilter, tx *sql.Tx) ([]ProductWithMetrics, error)
-	CountProducts(tx *sql.Tx) (int64, error)
+	CountProducts(filters *ProductMetricsFilter, tx *sql.Tx) (int64, error)
 }
 
 type productMetricsRepository struct {
@@ -108,36 +110,7 @@ func (r *productMetricsRepository) FindProducts(offset int64, limit int, orderBy
 	).From(ProductWithMetricsViewName)
 
 	if filters != nil {
-		f := squirrel.And{}
-
-		if filters.StoreId > -1 {
-			f = append(f, squirrel.Eq{"store_id": filters.StoreId})
-		}
-
-		if len(filters.NameLike) > 0 {
-			f = append(f, squirrel.Like{"name": "%" + filters.NameLike + "%"})
-		}
-
-		if len(filters.BrandLike) > 0 {
-			f = append(f, squirrel.Like{"brand": "%" + filters.BrandLike + "%"})
-		}
-
-		if !nulltype.IsUndefined(filters.Available) {
-			f = append(f, squirrel.Eq{"available": nulltype.IsTrue(filters.Available)})
-		}
-
-		if len(filters.ProductUrl) > 0 {
-			f = append(f, squirrel.Eq{"product_url": filters.ProductUrl})
-		}
-
-		f = append(f, generateBetween("price", filters.MinPrice, filters.MaxPrice)...)
-		f = append(f, generateBetween("diff", filters.MinDifference, filters.MaxDifference)...)
-		f = append(f, generateBetween("discount_percent", filters.MinDiscountPercent, filters.MaxDiscountPercent)...)
-		f = append(f, generateBetween("average", filters.MinAveragePrice, filters.MaxAveragePrice)...)
-		f = append(f, generateBetween("maximum", filters.MinMaximumPrice, filters.MaxMaximumPrice)...)
-		f = append(f, generateBetween("minimum", filters.MinMinimumPrice, filters.MaxMinimumPrice)...)
-
-		q = q.Where(f)
+		q = appendFiltersToQuery(q, *filters)
 	}
 
 	q = q.OrderBy(fmt.Sprintf("%s %s", orderBy, direction)).
@@ -167,11 +140,15 @@ func (r *productMetricsRepository) FindProducts(offset int64, limit int, orderBy
 }
 
 // CountProducts implements ProductMetricsRepository.
-func (r *productMetricsRepository) CountProducts(tx *sql.Tx) (int64, error) {
+func (r *productMetricsRepository) CountProducts(filters *ProductMetricsFilter, tx *sql.Tx) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("COUNT(*)").
 		From(ProductWithMetricsViewName)
+
+	if filters != nil {
+		q = appendFiltersToQuery(q, *filters)
+	}
 
 	var count int64
 	err := q.QueryRow().Scan(&count)
@@ -197,6 +174,45 @@ func (r *productMetricsRepository) scanFullRow(row squirrel.RowScanner, product 
 		&product.MetricEntryCount,
 		&product.MetricDataSince,
 	)
+}
+
+func appendFiltersToQuery(q squirrel.SelectBuilder, filters ProductMetricsFilter) squirrel.SelectBuilder {
+	f := squirrel.And{}
+
+	if len(filters.ProductId) > 0 {
+		f = append(f, squirrel.Eq{"product_id": filters.ProductId})
+	}
+
+	if filters.StoreId > -1 {
+		f = append(f, squirrel.Eq{"store_id": filters.StoreId})
+	}
+
+	if len(filters.NameLike) > 0 {
+		f = append(f, squirrel.Like{"name": "%" + filters.NameLike + "%"})
+	}
+
+	if len(filters.BrandLike) > 0 {
+		f = append(f, squirrel.Like{"brand": "%" + filters.BrandLike + "%"})
+	}
+
+	if !nulltype.IsUndefined(filters.Available) {
+		f = append(f, squirrel.Eq{"available": nulltype.IsTrue(filters.Available)})
+	}
+
+	if len(filters.ProductUrl) > 0 {
+		f = append(f, squirrel.Eq{"product_url": filters.ProductUrl})
+	}
+
+	f = append(f, generateBetween("price", filters.MinPrice, filters.MaxPrice)...)
+	f = append(f, generateBetween("diff", filters.MinDifference, filters.MaxDifference)...)
+	f = append(f, generateBetween("discount_percent", filters.MinDiscountPercent, filters.MaxDiscountPercent)...)
+	f = append(f, generateBetween("average", filters.MinAveragePrice, filters.MaxAveragePrice)...)
+	f = append(f, generateBetween("maximum", filters.MinMaximumPrice, filters.MaxMaximumPrice)...)
+	f = append(f, generateBetween("minimum", filters.MinMinimumPrice, filters.MaxMinimumPrice)...)
+
+	q = q.Where(f)
+
+	return q
 }
 
 func generateBetween(col string, minValue float64, maxValue float64) []squirrel.Sqlizer {

@@ -27,5 +27,5 @@ func GetProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	utils.WriteJSON(w, 200, &productWithMetrics)
+	utils.WriteJSON(w, http.StatusOK, &productWithMetrics)
 }

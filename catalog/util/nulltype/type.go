@@ -19,3 +19,14 @@ func IsFalse(n NullBoolean) bool {
 func IsUndefined(n NullBoolean) bool {
 	return n == UndefinedValue
 }
+
+func FromInt(value int) NullBoolean {
+	switch value {
+	case int(TrueValue):
+		return NullBoolean(TrueValue)
+	case int(FalseValue):
+		return NullBoolean(FalseValue)
+	default:
+		return NullBoolean(UndefinedValue)
+	}
+}

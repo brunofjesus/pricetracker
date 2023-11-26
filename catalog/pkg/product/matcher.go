@@ -12,8 +12,8 @@ import (
 	store_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 )
 
-var finderOnce sync.Once
-var finderInstance ProductMatcher
+var matcherOnce sync.Once
+var matcherInstance ProductMatcher
 
 type ProductMatcher interface {
 	Match(storeProduct MqStoreProduct) int64
@@ -27,15 +27,15 @@ type productMatcher struct {
 }
 
 func GetProductMatcher() ProductMatcher {
-	finderOnce.Do(func() {
-		finderInstance = &productMatcher{
+	matcherOnce.Do(func() {
+		matcherInstance = &productMatcher{
 			storeRepository:       store_repository.GetStoreRepository(),
 			productRepository:     product_repository.GetProductRepository(),
 			productMetaRepository: product_repository.GetProductMetaRepository(),
 			priceRepository:       price_repository.GetPriceRepository(),
 		}
 	})
-	return finderInstance
+	return matcherInstance
 }
 
 func (s *productMatcher) Match(storeProduct MqStoreProduct) int64 {

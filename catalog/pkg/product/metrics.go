@@ -6,38 +6,20 @@ import (
 
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
-	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 	"github.com/brunofjesus/pricetracker/catalog/util/pagination"
 )
 
 var metricsFinderOnce sync.Once
 var metricsFinderInstance *metricsFinder
 
-type ProductMetricsSearch struct {
-	StoreId    int
-	MinPrice   float64
-	MaxPrice   float64
-	NameLike   string
-	BrandLike  string
-	Available  nulltype.NullBoolean
-	ProductUrl string
-
-	MinDifference      float64
-	MaxDifference      float64
-	MinDiscountPercent float64
-	MaxDiscountPercent float64
-	MinAveragePrice    float64
-	MaxAveragePrice    float64
-	MinMaximumPrice    float64
-	MaxMaximumPrice    float64
-	MinMinimumPrice    float64
-	MaxMinimumPrice    float64
-
-	Page pagination.PaginatedQuery
-}
+type ProductFinderFilters product_repository.ProductMetricsFilter
 
 type MetricsFinder interface {
 	FindProductById(productId int64) (*product_repository.ProductWithMetrics, error)
+	FindProducts(
+		pagination pagination.PaginatedQuery,
+		filters ProductFinderFilters,
+	) (*pagination.PaginatedData[[]product_repository.ProductWithMetrics], error)
 }
 
 type metricsFinder struct {
@@ -59,6 +41,48 @@ func (s *metricsFinder) FindProductById(productId int64) (*product_repository.Pr
 	return s.productMetricsRepository.FindProductById(productId, nil)
 }
 
-func (s *metricsFinder) FindProducts(search ProductMetricsSearch) {
+func (s *metricsFinder) FindProducts(
+	paginatedQuery pagination.PaginatedQuery,
+	filters ProductFinderFilters,
+) (*pagination.PaginatedData[[]product_repository.ProductWithMetrics], error) {
 
+	tx, err := s.db.Begin()
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer tx.Rollback()
+
+	sortField := paginatedQuery.GetSortFieldIfValid(
+		[]string{
+			"product_id", "store_id", "name", "brand", "price", "available",
+			"diff", "discount_percent", "average", "minimum", "maximum",
+		},
+		"name",
+	)
+
+	items, err := s.productMetricsRepository.FindProducts(
+		paginatedQuery.Offset(), paginatedQuery.Limit(),
+		sortField, paginatedQuery.SortDirection,
+		(*product_repository.ProductMetricsFilter)(&filters),
+		nil,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	count, err := s.productMetricsRepository.CountProducts((*product_repository.ProductMetricsFilter)(&filters), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	tx.Commit()
+
+	return pagination.NewPaginatedData[[]product_repository.ProductWithMetrics](
+		items, len(items),
+		paginatedQuery.Page, paginatedQuery.PageSize, count,
+		paginatedQuery.SortField, paginatedQuery.SortDirection,
+	), nil
 }
