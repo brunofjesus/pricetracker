@@ -1,6 +1,6 @@
 build_sys_arch:
 	mkdir -p ../../dist/$(system)_$(arch)/store/pingodoce/
-	go build -o ../../dist/$(system)_$(arch)/store/pingodoce/pingodoce$(extension) main.go
+	GOOS=$(system) GOARCH=$(arch) go build -o ../../dist/$(system)_$(arch)/store/pingodoce/pingodoce$(extension) main.go
 	cp config.yaml ../../dist/$(system)_$(arch)/store/pingodoce/
 
 build:

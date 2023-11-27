@@ -1,6 +1,6 @@
 build_sys_arch:
 	mkdir -p ../../dist/$(system)_$(arch)/store/worten/
-	go build -o ../../dist/$(system)_$(arch)/store/worten/worten$(extension) main.go
+	GOOS=$(system) GOARCH=$(arch) go build -o ../../dist/$(system)_$(arch)/store/worten/worten$(extension) main.go
 	cp config.yaml ../../dist/$(system)_$(arch)/store/worten/
 	cp categories.csv ../../dist/$(system)_$(arch)/store/worten/
 
