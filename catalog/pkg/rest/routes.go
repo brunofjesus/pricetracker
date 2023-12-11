@@ -26,4 +26,5 @@ func ListenAndServe(port int) {
 func v1Routes(r chi.Router) {
 	r.Get("/product/{productId}", handler.GetProduct)
 	r.Get("/product/search", handler.SearchProduct)
+	r.Get("/product/{productId}/history", handler.GetHistory)
 }

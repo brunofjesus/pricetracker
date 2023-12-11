@@ -23,6 +23,7 @@ type ProductPrice struct {
 
 type PriceRepository interface {
 	FindLatestPrice(productId int64, tx *sql.Tx) (*ProductPrice, error)
+	FindPricesBetween(productId int64, from time.Time, to time.Time, tx *sql.Tx) ([]ProductPrice, error)
 	FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]ProductPrice, error)
 	CountPrices(productId int64, tx *sql.Tx) (int64, error)
 	CreatePrice(productId int64, price int, timestamp time.Time, tx *sql.Tx) error
@@ -64,6 +65,53 @@ func (r *priceRepository) FindLatestPrice(productId int64, tx *sql.Tx) (*Product
 	)
 
 	return &productPrice, err
+}
+
+// FindPricesBetween implements PriceRepository
+func (r *priceRepository) FindPricesBetween(productId int64, from time.Time, to time.Time, tx *sql.Tx) ([]ProductPrice, error) {
+	qb := repository.QueryBuilderOrDefault(tx, r.qb)
+
+	q := qb.Select("product_id", "date_time", "price").
+		From(ProductPriceTableName).
+		Where(
+			squirrel.And{
+				squirrel.Eq{
+					"product_id": productId,
+				},
+				squirrel.GtOrEq{
+					"date_time": from.Format(time.RFC3339),
+				},
+				squirrel.LtOrEq{
+					"date_time": to.Format(time.RFC3339),
+				},
+			},
+		)
+
+	fmt.Println(q.ToSql())
+
+	var prices []ProductPrice
+	rows, err := q.Query()
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var price ProductPrice
+		err := rows.Scan(
+			&price.ProductId,
+			&price.DateTime,
+			&price.Price,
+		)
+		if err != nil {
+			return nil, err
+		}
+		prices = append(prices, price)
+	}
+
+	return prices, nil
 }
 
 // FindPrices implements PriceRepository.

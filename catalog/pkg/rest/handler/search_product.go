@@ -2,19 +2,15 @@ package handler
 
 import (
 	"fmt"
-	"net/http"
-	"strconv"
-	"strings"
-
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/rest/utils"
-	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 	"github.com/brunofjesus/pricetracker/catalog/util/pagination"
+	"net/http"
 )
 
 func SearchProduct(w http.ResponseWriter, r *http.Request) {
 
-	filters, err := getFilters(r)
+	filters, err := getProductSearchFilters(r)
 
 	if err != nil {
 		utils.ErrorJSON(w, err, http.StatusBadRequest)
@@ -39,78 +35,78 @@ func SearchProduct(w http.ResponseWriter, r *http.Request) {
 	utils.WriteJSON(w, http.StatusOK, products)
 }
 
-func getFilters(r *http.Request) (*product.ProductFinderFilters, error) {
-	productId, err := getQueryParamInt64Slice(r, "productId")
+func getProductSearchFilters(r *http.Request) (*product.ProductFinderFilters, error) {
+	productId, err := utils.GetQueryParamInt64Slice(r, "productId")
 	if err != nil {
 		return nil, fmt.Errorf("invalid product id: %w", err)
 	}
 
-	storeId, err := getQueryParamInt(r, "storeId")
+	storeId, err := utils.GetQueryParamInt(r, "storeId")
 	if err != nil {
 		return nil, fmt.Errorf("invalid store id: %w", err)
 	}
 
-	minPrice, err := getQueryParamFloat64(r, "minPrice")
+	minPrice, err := utils.GetQueryParamFloat64(r, "minPrice")
 	if err != nil {
 		return nil, fmt.Errorf("invalid min price: %w", err)
 	}
 
-	maxPrice, err := getQueryParamFloat64(r, "maxPrice")
+	maxPrice, err := utils.GetQueryParamFloat64(r, "maxPrice")
 	if err != nil {
 		return nil, fmt.Errorf("invalid max price: %w", err)
 	}
 
-	nameLike := getQueryParam(r, "name")
-	brandLike := getQueryParam(r, "brand")
-	available := getQueryParamNullBoolean(r, "available")
-	productUrl := getQueryParam(r, "productUrl")
+	nameLike := utils.GetQueryParam(r, "name")
+	brandLike := utils.GetQueryParam(r, "brand")
+	available := utils.GetQueryParamNullBoolean(r, "available")
+	productUrl := utils.GetQueryParam(r, "productUrl")
 
-	minDifference, err := getQueryParamFloat64(r, "minDifference")
+	minDifference, err := utils.GetQueryParamFloat64(r, "minDifference")
 	if err != nil {
 		return nil, fmt.Errorf("invalid min difference: %w", err)
 	}
 
-	maxDifference, err := getQueryParamFloat64(r, "maxDifference")
+	maxDifference, err := utils.GetQueryParamFloat64(r, "maxDifference")
 	if err != nil {
 		return nil, fmt.Errorf("invalid max difference: %w", err)
 	}
 
-	minDiscountPercent, err := getQueryParamFloat64(r, "minDiscountPercent")
+	minDiscountPercent, err := utils.GetQueryParamFloat64(r, "minDiscountPercent")
 	if err != nil {
 		return nil, fmt.Errorf("invalid min discount: %w", err)
 	}
 
-	maxDiscountPercent, err := getQueryParamFloat64(r, "maxDiscountPercent")
+	maxDiscountPercent, err := utils.GetQueryParamFloat64(r, "maxDiscountPercent")
 	if err != nil {
 		return nil, fmt.Errorf("invalid max discount: %w", err)
 	}
 
-	minAvgPrice, err := getQueryParamFloat64(r, "minAveragePrice")
+	minAvgPrice, err := utils.GetQueryParamFloat64(r, "minAveragePrice")
 	if err != nil {
 		return nil, fmt.Errorf("invalid min average price: %w", err)
 	}
 
-	maxAvgPrice, err := getQueryParamFloat64(r, "maxAveragePrice")
+	maxAvgPrice, err := utils.GetQueryParamFloat64(r, "maxAveragePrice")
 	if err != nil {
 		return nil, fmt.Errorf("invalid max average price: %w", err)
 	}
 
-	minMinPrice, err := getQueryParamFloat64(r, "minMinimumPrice")
+	minMinPrice, err := utils.GetQueryParamFloat64(r, "minMinimumPrice")
 	if err != nil {
 		return nil, fmt.Errorf("invalid min minimum price: %w", err)
 	}
 
-	maxMinPrice, err := getQueryParamFloat64(r, "maxMinimumPrice")
+	maxMinPrice, err := utils.GetQueryParamFloat64(r, "maxMinimumPrice")
 	if err != nil {
 		return nil, fmt.Errorf("invalid min maximum price: %w", err)
 	}
 
-	minMaxPrice, err := getQueryParamFloat64(r, "minMaximumPrice")
+	minMaxPrice, err := utils.GetQueryParamFloat64(r, "minMaximumPrice")
 	if err != nil {
 		return nil, fmt.Errorf("invalid min maximum price: %w", err)
 	}
 
-	maxMaxPrice, err := getQueryParamFloat64(r, "maxMaximumPrice")
+	maxMaxPrice, err := utils.GetQueryParamFloat64(r, "maxMaximumPrice")
 	if err != nil {
 		return nil, fmt.Errorf("invalid max maximum price: %w", err)
 	}
@@ -136,73 +132,4 @@ func getFilters(r *http.Request) (*product.ProductFinderFilters, error) {
 		MaxMinimumPrice:    maxMinPrice,
 		MaxMaximumPrice:    maxMaxPrice,
 	}, nil
-}
-
-func getQueryParam(r *http.Request, key string) string {
-	return r.URL.Query().Get(key)
-}
-
-func getQueryParamNullBoolean(r *http.Request, key string) nulltype.NullBoolean {
-	intQueryParam, err := getQueryParamInt(r, key)
-
-	if err != nil {
-		return nulltype.UndefinedValue
-	}
-
-	return nulltype.FromInt(intQueryParam)
-}
-
-func getQueryParamInt(r *http.Request, key string) (int, error) {
-	strVal := getQueryParam(r, key)
-
-	if len(strVal) == 0 {
-		return -1, nil
-	}
-
-	return strconv.Atoi(strVal)
-}
-
-func getQueryParamInt64Slice(r *http.Request, key string) ([]int64, error) {
-	queryParamValue := getQueryParam(r, key)
-
-	if !strings.Contains(queryParamValue, ",") {
-		intVal, err := getQueryParamInt64(r, key)
-		if err != nil || intVal == -1 {
-			return []int64{}, err
-		}
-		return []int64{intVal}, nil
-	}
-
-	queryParamValueSlice := strings.Split(queryParamValue, ",")
-	result := make([]int64, 0, len(queryParamValueSlice))
-
-	for _, str := range queryParamValueSlice {
-		intVal, err := strconv.ParseInt(str, 10, 64)
-		if err != nil {
-			return []int64{}, err
-		}
-		result = append(result, intVal)
-	}
-
-	return result, nil
-}
-
-func getQueryParamInt64(r *http.Request, key string) (int64, error) {
-	strVal := getQueryParam(r, key)
-
-	if len(strVal) == 0 {
-		return -1, nil
-	}
-
-	return strconv.ParseInt(strVal, 10, 64)
-}
-
-func getQueryParamFloat64(r *http.Request, key string) (float64, error) {
-	strVal := getQueryParam(r, key)
-
-	if len(strVal) == 0 {
-		return -1, nil
-	}
-
-	return strconv.ParseFloat(strVal, 64)
 }
