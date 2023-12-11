@@ -40,7 +40,6 @@ func GetProductCreator() ProductCreator {
 	return creatorInstance
 }
 
-// Create implements ProductUpdater.
 func (s *productCreator) Create(storeProduct MqStoreProduct) error {
 	tx, err := s.db.Begin()
 

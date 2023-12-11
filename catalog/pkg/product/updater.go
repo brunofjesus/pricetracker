@@ -42,7 +42,6 @@ func GetProductUpdater() ProductUpdater {
 	return updaterInstance
 }
 
-// Update implements ProductUpdater.
 func (s *productUpdater) Update(productId int64, storeProduct MqStoreProduct) error {
 	tx, err := s.db.Begin()
 

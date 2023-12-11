@@ -47,7 +47,6 @@ func GetPriceRepository() PriceRepository {
 	return instance
 }
 
-// FindLatestPrice implements PriceRepository.
 func (r *priceRepository) FindLatestPrice(productId int64, tx *sql.Tx) (*ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
@@ -67,7 +66,6 @@ func (r *priceRepository) FindLatestPrice(productId int64, tx *sql.Tx) (*Product
 	return &productPrice, err
 }
 
-// FindPricesBetween implements PriceRepository
 func (r *priceRepository) FindPricesBetween(productId int64, from time.Time, to time.Time, tx *sql.Tx) ([]ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
@@ -112,7 +110,6 @@ func (r *priceRepository) FindPricesBetween(productId int64, from time.Time, to 
 	return prices, nil
 }
 
-// FindPrices implements PriceRepository.
 func (r *priceRepository) FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
@@ -147,7 +144,6 @@ func (r *priceRepository) FindPrices(productId int64, offset int64, limit int, o
 	return prices, nil
 }
 
-// CountPrices implements PriceRepository.
 func (r *priceRepository) CountPrices(productId int64, tx *sql.Tx) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 	q := qb.Select("COUNT(*)").
@@ -159,7 +155,6 @@ func (r *priceRepository) CountPrices(productId int64, tx *sql.Tx) (int64, error
 	return count, err
 }
 
-// CreatePrice implements PriceRepository.
 func (r *priceRepository) CreatePrice(productId int64, price int, timestamp time.Time, tx *sql.Tx) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
