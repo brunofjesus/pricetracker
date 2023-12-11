@@ -87,8 +87,6 @@ func (r *priceRepository) FindPricesBetween(productId int64, from time.Time, to 
 			},
 		)
 
-	fmt.Println(q.ToSql())
-
 	var prices []ProductPrice
 	rows, err := q.Query()
 
