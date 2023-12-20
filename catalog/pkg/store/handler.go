@@ -1,6 +1,7 @@
 package store
 
 import (
+	"context"
 	"database/sql"
 	"errors"
 	"sync"
@@ -12,7 +13,7 @@ var once sync.Once
 var instance StoreHandler
 
 type StoreHandler interface {
-	Handle(store MqStore) error
+	Handle(ctx context.Context, store MqStore) error
 }
 
 type storeHandler struct {
@@ -28,8 +29,7 @@ func GetStoreHandler() StoreHandler {
 	return instance
 }
 
-// Handle implements StoreEnroller.
-func (s *storeHandler) Handle(store MqStore) error {
+func (s *storeHandler) Handle(ctx context.Context, store MqStore) error {
 	_, err := s.storeRepository.FindStoreBySlug(store.Slug, nil)
 
 	if err != nil && errors.Is(err, sql.ErrNoRows) {

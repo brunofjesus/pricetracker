@@ -1,44 +1,28 @@
 package product
 
 import (
-	"log"
-	"sync"
+	"context"
+	"log/slog"
 )
 
-var handlerOnce sync.Once
-var handlerInstance ProductHandler
-
-type ProductHandler interface {
-	Handle(storeProduct MqStoreProduct) error
+type ProductHandler struct {
+	ProductMatcher ProductMatcher
+	ProductCreator ProductCreator
+	ProductUpdater ProductUpdater
 }
 
-type productHandler struct {
-	productMatcher ProductMatcher
-	productCreator ProductCreator
-	productUpdater ProductUpdater
-}
+func (s *ProductHandler) Handle(ctx context.Context, storeProduct MqStoreProduct) error {
+	logger := ctx.Value("logger").(*slog.Logger)
 
-func GetProductHandler() ProductHandler {
-	handlerOnce.Do(func() {
-		handlerInstance = &productHandler{
-			productMatcher: GetProductMatcher(),
-			productCreator: GetProductCreator(),
-			productUpdater: GetProductUpdater(),
-		}
-	})
-	return handlerInstance
-}
-
-func (s *productHandler) Handle(storeProduct MqStoreProduct) error {
 	var err error
-	if productId := s.productMatcher.Match(storeProduct); productId > 0 {
-		err = s.productUpdater.Update(productId, storeProduct)
+	if productId := s.ProductMatcher.Match(storeProduct); productId > 0 {
+		err = s.ProductUpdater.Update(productId, storeProduct)
 	} else {
-		err = s.productCreator.Create(storeProduct)
+		err = s.ProductCreator.Create(storeProduct)
 	}
 
 	if err != nil {
-		log.Printf("error on receiver handler: %v on %v", err, storeProduct)
+		logger.Error("error on receiver handler", slog.Any("error", err), slog.Any("storeProduct", storeProduct))
 	}
 	return err
 }

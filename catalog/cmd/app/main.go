@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
+	"github.com/brunofjesus/pricetracker/catalog/internal/app"
 	"log/slog"
 	"os"
 
-	"github.com/brunofjesus/pricetracker/catalog/config"
 	"github.com/brunofjesus/pricetracker/catalog/internal/mq"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/rest"
 )
@@ -16,7 +16,7 @@ func main() {
 
 	logger.Info("starting catalog application")
 
-	appConfig := config.GetApplicationConfiguration()
+	appConfig := app.GetApplicationConfiguration()
 
 	logger.Info("will start workers", "workers", appConfig.MessageQueue.ThreadCount)
 

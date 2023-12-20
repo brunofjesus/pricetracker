@@ -1,14 +1,25 @@
-package config
+package app
 
 import (
+	"gopkg.in/yaml.v3"
 	"os"
 	"sync"
-
-	"gopkg.in/yaml.v3"
 )
 
 var once sync.Once
 var instance *ApplicationConfiguration
+
+type ApplicationConfiguration struct {
+	Database struct {
+		DSN      string `yaml:"dsn"`
+		Attempts int    `yaml:"attempts"`
+	} `yaml:"database"`
+	MessageQueue struct {
+		URL         string `yaml:"url"`
+		ManualAck   bool   `yaml:"manualAck"`
+		ThreadCount int    `yaml:"threadCount"`
+	} `yaml:"messagequeue"`
+}
 
 func GetApplicationConfiguration() *ApplicationConfiguration {
 	once.Do(func() {

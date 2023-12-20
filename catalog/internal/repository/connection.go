@@ -2,11 +2,10 @@ package repository
 
 import (
 	"database/sql"
+	"github.com/brunofjesus/pricetracker/catalog/internal/app/config"
 	"log"
 	"sync"
 	"time"
-
-	"github.com/brunofjesus/pricetracker/catalog/config"
 
 	_ "github.com/lib/pq"
 )

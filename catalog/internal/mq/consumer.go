@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/brunofjesus/pricetracker/catalog/internal/app"
 	"log/slog"
 
-	"github.com/brunofjesus/pricetracker/catalog/config"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/store"
 	amqp "github.com/rabbitmq/amqp091-go"
@@ -20,14 +20,14 @@ type Consumer interface {
 type consumer struct {
 	productHandler           product.ProductHandler
 	storeHandler             store.StoreHandler
-	applicationConfiguration *config.ApplicationConfiguration
+	applicationConfiguration *app.ApplicationConfiguration
 }
 
 func newConsumer() Consumer {
 	return &consumer{
 		productHandler:           product.GetProductHandler(),
 		storeHandler:             store.GetStoreHandler(),
-		applicationConfiguration: config.GetApplicationConfiguration(),
+		applicationConfiguration: app.GetApplicationConfiguration(),
 	}
 }
 
@@ -85,7 +85,7 @@ func (c *consumer) Listen(ctx context.Context) error {
 					logger.Error("cannot unmarshall store", slog.Any("error", err))
 					continue
 				}
-				err = c.storeHandler.Handle(store)
+				err = c.storeHandler.Handle(ctx, store)
 			case "product":
 				var storeProduct product.MqStoreProduct
 				err = json.Unmarshal(d.Body, &storeProduct)
@@ -93,7 +93,7 @@ func (c *consumer) Listen(ctx context.Context) error {
 					logger.Error("cannot unmarshall store product", slog.Any("error", err))
 					continue
 				}
-				err = c.productHandler.Handle(storeProduct)
+				err = c.productHandler.Handle(ctx, storeProduct)
 			}
 
 			if manualAck {
