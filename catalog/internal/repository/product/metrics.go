@@ -14,14 +14,17 @@ import (
 const ProductWithMetricsViewName = "product_metrics"
 
 type ProductWithMetrics struct {
-	ProductId  int64  `db:"product_id" json:"product_id"`
-	StoreId    int64  `db:"store_id" json:"store_id"`
-	Name       string `db:"name" json:"name"`
-	Brand      string `db:"brand" json:"brand"`
-	Price      int    `db:"price" json:"price"`
-	Available  bool   `db:"available" json:"available"`
-	ImageUrl   string `db:"image_url" json:"image_url"`
-	ProductUrl string `db:"product_url" json:"product_url"`
+	ProductId    int64  `db:"product_id" json:"product_id"`
+	StoreId      int64  `db:"store_id" json:"store_id"`
+	StoreName    string `db:"store_name" json:"store_name"`
+	StoreSlug    string `db:"store_slug" json:"store_slug"`
+	StoreWebsite string `db:"store_website" json:"store_website"`
+	Name         string `db:"name" json:"name"`
+	Brand        string `db:"brand" json:"brand"`
+	Price        int    `db:"price" json:"price"`
+	Available    bool   `db:"available" json:"available"`
+	ImageUrl     string `db:"image_url" json:"image_url"`
+	ProductUrl   string `db:"product_url" json:"product_url"`
 
 	Difference       decimal.Decimal `db:"diff" json:"diff"`
 	DiscountPercent  decimal.Decimal `db:"discount_percent" json:"discount_percent"`
@@ -55,6 +58,11 @@ type ProductMetricsFilter struct {
 	MaxMaximumPrice    float64
 }
 
+var cols = []string{
+	"product_id", "store_id", "store_name", "store_slug", "store_website", "name", "brand", "price", "available",
+	"image_url", "product_url", "diff", "discount_percent", "average", "maximum", "minimum", "entries", "metrics_since",
+}
+
 type MetricsRepository struct {
 	db *sql.DB
 	qb *squirrel.StatementBuilderType
@@ -70,12 +78,7 @@ func NewMetricsRepository(db *sql.DB) *MetricsRepository {
 func (r *MetricsRepository) FindProductById(productId int64, tx *sql.Tx) (*ProductWithMetrics, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Select(
-		"product_id", "store_id", "name", "brand", "price", "available", "image_url", "product_url",
-		"diff", "discount_percent", "average", "maximum", "minimum", "entries", "metrics_since",
-	).
-		From(ProductWithMetricsViewName).
-		Where(squirrel.Eq{"product_id": productId})
+	q := qb.Select(cols...).From(ProductWithMetricsViewName).Where(squirrel.Eq{"product_id": productId})
 
 	var product ProductWithMetrics
 
@@ -87,10 +90,7 @@ func (r *MetricsRepository) FindProductById(productId int64, tx *sql.Tx) (*Produ
 func (r *MetricsRepository) FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductMetricsFilter, tx *sql.Tx) ([]ProductWithMetrics, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Select(
-		"product_id", "store_id", "store_name", "name", "brand", "price", "available", "image_url", "product_url",
-		"diff", "discount_percent", "average", "maximum", "minimum", "entries", "metrics_since",
-	).From(ProductWithMetricsViewName)
+	q := qb.Select(cols...).From(ProductWithMetricsViewName)
 	if filters != nil {
 		q = appendFiltersToQuery(q, *filters)
 	}
@@ -124,8 +124,7 @@ func (r *MetricsRepository) FindProducts(offset int64, limit int, orderBy, direc
 func (r *MetricsRepository) CountProducts(filters *ProductMetricsFilter, tx *sql.Tx) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Select("COUNT(*)").
-		From(ProductWithMetricsViewName)
+	q := qb.Select("COUNT(*)").From(ProductWithMetricsViewName)
 
 	if filters != nil {
 		q = appendFiltersToQuery(q, *filters)
@@ -140,6 +139,9 @@ func (r *MetricsRepository) scanFullRow(row squirrel.RowScanner, product *Produc
 	return row.Scan(
 		&product.ProductId,
 		&product.StoreId,
+		&product.StoreName,
+		&product.StoreSlug,
+		&product.StoreWebsite,
 		&product.Name,
 		&product.Brand,
 		&product.Price,
