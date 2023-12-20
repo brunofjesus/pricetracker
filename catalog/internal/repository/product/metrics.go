@@ -3,7 +3,6 @@ package product
 import (
 	"database/sql"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/Masterminds/squirrel"
@@ -11,9 +10,6 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 	"github.com/shopspring/decimal"
 )
-
-var productMetricsOnce sync.Once
-var productMetricsInstance ProductMetricsRepository
 
 const ProductWithMetricsViewName = "product_metrics"
 
@@ -59,31 +55,19 @@ type ProductMetricsFilter struct {
 	MaxMaximumPrice    float64
 }
 
-type ProductMetricsRepository interface {
-	FindProductById(productId int64, tx *sql.Tx) (*ProductWithMetrics, error)
-	FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductMetricsFilter, tx *sql.Tx) ([]ProductWithMetrics, error)
-	CountProducts(filters *ProductMetricsFilter, tx *sql.Tx) (int64, error)
-}
-
-type productMetricsRepository struct {
+type MetricsRepository struct {
 	db *sql.DB
 	qb *squirrel.StatementBuilderType
 }
 
-func GetProductMetricsRepository() ProductMetricsRepository {
-	productMetricsOnce.Do(func() {
-		db := repository.GetDatabaseConnection()
-		productMetricsInstance = &productMetricsRepository{
-			db: db,
-			qb: repository.QueryBuilder(db),
-		}
-	})
-
-	return productMetricsInstance
+func NewMetricsRepository(db *sql.DB) *MetricsRepository {
+	return &MetricsRepository{
+		db: db,
+		qb: repository.QueryBuilder(db),
+	}
 }
 
-// FindProductById implements ProductMetricsRepository.
-func (r *productMetricsRepository) FindProductById(productId int64, tx *sql.Tx) (*ProductWithMetrics, error) {
+func (r *MetricsRepository) FindProductById(productId int64, tx *sql.Tx) (*ProductWithMetrics, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select(
@@ -100,15 +84,13 @@ func (r *productMetricsRepository) FindProductById(productId int64, tx *sql.Tx) 
 	return &product, err
 }
 
-// FindProducts implements ProductMetricsRepository.
-func (r *productMetricsRepository) FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductMetricsFilter, tx *sql.Tx) ([]ProductWithMetrics, error) {
+func (r *MetricsRepository) FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductMetricsFilter, tx *sql.Tx) ([]ProductWithMetrics, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select(
-		"product_id", "store_id", "name", "brand", "price", "available", "image_url", "product_url",
+		"product_id", "store_id", "store_name", "name", "brand", "price", "available", "image_url", "product_url",
 		"diff", "discount_percent", "average", "maximum", "minimum", "entries", "metrics_since",
 	).From(ProductWithMetricsViewName)
-
 	if filters != nil {
 		q = appendFiltersToQuery(q, *filters)
 	}
@@ -139,8 +121,7 @@ func (r *productMetricsRepository) FindProducts(offset int64, limit int, orderBy
 	return products, nil
 }
 
-// CountProducts implements ProductMetricsRepository.
-func (r *productMetricsRepository) CountProducts(filters *ProductMetricsFilter, tx *sql.Tx) (int64, error) {
+func (r *MetricsRepository) CountProducts(filters *ProductMetricsFilter, tx *sql.Tx) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("COUNT(*)").
@@ -155,7 +136,7 @@ func (r *productMetricsRepository) CountProducts(filters *ProductMetricsFilter, 
 	return count, err
 }
 
-func (r *productMetricsRepository) scanFullRow(row squirrel.RowScanner, product *ProductWithMetrics) error {
+func (r *MetricsRepository) scanFullRow(row squirrel.RowScanner, product *ProductWithMetrics) error {
 	return row.Scan(
 		&product.ProductId,
 		&product.StoreId,

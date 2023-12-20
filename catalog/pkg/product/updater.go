@@ -3,10 +3,8 @@ package product
 import (
 	"database/sql"
 	"errors"
-	"sync"
 	"time"
 
-	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 	"github.com/brunofjesus/pricetracker/catalog/util/list"
 
 	price_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/price"
@@ -14,36 +12,16 @@ import (
 	store_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 )
 
-var updaterOnce sync.Once
-var updaterInstance ProductUpdater
-
-type ProductUpdater interface {
-	Update(productId int64, storeProduct MqStoreProduct) error
+type Updater struct {
+	DB                    *sql.DB
+	StoreRepository       *store_repository.Repository
+	ProductRepository     *product_repository.Repository
+	ProductMetaRepository *product_repository.MetaRepository
+	PriceRepository       *price_repository.Repository
 }
 
-type productUpdater struct {
-	db                    *sql.DB
-	storeRepository       store_repository.StoreRepository
-	productRepository     product_repository.ProductRepository
-	productMetaRepository product_repository.ProductMetaRepository
-	priceRepository       price_repository.PriceRepository
-}
-
-func GetProductUpdater() ProductUpdater {
-	updaterOnce.Do(func() {
-		updaterInstance = &productUpdater{
-			db:                    repository.GetDatabaseConnection(),
-			storeRepository:       store_repository.GetStoreRepository(),
-			productRepository:     product_repository.GetProductRepository(),
-			productMetaRepository: product_repository.GetProductMetaRepository(),
-			priceRepository:       price_repository.GetPriceRepository(),
-		}
-	})
-	return updaterInstance
-}
-
-func (s *productUpdater) Update(productId int64, storeProduct MqStoreProduct) error {
-	tx, err := s.db.Begin()
+func (s *Updater) Update(productId int64, storeProduct MqStoreProduct) error {
+	tx, err := s.DB.Begin()
 
 	if err != nil {
 		return err
@@ -52,7 +30,7 @@ func (s *productUpdater) Update(productId int64, storeProduct MqStoreProduct) er
 	defer tx.Rollback()
 
 	// Update the product properties
-	err = s.productRepository.UpdateProduct(
+	err = s.ProductRepository.UpdateProduct(
 		productId,
 		storeProduct.Name,
 		storeProduct.Brand,
@@ -75,7 +53,7 @@ func (s *productUpdater) Update(productId int64, storeProduct MqStoreProduct) er
 		return err
 	}
 
-	latestPrice, err := s.priceRepository.FindLatestPrice(productId, tx)
+	latestPrice, err := s.PriceRepository.FindLatestPrice(productId, tx)
 	if err != nil {
 		return err
 	}
@@ -84,7 +62,7 @@ func (s *productUpdater) Update(productId int64, storeProduct MqStoreProduct) er
 		time.Since(latestPrice.DateTime) > time.Hour*4 {
 
 		// Insert price update
-		err = s.priceRepository.CreatePrice(
+		err = s.PriceRepository.CreatePrice(
 			productId,
 			storeProduct.Price,
 			time.Now(),
@@ -99,8 +77,8 @@ func (s *productUpdater) Update(productId int64, storeProduct MqStoreProduct) er
 	return tx.Commit()
 }
 
-func (s *productUpdater) updateSkus(productId int64, storeProduct MqStoreProduct, tx *sql.Tx) error {
-	dbProductSku, err := s.productMetaRepository.GetProductSKUs(productId, tx)
+func (s *Updater) updateSkus(productId int64, storeProduct MqStoreProduct, tx *sql.Tx) error {
+	dbProductSku, err := s.ProductMetaRepository.GetProductSKUs(productId, tx)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		// unexpected error
@@ -116,15 +94,15 @@ func (s *productUpdater) updateSkus(productId int64, storeProduct MqStoreProduct
 		toCreate := list.FindMissing[string](storeProduct.SKU, previousSkus)
 		toDelete := list.FindMissing[string](previousSkus, storeProduct.SKU)
 
-		if err = s.productMetaRepository.CreateSKUs(productId, toCreate, tx); err != nil {
+		if err = s.ProductMetaRepository.CreateSKUs(productId, toCreate, tx); err != nil {
 			return err
 		}
 
-		if err = s.productMetaRepository.DeleteSKUs(productId, toDelete, tx); err != nil {
+		if err = s.ProductMetaRepository.DeleteSKUs(productId, toDelete, tx); err != nil {
 			return err
 		}
 
-	} else if err = s.productMetaRepository.CreateSKUs(productId, storeProduct.SKU, tx); err != nil {
+	} else if err = s.ProductMetaRepository.CreateSKUs(productId, storeProduct.SKU, tx); err != nil {
 		// no records, create
 		return err
 	}
@@ -132,8 +110,8 @@ func (s *productUpdater) updateSkus(productId int64, storeProduct MqStoreProduct
 	return nil
 }
 
-func (s *productUpdater) updateEans(productId int64, storeProduct MqStoreProduct, tx *sql.Tx) error {
-	dbProductEan, err := s.productMetaRepository.GetProductEANs(productId, tx)
+func (s *Updater) updateEans(productId int64, storeProduct MqStoreProduct, tx *sql.Tx) error {
+	dbProductEan, err := s.ProductMetaRepository.GetProductEANs(productId, tx)
 
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		// unexpected error
@@ -151,15 +129,15 @@ func (s *productUpdater) updateEans(productId int64, storeProduct MqStoreProduct
 		toCreate := list.FindMissing[int64](currentEans, previousEans)
 		toDelete := list.FindMissing[int64](previousEans, currentEans)
 
-		if err = s.productMetaRepository.CreateEANs(productId, toCreate, tx); err != nil {
+		if err = s.ProductMetaRepository.CreateEANs(productId, toCreate, tx); err != nil {
 			return err
 		}
 
-		if err = s.productMetaRepository.DeleteEANs(productId, toDelete, tx); err != nil {
+		if err = s.ProductMetaRepository.DeleteEANs(productId, toDelete, tx); err != nil {
 			return err
 		}
 
-	} else if err = s.productMetaRepository.CreateEANs(productId, currentEans, tx); err != nil {
+	} else if err = s.ProductMetaRepository.CreateEANs(productId, currentEans, tx); err != nil {
 		// no records, create
 		return err
 	}

@@ -2,27 +2,13 @@ package repository
 
 import (
 	"database/sql"
-	"github.com/brunofjesus/pricetracker/catalog/internal/app/config"
 	"log"
-	"sync"
 	"time"
 
 	_ "github.com/lib/pq"
 )
 
-var once sync.Once
-var instance *sql.DB
-
-func GetDatabaseConnection() *sql.DB {
-	once.Do(func() {
-		applicationConfig := config.GetApplicationConfiguration()
-		instance = databaseConnect(applicationConfig.Database.DSN, applicationConfig.Database.Attempts)
-	})
-
-	return instance
-}
-
-func databaseConnect(dsn string, attempts int) *sql.DB {
+func Connect(dsn string, attempts int) *sql.DB {
 	var result *sql.DB
 
 	var counts int

@@ -9,31 +9,34 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/pkg/rest/utils"
 )
 
-func SearchProduct(w http.ResponseWriter, r *http.Request) {
-	filters, err := getProductSearchFilters(r)
-	if err != nil {
-		utils.ErrorJSON(w, err, http.StatusBadRequest)
-		return
-	}
+func SearchProduct(finder *product.Finder) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		filters, err := getProductSearchFilters(r)
+		if err != nil {
+			utils.ErrorJSON(w, err, http.StatusBadRequest)
+			return
+		}
 
-	paginationQuery, err := pagination.FromHttpRequest(r)
-	if err != nil {
-		utils.ErrorJSON(w, err, http.StatusBadRequest)
-		return
-	}
+		paginationQuery, err := pagination.FromHttpRequest(r)
+		if err != nil {
+			utils.ErrorJSON(w, err, http.StatusBadRequest)
+			return
+		}
 
-	products, err := product.GetMetricsFinder().FindProducts(
-		*paginationQuery, *filters,
-	)
-	if err != nil {
-		utils.ErrorJSON(w, err, http.StatusInternalServerError)
-		return
-	}
+		products, err := finder.FindProducts(
+			*paginationQuery, *filters,
+		)
 
-	utils.WriteJSON(w, http.StatusOK, products)
+		if err != nil {
+			utils.ErrorJSON(w, err, http.StatusInternalServerError)
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, products)
+	}
 }
 
-func getProductSearchFilters(r *http.Request) (*product.ProductFinderFilters, error) {
+func getProductSearchFilters(r *http.Request) (*product.FinderFilters, error) {
 	productId, err := utils.GetQueryParamInt64Slice(r, "productId")
 	if err != nil {
 		return nil, fmt.Errorf("invalid product id: %w", err)
@@ -109,7 +112,7 @@ func getProductSearchFilters(r *http.Request) (*product.ProductFinderFilters, er
 		return nil, fmt.Errorf("invalid max maximum price: %w", err)
 	}
 
-	return &product.ProductFinderFilters{
+	return &product.FinderFilters{
 		ProductId:  productId,
 		StoreId:    storeId,
 		MinPrice:   minPrice,

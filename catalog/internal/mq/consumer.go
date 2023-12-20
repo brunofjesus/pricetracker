@@ -13,26 +13,14 @@ import (
 	amqp "github.com/rabbitmq/amqp091-go"
 )
 
-type Consumer interface {
-	Listen(ctx context.Context) error
-}
-
-type consumer struct {
-	productHandler           product.ProductHandler
-	storeHandler             store.StoreHandler
+type Consumer struct {
+	productHandler           *product.Handler
+	storeHandler             *store.Handler
 	applicationConfiguration *app.ApplicationConfiguration
 }
 
-func newConsumer() Consumer {
-	return &consumer{
-		productHandler:           product.GetProductHandler(),
-		storeHandler:             store.GetStoreHandler(),
-		applicationConfiguration: app.GetApplicationConfiguration(),
-	}
-}
-
 // Listen implements ProductConsumer.
-func (c *consumer) Listen(ctx context.Context) error {
+func (c *Consumer) Listen(ctx context.Context) error {
 	logger := ctx.Value("logger").(*slog.Logger)
 
 	logger.Debug("connecting to MQ")
@@ -60,7 +48,7 @@ func (c *consumer) Listen(ctx context.Context) error {
 	logger.Debug("start consuming mq", slog.String("queue", "catalog"), slog.Bool("manualAck", manualAck))
 	msgs, err := ch.Consume(
 		"catalog",  // queue
-		"",         // consumer
+		"",         // Consumer
 		!manualAck, // auto-ack
 		false,      // exclusive
 		false,      // no-local
@@ -69,7 +57,7 @@ func (c *consumer) Listen(ctx context.Context) error {
 	)
 
 	if err != nil {
-		return fmt.Errorf("error registering RabbitMQ consumer: %w", err)
+		return fmt.Errorf("error registering RabbitMQ Consumer: %w", err)
 	}
 
 	go func() {
@@ -116,7 +104,7 @@ func (c *consumer) Listen(ctx context.Context) error {
 	return errors.New("MQ Connection closed")
 }
 
-func (c *consumer) connect() (*amqp.Connection, error) {
+func (c *Consumer) connect() (*amqp.Connection, error) {
 	conn, err := amqp.Dial(c.applicationConfiguration.MessageQueue.URL)
 
 	if err != nil {

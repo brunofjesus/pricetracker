@@ -3,16 +3,11 @@ package product
 import (
 	"database/sql"
 	"fmt"
-	"log"
-	"sync"
-
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
+	"log"
 )
-
-var productMetaOnce sync.Once
-var productMetaInstance ProductMetaRepository
 
 const ProductEanTableName = "product_ean"
 const ProductSkuTableName = "product_sku"
@@ -27,36 +22,19 @@ type ProductSku struct {
 	Sku       string `db:"sku"`
 }
 
-type ProductMetaRepository interface {
-	FindProductIdBySKU(sku []string, storeSlug string, tx *sql.Tx) (int64, error)
-	FindProductIdByEAN(ean []int64, storeSlug string, tx *sql.Tx) (int64, error)
-	CreateSKUs(productId int64, skus []string, tx *sql.Tx) error
-	DeleteSKUs(productId int64, skus []string, tx *sql.Tx) error
-	CreateEANs(productId int64, eans []int64, tx *sql.Tx) error
-	DeleteEANs(productId int64, eans []int64, tx *sql.Tx) error
-	GetProductSKUs(productId int64, tx *sql.Tx) ([]ProductSku, error)
-	GetProductEANs(productId int64, tx *sql.Tx) ([]ProductEan, error)
-}
-
-type productMetaRepository struct {
+type MetaRepository struct {
 	db *sql.DB
 	qb *squirrel.StatementBuilderType
 }
 
-func GetProductMetaRepository() ProductMetaRepository {
-	productMetaOnce.Do(func() {
-		db := repository.GetDatabaseConnection()
-
-		productMetaInstance = &productMetaRepository{
-			db: db,
-			qb: repository.QueryBuilder(db),
-		}
-	})
-	return productMetaInstance
+func NewMetaRepository(db *sql.DB) *MetaRepository {
+	return &MetaRepository{
+		db: db,
+		qb: repository.QueryBuilder(db),
+	}
 }
 
-// FindProductIdBySKU implements ProductMetaRepository.
-func (r *productMetaRepository) FindProductIdBySKU(sku []string, storeSlug string, tx *sql.Tx) (int64, error) {
+func (r *MetaRepository) FindProductIdBySKU(sku []string, storeSlug string, tx *sql.Tx) (int64, error) {
 	return r.findOne(
 		tx,
 		ProductSkuTableName,
@@ -67,8 +45,7 @@ func (r *productMetaRepository) FindProductIdBySKU(sku []string, storeSlug strin
 	)
 }
 
-// FindProductIdByEAN implements ProductMetaRepository.
-func (r *productMetaRepository) FindProductIdByEAN(ean []int64, storeSlug string, tx *sql.Tx) (int64, error) {
+func (r *MetaRepository) FindProductIdByEAN(ean []int64, storeSlug string, tx *sql.Tx) (int64, error) {
 	return r.findOne(
 		tx,
 		ProductEanTableName,
@@ -79,8 +56,7 @@ func (r *productMetaRepository) FindProductIdByEAN(ean []int64, storeSlug string
 	)
 }
 
-// CreateEANs implements ProductMetaRepository.
-func (r *productMetaRepository) CreateEANs(productId int64, eans []int64, tx *sql.Tx) error {
+func (r *MetaRepository) CreateEANs(productId int64, eans []int64, tx *sql.Tx) error {
 	var transaction *sql.Tx = tx
 	var err error
 
@@ -111,8 +87,7 @@ func (r *productMetaRepository) CreateEANs(productId int64, eans []int64, tx *sq
 	return err
 }
 
-// CreateSKUs implements ProductMetaRepository.
-func (r *productMetaRepository) CreateSKUs(productId int64, skus []string, tx *sql.Tx) error {
+func (r *MetaRepository) CreateSKUs(productId int64, skus []string, tx *sql.Tx) error {
 	var transaction *sql.Tx = tx
 	var err error
 
@@ -143,8 +118,7 @@ func (r *productMetaRepository) CreateSKUs(productId int64, skus []string, tx *s
 	return err
 }
 
-// DeleteEANs implements ProductMetaRepository.
-func (r *productMetaRepository) DeleteEANs(productId int64, eans []int64, tx *sql.Tx) error {
+func (r *MetaRepository) DeleteEANs(productId int64, eans []int64, tx *sql.Tx) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Delete(ProductEanTableName).
@@ -166,8 +140,7 @@ func (r *productMetaRepository) DeleteEANs(productId int64, eans []int64, tx *sq
 	return nil
 }
 
-// DeleteSKUs implements ProductMetaRepository.
-func (r *productMetaRepository) DeleteSKUs(productId int64, skus []string, tx *sql.Tx) error {
+func (r *MetaRepository) DeleteSKUs(productId int64, skus []string, tx *sql.Tx) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Delete(ProductSkuTableName).
@@ -189,8 +162,7 @@ func (r *productMetaRepository) DeleteSKUs(productId int64, skus []string, tx *s
 	return nil
 }
 
-// GetProductSKUs implements ProductMetaRepository.
-func (r *productMetaRepository) GetProductSKUs(productId int64, tx *sql.Tx) ([]ProductSku, error) {
+func (r *MetaRepository) GetProductSKUs(productId int64, tx *sql.Tx) ([]ProductSku, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id", "sku").
@@ -223,8 +195,7 @@ func (r *productMetaRepository) GetProductSKUs(productId int64, tx *sql.Tx) ([]P
 	return skus, nil
 }
 
-// GetProductEANs implements ProductMetaRepository.
-func (r *productMetaRepository) GetProductEANs(productId int64, tx *sql.Tx) ([]ProductEan, error) {
+func (r *MetaRepository) GetProductEANs(productId int64, tx *sql.Tx) ([]ProductEan, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id", "ean").
@@ -257,7 +228,7 @@ func (r *productMetaRepository) GetProductEANs(productId int64, tx *sql.Tx) ([]P
 	return eans, nil
 }
 
-func (r *productMetaRepository) findOne(tx *sql.Tx, tableName string, where any, args ...any) (int64, error) {
+func (r *MetaRepository) findOne(tx *sql.Tx, tableName string, where any, args ...any) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id").
@@ -275,7 +246,7 @@ func (r *productMetaRepository) findOne(tx *sql.Tx, tableName string, where any,
 	return productId, nil
 }
 
-func (r *productMetaRepository) createEan(productId int64, ean int64, tx *sql.Tx) error {
+func (r *MetaRepository) createEan(productId int64, ean int64, tx *sql.Tx) error {
 	qb := repository.QueryBuilder(tx)
 
 	q := qb.Insert(ProductEanTableName).
@@ -287,7 +258,7 @@ func (r *productMetaRepository) createEan(productId int64, ean int64, tx *sql.Tx
 	return err
 }
 
-func (r *productMetaRepository) createSku(productId int64, sku string, tx *sql.Tx) error {
+func (r *MetaRepository) createSku(productId int64, sku string, tx *sql.Tx) error {
 	qb := repository.QueryBuilder(tx)
 
 	q := qb.Insert(ProductSkuTableName).

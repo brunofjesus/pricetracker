@@ -5,20 +5,20 @@ import (
 	"log/slog"
 )
 
-type ProductHandler struct {
-	ProductMatcher ProductMatcher
-	ProductCreator ProductCreator
-	ProductUpdater ProductUpdater
+type Handler struct {
+	Matcher *Matcher
+	Creator *Creator
+	Updater *Updater
 }
 
-func (s *ProductHandler) Handle(ctx context.Context, storeProduct MqStoreProduct) error {
+func (s *Handler) Handle(ctx context.Context, storeProduct MqStoreProduct) error {
 	logger := ctx.Value("logger").(*slog.Logger)
 
 	var err error
-	if productId := s.ProductMatcher.Match(storeProduct); productId > 0 {
-		err = s.ProductUpdater.Update(productId, storeProduct)
+	if productId := s.Matcher.Match(storeProduct); productId > 0 {
+		err = s.Updater.Update(productId, storeProduct)
 	} else {
-		err = s.ProductCreator.Create(storeProduct)
+		err = s.Creator.Create(storeProduct)
 	}
 
 	if err != nil {

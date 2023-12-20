@@ -2,11 +2,20 @@ package mq
 
 import (
 	"context"
+	"github.com/brunofjesus/pricetracker/catalog/internal/app"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/store"
 	"log/slog"
 	"time"
 )
 
-func SpawnWorker(ctx context.Context, id int) {
+func SpawnWorker(
+	ctx context.Context,
+	appConfig *app.ApplicationConfiguration,
+	productHandler *product.Handler,
+	storeHandler *store.Handler,
+	id int,
+) {
 	logger := slog.New(
 		ctx.Value("logger").(*slog.Logger).
 			Handler().WithAttrs(
@@ -17,7 +26,14 @@ func SpawnWorker(ctx context.Context, id int) {
 
 	logger.Debug("spawning worker")
 	for {
-		err := newConsumer().Listen(context.WithValue(ctx, "logger", logger))
+
+		consumer := Consumer{
+			productHandler:           productHandler,
+			storeHandler:             storeHandler,
+			applicationConfiguration: appConfig,
+		}
+
+		err := consumer.Listen(context.WithValue(ctx, "logger", logger))
 		if err != nil {
 			logger.Error("worker crashed", slog.Any("error", err))
 		}

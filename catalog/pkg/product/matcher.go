@@ -11,14 +11,14 @@ import (
 	store_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 )
 
-type ProductMatcher struct {
-	StoreRepository       store_repository.StoreRepository
-	ProductRepository     product_repository.ProductRepository
-	ProductMetaRepository product_repository.ProductMetaRepository
-	PriceRepository       price_repository.PriceRepository
+type Matcher struct {
+	StoreRepository       *store_repository.Repository
+	ProductRepository     *product_repository.Repository
+	ProductMetaRepository *product_repository.MetaRepository
+	PriceRepository       *price_repository.Repository
 }
 
-func (s *ProductMatcher) Match(storeProduct MqStoreProduct) int64 {
+func (s *Matcher) Match(storeProduct MqStoreProduct) int64 {
 	var searchFunctions []func(MqStoreProduct) int64
 	searchFunctions = append(searchFunctions, s.findByProductUrl)
 	searchFunctions = append(searchFunctions, s.findByEan)
@@ -35,7 +35,7 @@ func (s *ProductMatcher) Match(storeProduct MqStoreProduct) int64 {
 	return -1
 }
 
-func (s *ProductMatcher) findByEan(storeProduct MqStoreProduct) int64 {
+func (s *Matcher) findByEan(storeProduct MqStoreProduct) int64 {
 	var validEans []int64
 	for _, ean := range storeProduct.EAN {
 		if eanInt, err := strconv.Atoi(ean); err == nil {
@@ -55,7 +55,7 @@ func (s *ProductMatcher) findByEan(storeProduct MqStoreProduct) int64 {
 	return -1
 }
 
-func (s *ProductMatcher) findBySku(storeProduct MqStoreProduct) int64 {
+func (s *Matcher) findBySku(storeProduct MqStoreProduct) int64 {
 	productId, err := s.ProductMetaRepository.FindProductIdBySKU(storeProduct.SKU, storeProduct.StoreSlug, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Printf("error finding by sku %v: %v", storeProduct.SKU, err)
@@ -66,7 +66,7 @@ func (s *ProductMatcher) findBySku(storeProduct MqStoreProduct) int64 {
 	return -1
 }
 
-func (s *ProductMatcher) findByProductUrl(storeProduct MqStoreProduct) int64 {
+func (s *Matcher) findByProductUrl(storeProduct MqStoreProduct) int64 {
 	product, err := s.ProductRepository.FindProductByUrl(storeProduct.Link, nil)
 	if err != nil && !errors.Is(err, sql.ErrNoRows) {
 		log.Printf("error finding by url %v: %v", storeProduct.Link, err)
