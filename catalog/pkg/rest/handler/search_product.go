@@ -2,16 +2,15 @@ package handler
 
 import (
 	"fmt"
+	"net/http"
+
+	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/rest/utils"
-	"github.com/brunofjesus/pricetracker/catalog/util/pagination"
-	"net/http"
 )
 
 func SearchProduct(w http.ResponseWriter, r *http.Request) {
-
 	filters, err := getProductSearchFilters(r)
-
 	if err != nil {
 		utils.ErrorJSON(w, err, http.StatusBadRequest)
 		return
@@ -26,7 +25,6 @@ func SearchProduct(w http.ResponseWriter, r *http.Request) {
 	products, err := product.GetMetricsFinder().FindProducts(
 		*paginationQuery, *filters,
 	)
-
 	if err != nil {
 		utils.ErrorJSON(w, err, http.StatusInternalServerError)
 		return

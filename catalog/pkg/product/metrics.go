@@ -6,11 +6,13 @@ import (
 
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
-	"github.com/brunofjesus/pricetracker/catalog/util/pagination"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 )
 
-var metricsFinderOnce sync.Once
-var metricsFinderInstance *metricsFinder
+var (
+	metricsFinderOnce     sync.Once
+	metricsFinderInstance *metricsFinder
+)
 
 type ProductFinderFilters product_repository.ProductMetricsFilter
 
@@ -45,9 +47,7 @@ func (s *metricsFinder) FindProducts(
 	paginatedQuery pagination.PaginatedQuery,
 	filters ProductFinderFilters,
 ) (*pagination.PaginatedData[[]product_repository.ProductWithMetrics], error) {
-
 	tx, err := s.db.Begin()
-
 	if err != nil {
 		return nil, err
 	}
@@ -68,7 +68,6 @@ func (s *metricsFinder) FindProducts(
 		(*product_repository.ProductMetricsFilter)(&filters),
 		nil,
 	)
-
 	if err != nil {
 		return nil, err
 	}
