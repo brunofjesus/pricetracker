@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/brunofjesus/pricetracker/catalog/internal/app"
 	httpserver "github.com/brunofjesus/pricetracker/catalog/pkg/http"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest"
 	"log/slog"
 	"os"
@@ -39,7 +40,8 @@ func main() {
 			ProductFinder: environment.Product.Finder,
 			PriceFinder:   environment.Price.Finder,
 		},
-		Port: 8080,
+		FrontendProps: &frontend.V1FrontendProps{},
+		Port:          8080,
 	}
 	err := httpserver.ListenAndServe(httpServerProps)
 	if err != nil {

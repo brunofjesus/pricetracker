@@ -10,6 +10,9 @@ migration_up:
 migration_drop:
 	migrate -database postgres://postgres:price@localhost:5432/postgres?sslmode=disable -path ./migration drop
 
+templ:
+	@templ generate
+
 build_sys_arch:
 	mkdir -p ../dist/$(system)_$(arch)/catalog;
 	cp config.yaml ../dist/$(system)_$(arch)/catalog;
@@ -31,3 +34,9 @@ build:
 	else\
 		make build_sys_arch system=$(system) arch=$(arch);\
 	fi
+
+run:
+	air \
+		--build.cmd "make templ && sleep 2 && go build -o ./.bin/app github.com/brunofjesus/pricetracker/catalog/cmd/app" \
+		--build.bin "./.bin/app" \
+		--build.exclude_dir=".bin"
