@@ -1,4 +1,4 @@
-package definition
+package dto
 
 type Store struct {
 	Slug    string

@@ -2,14 +2,13 @@ package mapping
 
 import (
 	"fmt"
+	"github.com/brunofjesus/pricetracker/stores/connector/dto"
+	"github.com/brunofjesus/pricetracker/stores/worten/pkg/definition"
 	"strconv"
-
-	"github.com/brunofjesus/pricetracker/stores/worten/definition/catalog"
-	"github.com/brunofjesus/pricetracker/stores/worten/definition/store"
 )
 
-func MapWortenProductToCatalogProduct(source store.WortenProductHit, destination *catalog.StoreProduct) error {
-	winningOffer, err := strconv.Atoi(source.WinningOffer.Price.Value)
+func MapWortenProductToCatalogProduct(source definition.WortenProductHit, destination *dto.StoreProduct) error {
+	winningOffer, err := strconv.ParseInt(source.WinningOffer.Price.Value, 10, 64)
 	if err != nil {
 		return fmt.Errorf("cannot handle winning offer (%v) %v", source.WinningOffer.Price, err)
 	}

@@ -237,8 +237,6 @@ func (r *MetaRepository) findOne(tx *sql.Tx, tableName string, where any, args .
 		From(tableName).
 		Where(where, args...)
 
-	log.Println(q.ToSql())
-
 	var productId int64
 
 	if err := q.QueryRow().Scan(&productId); err != nil {

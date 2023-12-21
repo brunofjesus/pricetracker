@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/brunofjesus/pricetracker/stores/worten/pkg/definition"
 	"io"
 	"log/slog"
 	"net/http"
@@ -13,8 +14,7 @@ import (
 	"time"
 
 	"github.com/brunofjesus/pricetracker/stores/worten/config"
-	"github.com/brunofjesus/pricetracker/stores/worten/definition/store"
-	"github.com/brunofjesus/pricetracker/stores/worten/integration/sitemap"
+	"github.com/brunofjesus/pricetracker/stores/worten/pkg/sitemap"
 )
 
 func FindCategories(logger *slog.Logger) (map[string]string, error) {
@@ -62,14 +62,14 @@ func FindCategories(logger *slog.Logger) (map[string]string, error) {
 }
 
 func solveUrl(categoryUrl string) (string, error) {
-	requestBody := store.WortenSolveURLRequest{
+	requestBody := definition.WortenSolveURLRequest{
 		OperationName: "solveURL",
-		Variables: store.WortenSolveURLRequestVariables{
+		Variables: definition.WortenSolveURLRequestVariables{
 			Debug:           false,
 			URI:             categoryUrl,
 			FetchFullEntity: false,
 		},
-		Query: store.WortenSolveURLRequestQuery,
+		Query: definition.WortenSolveURLRequestQuery,
 	}
 
 	client := &http.Client{}
@@ -104,7 +104,7 @@ func solveUrl(categoryUrl string) (string, error) {
 	}
 	defer res.Body.Close()
 
-	var response store.WortenSolveURLResponse
+	var response definition.WortenSolveURLResponse
 	err = json.NewDecoder(res.Body).Decode(&response)
 
 	if err != nil {

@@ -1,4 +1,4 @@
-package store
+package definition
 
 type WortenSolveURLRequest struct {
 	OperationName string                         `json:"operationName"`

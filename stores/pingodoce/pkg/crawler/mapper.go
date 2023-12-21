@@ -2,12 +2,12 @@ package crawler
 
 import (
 	"fmt"
-
-	"github.com/brunofjesus/pricetracker/stores/pingodoce/definition"
+	"github.com/brunofjesus/pricetracker/stores/connector/dto"
+	"github.com/brunofjesus/pricetracker/stores/pingodoce/pkg/definition"
 )
 
-func mapPingoDoceProductToStoreProduct(store definition.Store, in definition.PingoDoceProduct) definition.StoreProduct {
-	return definition.StoreProduct{
+func mapPingoDoceProductToStoreProduct(store dto.Store, in definition.PingoDoceProduct) dto.StoreProduct {
+	return dto.StoreProduct{
 		StoreSlug: store.Slug,
 		Name:      in.ShortDescription,
 		EAN:       in.Eans,

@@ -3,15 +3,16 @@ package crawler
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/brunofjesus/pricetracker/stores/connector/dto"
 	"log/slog"
 	"net/http"
 	"time"
 
 	"github.com/brunofjesus/pricetracker/stores/pingodoce/config"
-	"github.com/brunofjesus/pricetracker/stores/pingodoce/definition"
+	owndefinition "github.com/brunofjesus/pricetracker/stores/pingodoce/pkg/definition"
 )
 
-func Crawl(logger *slog.Logger, store definition.Store, publishFunc func(definition.StoreProduct)) {
+func Crawl(logger *slog.Logger, store dto.Store, publishFunc func(dto.StoreProduct)) {
 	appConfig := config.GetApplicationConfiguration()
 
 	categories, err := fetchCategories()
@@ -69,7 +70,7 @@ func Crawl(logger *slog.Logger, store definition.Store, publishFunc func(definit
 	}
 }
 
-func search(category string, offset, size int) (*definition.PingoDoceSearchResult, error) {
+func search(category string, offset, size int) (*owndefinition.PingoDoceSearchResult, error) {
 	urlFormat := "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/products/search?mainCategoriesIds=[\"%s\"]&from=%d&size=%d&esPreference=0.7998979678255991"
 	url := fmt.Sprintf(urlFormat, category, offset, size)
 
@@ -79,13 +80,13 @@ func search(category string, offset, size int) (*definition.PingoDoceSearchResul
 	}
 	defer res.Body.Close()
 
-	var response definition.PingoDoceSearchResult
+	var response owndefinition.PingoDoceSearchResult
 	err = json.NewDecoder(res.Body).Decode(&response)
 
 	return &response, err
 }
 
-func fetchCategories() (*definition.PingoDoceCategories, error) {
+func fetchCategories() (*owndefinition.PingoDoceCategories, error) {
 	url := "https://mercadao.pt/api/catalogues/6107d28d72939a003ff6bf51/with-descendants"
 
 	res, err := request(url)
@@ -94,7 +95,7 @@ func fetchCategories() (*definition.PingoDoceCategories, error) {
 	}
 	defer res.Body.Close()
 
-	var response definition.PingoDoceCategories
+	var response owndefinition.PingoDoceCategories
 	err = json.NewDecoder(res.Body).Decode(&response)
 
 	return &response, err

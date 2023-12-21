@@ -4,28 +4,27 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/brunofjesus/pricetracker/stores/worten/pkg/definition"
 	"net/http"
-
-	"github.com/brunofjesus/pricetracker/stores/worten/definition/store"
 )
 
-func FindProducts(pageNumber int, categoryId, slug string, callback func(store.WortenProductHit) error) (bool, error) {
-	requestBody := []store.WortenBrowseProductsRequest{
+func FindProducts(pageNumber int, categoryId, slug string, callback func(definition.WortenProductHit) error) (bool, error) {
+	requestBody := []definition.WortenBrowseProductsRequest{
 		{
 			OperationName: "browseProducts",
-			Variables: store.WortenBrowseProductsRequestVariables{
+			Variables: definition.WortenBrowseProductsRequestVariables{
 				Contexts: []string{categoryId},
-				Params: store.WortenBrowseProductsRequestVariablesParams{
+				Params: definition.WortenBrowseProductsRequestVariablesParams{
 					PageNumber: pageNumber,
 					PageSize:   48,
-					Filters: []store.WortenBrowseProductsRequestVariablesParamsFilter{
+					Filters: []definition.WortenBrowseProductsRequestVariablesParamsFilter{
 						{
 							Key:     "seller_name",
 							Virtual: false,
 							Value:   []string{"Worten"},
 						},
 					},
-					Sort: store.WortenSort{
+					Sort: definition.WortenSort{
 						Field: "rank1",
 						Order: "ASC",
 					},
@@ -33,7 +32,7 @@ func FindProducts(pageNumber int, categoryId, slug string, callback func(store.W
 				},
 				HasVariants: false,
 			},
-			Query: store.WortenBrowseProductsRequestQuery,
+			Query: definition.WortenBrowseProductsRequestQuery,
 		},
 	}
 
@@ -69,7 +68,7 @@ func FindProducts(pageNumber int, categoryId, slug string, callback func(store.W
 	}
 	defer res.Body.Close()
 
-	var response []store.WortenBrowseProductResponse
+	var response []definition.WortenBrowseProductResponse
 	err = json.NewDecoder(res.Body).Decode(&response)
 
 	if err != nil {

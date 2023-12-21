@@ -118,7 +118,10 @@ func channelSetup(ctx context.Context, ch *amqp.Channel) error {
 	logger := ctx.Value("logger").(*slog.Logger)
 
 	// Prefetch 10
-	ch.Qos(10, 0, false)
+	err := ch.Qos(10, 0, false)
+	if err != nil {
+		return fmt.Errorf("error setting prefetch: %w", err)
+	}
 
 	exchangeName := "catalog_ex"
 
@@ -129,7 +132,7 @@ func channelSetup(ctx context.Context, ch *amqp.Channel) error {
 			slog.String("name", exchangeName),
 		),
 	)
-	err := ch.ExchangeDeclare(
+	err = ch.ExchangeDeclare(
 		"catalog_ex", // name
 		"direct",     //kind
 		false,        // durable

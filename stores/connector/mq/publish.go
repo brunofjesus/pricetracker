@@ -5,35 +5,32 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/brunofjesus/pricetracker/stores/connector/dto"
+	"github.com/rabbitmq/amqp091-go"
 	"log/slog"
 	"time"
-
-	"github.com/brunofjesus/pricetracker/stores/worten/config"
-	"github.com/brunofjesus/pricetracker/stores/worten/definition/catalog"
-	"github.com/rabbitmq/amqp091-go"
 )
 
 type Publisher struct {
-	logger    *slog.Logger
-	appConfig config.ApplicationConfiguration
-	conn      *amqp091.Connection
-	ch        *amqp091.Channel
-	closeChan chan struct{}
+	logger          *slog.Logger
+	messageQueueUrl string
+	conn            *amqp091.Connection
+	ch              *amqp091.Channel
+	closeChan       chan struct{}
 }
 
-func NewPublisher(logger *slog.Logger) (*Publisher, error) {
-	appConfig := config.GetApplicationConfiguration()
-	conn, ch, err := Connect(appConfig.MessageQueue.URL)
+func NewPublisher(logger *slog.Logger, messageQueueUrl string) (*Publisher, error) {
+	conn, ch, err := Connect(messageQueueUrl)
 	if err != nil {
 		return nil, err
 	}
 
 	instance := &Publisher{
-		logger:    logger,
-		appConfig: *appConfig,
-		conn:      conn,
-		ch:        ch,
-		closeChan: make(chan struct{}),
+		logger:          logger,
+		messageQueueUrl: messageQueueUrl,
+		conn:            conn,
+		ch:              ch,
+		closeChan:       make(chan struct{}),
 	}
 
 	go instance.backgroundLoop()
@@ -41,7 +38,7 @@ func NewPublisher(logger *slog.Logger) (*Publisher, error) {
 	return instance, nil
 }
 
-func (p *Publisher) PublishProduct(product catalog.StoreProduct) error {
+func (p *Publisher) PublishProduct(product dto.StoreProduct) error {
 	messageBytes, err := json.Marshal(product)
 
 	if err != nil {
@@ -51,7 +48,7 @@ func (p *Publisher) PublishProduct(product catalog.StoreProduct) error {
 	return p.publish("product", messageBytes)
 }
 
-func (p *Publisher) PublishStore(store catalog.Store) error {
+func (p *Publisher) PublishStore(store dto.Store) error {
 	messageBytes, err := json.Marshal(store)
 
 	if err != nil {
@@ -119,7 +116,7 @@ func (p *Publisher) handleMqClose(amqpErr *amqp091.Error) {
 	//it was an error
 	if amqpErr != nil {
 		for {
-			conn, ch, err := Connect(p.appConfig.MessageQueue.URL)
+			conn, ch, err := Connect(p.messageQueueUrl)
 			if err != nil {
 				p.logger.Error("MQ Reconnect error", slog.Any("error", err))
 				time.Sleep(1 * time.Second)
