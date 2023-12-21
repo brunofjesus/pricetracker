@@ -2,14 +2,10 @@ package store
 
 import (
 	"database/sql"
-	"sync"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 )
-
-var once sync.Once
-var instance StoreRepository
 
 const StoreTableName = "store"
 
@@ -21,30 +17,19 @@ type Store struct {
 	Active  bool   `db:"active"`
 }
 
-type StoreRepository interface {
-	FindStoreBySlug(slug string, tx *sql.Tx) (*Store, error)
-	CreateStore(slug, name, website string, tx *sql.Tx) (int64, error)
-}
-
-type storeRepository struct {
+type Repository struct {
 	db *sql.DB
 	qb *squirrel.StatementBuilderType
 }
 
-func GetStoreRepository() StoreRepository {
-	once.Do(func() {
-		db := repository.GetDatabaseConnection()
-
-		instance = &storeRepository{
-			db: db,
-			qb: repository.QueryBuilder(db),
-		}
-	})
-
-	return instance
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{
+		db: db,
+		qb: repository.QueryBuilder(db),
+	}
 }
 
-func (r *storeRepository) FindStoreBySlug(slug string, tx *sql.Tx) (*Store, error) {
+func (r *Repository) FindStoreBySlug(slug string, tx *sql.Tx) (*Store, error) {
 	qb := r.qb
 	if tx != nil {
 		qb = repository.QueryBuilder(tx)
@@ -66,7 +51,7 @@ func (r *storeRepository) FindStoreBySlug(slug string, tx *sql.Tx) (*Store, erro
 	return &store, err
 }
 
-func (r *storeRepository) CreateStore(slug string, name string, website string, tx *sql.Tx) (int64, error) {
+func (r *Repository) CreateStore(slug string, name string, website string, tx *sql.Tx) (int64, error) {
 	qb := r.qb
 	if tx != nil {
 		qb = repository.QueryBuilder(tx)

@@ -11,21 +11,22 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-func GetProduct(w http.ResponseWriter, r *http.Request) {
-	productId, err := strconv.ParseInt(chi.URLParam(r, "productId"), 10, 64)
+func GetProduct(finder *product.Finder) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		productId, err := strconv.ParseInt(chi.URLParam(r, "productId"), 10, 64)
 
-	if err != nil {
-		utils.ErrorJSON(w, errors.New("product does not exist"), http.StatusNotFound)
-		return
+		if err != nil {
+			utils.ErrorJSON(w, errors.New("product does not exist"), http.StatusNotFound)
+			return
+		}
+
+		productWithMetrics, err := finder.FindProductById(productId)
+
+		if err != nil {
+			utils.ErrorJSON(w, fmt.Errorf("cannot fetch product: %d", productId), http.StatusInternalServerError)
+			return
+		}
+
+		utils.WriteJSON(w, http.StatusOK, &productWithMetrics)
 	}
-
-	productWithMetrics, err := product.GetMetricsFinder().
-		FindProductById(productId)
-
-	if err != nil {
-		utils.ErrorJSON(w, fmt.Errorf("cannot fetch product: %d", productId), http.StatusInternalServerError)
-		return
-	}
-
-	utils.WriteJSON(w, http.StatusOK, &productWithMetrics)
 }

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/brunofjesus/pricetracker/catalog/internal/app"
 	"log"
 
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
@@ -14,7 +15,8 @@ func main() {
 }
 
 func doMigration() {
-	db := repository.GetDatabaseConnection()
+	config := app.GetApplicationConfiguration()
+	db := repository.Connect(config.Database.DSN, config.Database.Attempts)
 
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 

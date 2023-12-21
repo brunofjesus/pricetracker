@@ -3,15 +3,11 @@ package price
 import (
 	"database/sql"
 	"fmt"
-	"sync"
 	"time"
 
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 )
-
-var once sync.Once
-var instance PriceRepository
 
 const ProductPriceTableName = "product_price"
 
@@ -21,33 +17,16 @@ type ProductPrice struct {
 	Price     int       `db:"price"`
 }
 
-type PriceRepository interface {
-	FindLatestPrice(productId int64, tx *sql.Tx) (*ProductPrice, error)
-	FindPricesBetween(productId int64, from time.Time, to time.Time, tx *sql.Tx) ([]ProductPrice, error)
-	FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]ProductPrice, error)
-	CountPrices(productId int64, tx *sql.Tx) (int64, error)
-	CreatePrice(productId int64, price int, timestamp time.Time, tx *sql.Tx) error
-}
-
-type priceRepository struct {
+type Repository struct {
 	db *sql.DB
 	qb *squirrel.StatementBuilderType
 }
 
-func GetPriceRepository() PriceRepository {
-	once.Do(func() {
-		db := repository.GetDatabaseConnection()
-
-		instance = &priceRepository{
-			db: db,
-			qb: repository.QueryBuilder(db),
-		}
-	})
-
-	return instance
+func NewRepository(db *sql.DB) *Repository {
+	return &Repository{db: db, qb: repository.QueryBuilder(db)}
 }
 
-func (r *priceRepository) FindLatestPrice(productId int64, tx *sql.Tx) (*ProductPrice, error) {
+func (r *Repository) FindLatestPrice(productId int64, tx *sql.Tx) (*ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id", "date_time", "price").
@@ -66,7 +45,7 @@ func (r *priceRepository) FindLatestPrice(productId int64, tx *sql.Tx) (*Product
 	return &productPrice, err
 }
 
-func (r *priceRepository) FindPricesBetween(productId int64, from time.Time, to time.Time, tx *sql.Tx) ([]ProductPrice, error) {
+func (r *Repository) FindPricesBetween(productId int64, from time.Time, to time.Time, tx *sql.Tx) ([]ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id", "date_time", "price").
@@ -110,7 +89,7 @@ func (r *priceRepository) FindPricesBetween(productId int64, from time.Time, to 
 	return prices, nil
 }
 
-func (r *priceRepository) FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]ProductPrice, error) {
+func (r *Repository) FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id", "date_time", "price").
@@ -144,7 +123,7 @@ func (r *priceRepository) FindPrices(productId int64, offset int64, limit int, o
 	return prices, nil
 }
 
-func (r *priceRepository) CountPrices(productId int64, tx *sql.Tx) (int64, error) {
+func (r *Repository) CountPrices(productId int64, tx *sql.Tx) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 	q := qb.Select("COUNT(*)").
 		From(ProductPriceTableName).
@@ -155,7 +134,7 @@ func (r *priceRepository) CountPrices(productId int64, tx *sql.Tx) (int64, error
 	return count, err
 }
 
-func (r *priceRepository) CreatePrice(productId int64, price int, timestamp time.Time, tx *sql.Tx) error {
+func (r *Repository) CreatePrice(productId int64, price int, timestamp time.Time, tx *sql.Tx) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Insert(ProductPriceTableName).

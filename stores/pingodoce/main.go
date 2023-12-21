@@ -2,14 +2,14 @@ package main
 
 import (
 	"fmt"
+	"github.com/brunofjesus/pricetracker/stores/connector/dto"
 	"log/slog"
 	"os"
 	"time"
 
+	"github.com/brunofjesus/pricetracker/stores/connector/mq"
 	"github.com/brunofjesus/pricetracker/stores/pingodoce/config"
-	"github.com/brunofjesus/pricetracker/stores/pingodoce/crawler"
-	"github.com/brunofjesus/pricetracker/stores/pingodoce/definition"
-	"github.com/brunofjesus/pricetracker/stores/pingodoce/mq"
+	"github.com/brunofjesus/pricetracker/stores/pingodoce/pkg/crawler"
 )
 
 const (
@@ -32,19 +32,20 @@ func main() {
 
 	for {
 		logger.Info("Running store scrapper")
-		run(logger)
+		run(logger, applicationConfig)
 		logger.Info("Scraping done waiting for next loop", slog.Int64("wait_time_minutes", applicationConfig.LoopIntervalMinutes))
 		time.Sleep(time.Minute * time.Duration(applicationConfig.LoopIntervalMinutes))
 	}
 }
 
-func run(logger *slog.Logger) {
+func run(logger *slog.Logger, appConfig *config.ApplicationConfiguration) {
 	publisher, err := mq.NewPublisher(
 		slog.New(
 			logger.Handler().WithAttrs([]slog.Attr{
 				slog.String("service", "publisher"),
 			}),
 		),
+		appConfig.MessageQueue.URL,
 	)
 
 	if err != nil {
@@ -55,7 +56,7 @@ func run(logger *slog.Logger) {
 	defer publisher.Close()
 
 	// Register store
-	store := definition.Store{
+	store := dto.Store{
 		Slug:    StoreSlug,
 		Name:    StoreName,
 		Website: StoreWebSite,
@@ -74,7 +75,7 @@ func run(logger *slog.Logger) {
 			}),
 		),
 		store,
-		func(storeProduct definition.StoreProduct) {
+		func(storeProduct dto.StoreProduct) {
 			err := publisher.PublishProduct(storeProduct)
 			if err != nil {
 				fmt.Printf("error: %v", err)

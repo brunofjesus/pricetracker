@@ -1,44 +1,39 @@
 package product
 
 import (
-	"log"
-	"sync"
+	"context"
+	"log/slog"
 )
 
-var handlerOnce sync.Once
-var handlerInstance ProductHandler
-
-type ProductHandler interface {
-	Handle(storeProduct MqStoreProduct) error
+type Handler struct {
+	Matchers []Matcher
+	Creator  *Creator
+	Updater  *Updater
 }
 
-type productHandler struct {
-	productMatcher ProductMatcher
-	productCreator ProductCreator
-	productUpdater ProductUpdater
+type Matcher interface {
+	Match(storeProduct MqStoreProduct) int64
 }
 
-func GetProductHandler() ProductHandler {
-	handlerOnce.Do(func() {
-		handlerInstance = &productHandler{
-			productMatcher: GetProductMatcher(),
-			productCreator: GetProductCreator(),
-			productUpdater: GetProductUpdater(),
+func (s *Handler) Handle(ctx context.Context, storeProduct MqStoreProduct) error {
+	logger := ctx.Value("logger").(*slog.Logger)
+
+	var productId int64
+	for _, matcher := range s.Matchers {
+		if productId = matcher.Match(storeProduct); productId > 0 {
+			break
 		}
-	})
-	return handlerInstance
-}
+	}
 
-func (s *productHandler) Handle(storeProduct MqStoreProduct) error {
 	var err error
-	if productId := s.productMatcher.Match(storeProduct); productId > 0 {
-		err = s.productUpdater.Update(productId, storeProduct)
+	if productId > 0 {
+		err = s.Updater.Update(productId, storeProduct)
 	} else {
-		err = s.productCreator.Create(storeProduct)
+		err = s.Creator.Create(storeProduct)
 	}
 
 	if err != nil {
-		log.Printf("error on receiver handler: %v on %v", err, storeProduct)
+		logger.Error("error on receiver handler", slog.Any("error", err), slog.Any("storeProduct", storeProduct))
 	}
 	return err
 }

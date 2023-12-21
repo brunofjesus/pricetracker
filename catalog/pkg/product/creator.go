@@ -2,46 +2,23 @@ package product
 
 import (
 	"database/sql"
-	"sync"
 	"time"
-
-	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 
 	price_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 	store_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 )
 
-var creatorOnce sync.Once
-var creatorInstance ProductCreator
-
-type ProductCreator interface {
-	Create(storeProduct MqStoreProduct) error
+type Creator struct {
+	DB                    *sql.DB
+	StoreRepository       *store_repository.Repository
+	ProductRepository     *product_repository.Repository
+	ProductMetaRepository *product_repository.MetaRepository
+	PriceRepository       *price_repository.Repository
 }
 
-type productCreator struct {
-	db                    *sql.DB
-	storeRepository       store_repository.StoreRepository
-	productRepository     product_repository.ProductRepository
-	productMetaRepository product_repository.ProductMetaRepository
-	priceRepository       price_repository.PriceRepository
-}
-
-func GetProductCreator() ProductCreator {
-	creatorOnce.Do(func() {
-		creatorInstance = &productCreator{
-			db:                    repository.GetDatabaseConnection(),
-			storeRepository:       store_repository.GetStoreRepository(),
-			productRepository:     product_repository.GetProductRepository(),
-			productMetaRepository: product_repository.GetProductMetaRepository(),
-			priceRepository:       price_repository.GetPriceRepository(),
-		}
-	})
-	return creatorInstance
-}
-
-func (s *productCreator) Create(storeProduct MqStoreProduct) error {
-	tx, err := s.db.Begin()
+func (s *Creator) Create(storeProduct MqStoreProduct) error {
+	tx, err := s.DB.Begin()
 
 	if err != nil {
 		return err
@@ -49,12 +26,12 @@ func (s *productCreator) Create(storeProduct MqStoreProduct) error {
 
 	defer tx.Rollback()
 
-	store, err := s.storeRepository.FindStoreBySlug(storeProduct.StoreSlug, tx)
+	store, err := s.StoreRepository.FindStoreBySlug(storeProduct.StoreSlug, tx)
 	if err != nil {
 		return err
 	}
 
-	productId, err := s.productRepository.CreateProduct(
+	productId, err := s.ProductRepository.CreateProduct(
 		store.StoreId,
 		storeProduct.Name,
 		storeProduct.Brand,
@@ -70,22 +47,22 @@ func (s *productCreator) Create(storeProduct MqStoreProduct) error {
 	}
 
 	if len(storeProduct.EAN) > 0 {
-		s.productMetaRepository.CreateEANs(
+		s.ProductMetaRepository.CreateEANs(
 			productId,
-			filterEANs(storeProduct),
+			filterNumbers(storeProduct.EAN),
 			tx,
 		)
 	}
 
 	if len(storeProduct.SKU) > 0 {
-		s.productMetaRepository.CreateSKUs(
+		s.ProductMetaRepository.CreateSKUs(
 			productId,
 			storeProduct.SKU,
 			tx,
 		)
 	}
 
-	err = s.priceRepository.CreatePrice(productId, storeProduct.Price, time.Now(), tx)
+	err = s.PriceRepository.CreatePrice(productId, storeProduct.Price, time.Now(), tx)
 
 	if err != nil {
 		return err
