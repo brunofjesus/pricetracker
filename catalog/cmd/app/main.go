@@ -3,11 +3,12 @@ package main
 import (
 	"context"
 	"github.com/brunofjesus/pricetracker/catalog/internal/app"
+	httpserver "github.com/brunofjesus/pricetracker/catalog/pkg/http"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest"
 	"log/slog"
 	"os"
 
 	"github.com/brunofjesus/pricetracker/catalog/internal/mq"
-	"github.com/brunofjesus/pricetracker/catalog/pkg/rest"
 )
 
 func main() {
@@ -33,13 +34,17 @@ func main() {
 	}
 
 	// select {}
-	rest.ListenAndServe(
-		rest.PropsV1{
+	httpServerProps := httpserver.ServerProps{
+		ApiProps: &rest.V1ApiProps{
 			ProductFinder: environment.Product.Finder,
 			PriceFinder:   environment.Price.Finder,
 		},
-		8080,
-	)
+		Port: 8080,
+	}
+	err := httpserver.ListenAndServe(httpServerProps)
+	if err != nil {
+		panic(err)
+	}
 }
 
 func newLogger() *slog.Logger {

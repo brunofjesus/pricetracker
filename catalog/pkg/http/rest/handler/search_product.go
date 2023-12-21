@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest/utils"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
-	"github.com/brunofjesus/pricetracker/catalog/pkg/rest/utils"
 )
 
 func SearchProduct(finder *product.Finder) http.HandlerFunc {

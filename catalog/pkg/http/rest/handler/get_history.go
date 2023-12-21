@@ -2,8 +2,8 @@ package handler
 
 import (
 	"fmt"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest/utils"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/price"
-	"github.com/brunofjesus/pricetracker/catalog/pkg/rest/utils"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"

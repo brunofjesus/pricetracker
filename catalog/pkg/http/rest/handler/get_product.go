@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"strconv"
 
+	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest/utils"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
-	"github.com/brunofjesus/pricetracker/catalog/pkg/rest/utils"
 	"github.com/go-chi/chi/v5"
 )
 
