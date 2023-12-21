@@ -34,7 +34,7 @@ func NewMetaRepository(db *sql.DB) *MetaRepository {
 	}
 }
 
-func (r *MetaRepository) FindProductIdBySKU(sku []string, storeSlug string, tx *sql.Tx) (int64, error) {
+func (r *MetaRepository) FindProductIdByStoreSlugAndSKUs(storeSlug string, sku []string, tx *sql.Tx) (int64, error) {
 	return r.findOne(
 		tx,
 		ProductSkuTableName,
@@ -45,13 +45,13 @@ func (r *MetaRepository) FindProductIdBySKU(sku []string, storeSlug string, tx *
 	)
 }
 
-func (r *MetaRepository) FindProductIdByEAN(ean []int64, storeSlug string, tx *sql.Tx) (int64, error) {
+func (r *MetaRepository) FindProductIdByStoreSlugAndEANs(storeSlug string, eans []int64, tx *sql.Tx) (int64, error) {
 	return r.findOne(
 		tx,
 		ProductEanTableName,
 		squirrel.Eq{
 			"slug": storeSlug,
-			"ean":  ean,
+			"ean":  eans,
 		},
 	)
 }
@@ -236,6 +236,8 @@ func (r *MetaRepository) findOne(tx *sql.Tx, tableName string, where any, args .
 		InnerJoin(fmt.Sprintf("%s USING (store_id)", store.StoreTableName)).
 		From(tableName).
 		Where(where, args...)
+
+	log.Println(q.ToSql())
 
 	var productId int64
 

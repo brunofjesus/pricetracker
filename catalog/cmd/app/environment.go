@@ -20,7 +20,6 @@ type Environment struct {
 type Product struct {
 	Creator *product.Creator
 	Handler *product.Handler
-	Matcher *product.Matcher
 	Finder  *product.Finder
 }
 
@@ -43,13 +42,6 @@ func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
 	priceRepository := price_repository.NewRepository(db)
 	metricsRepository := product_repository.NewMetricsRepository(db)
 
-	productMatcher := product.Matcher{
-		StoreRepository:       storeRepository,
-		ProductRepository:     productRepository,
-		ProductMetaRepository: productMetaRepository,
-		PriceRepository:       priceRepository,
-	}
-
 	productCreator := product.Creator{
 		DB:                    db,
 		StoreRepository:       storeRepository,
@@ -66,15 +58,21 @@ func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
 		PriceRepository:       priceRepository,
 	}
 
-	productHandler := product.Handler{
-		Matcher: &productMatcher,
-		Creator: &productCreator,
-		Updater: &productUpdater,
+	productFinder := product.Finder{
+		DB:                    db,
+		MetricsRepository:     metricsRepository,
+		ProductRepository:     productRepository,
+		ProductMetaRepository: productMetaRepository,
 	}
 
-	productFinder := product.Finder{
-		DB:         db,
-		Repository: metricsRepository,
+	productHandler := product.Handler{
+		Matchers: []product.Matcher{
+			&product.UrlMatcher{Finder: &productFinder},
+			&product.EanMatcher{Finder: &productFinder},
+			&product.SkuMatcher{Finder: &productFinder},
+		},
+		Creator: &productCreator,
+		Updater: &productUpdater,
 	}
 
 	priceFinder := price.Finder{
@@ -90,7 +88,6 @@ func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
 		Product: Product{
 			Creator: &productCreator,
 			Handler: &productHandler,
-			Matcher: &productMatcher,
 			Finder:  &productFinder,
 		},
 		Price: Price{

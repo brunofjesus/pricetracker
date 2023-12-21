@@ -49,7 +49,7 @@ func (s *Creator) Create(storeProduct MqStoreProduct) error {
 	if len(storeProduct.EAN) > 0 {
 		s.ProductMetaRepository.CreateEANs(
 			productId,
-			filterEANs(storeProduct),
+			filterNumbers(storeProduct.EAN),
 			tx,
 		)
 	}

@@ -2,6 +2,7 @@ package product
 
 import (
 	"database/sql"
+	"errors"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 )
@@ -9,15 +10,17 @@ import (
 type FinderFilters product_repository.ProductMetricsFilter
 
 type Finder struct {
-	DB         *sql.DB
-	Repository *product_repository.MetricsRepository
+	DB                    *sql.DB
+	MetricsRepository     *product_repository.MetricsRepository
+	ProductRepository     *product_repository.Repository
+	ProductMetaRepository *product_repository.MetaRepository
 }
 
 func (s *Finder) FindProductById(productId int64) (*product_repository.ProductWithMetrics, error) {
-	return s.Repository.FindProductById(productId, nil)
+	return s.MetricsRepository.FindProductById(productId, nil)
 }
 
-func (s *Finder) FindProducts(
+func (s *Finder) FindDetailedProducts(
 	paginatedQuery pagination.PaginatedQuery,
 	filters FinderFilters,
 ) (*pagination.PaginatedData[[]product_repository.ProductWithMetrics], error) {
@@ -36,7 +39,7 @@ func (s *Finder) FindProducts(
 		"name",
 	)
 
-	items, err := s.Repository.FindProducts(
+	items, err := s.MetricsRepository.FindProducts(
 		paginatedQuery.Offset(), paginatedQuery.Limit(),
 		sortField, paginatedQuery.SortDirection,
 		(*product_repository.ProductMetricsFilter)(&filters),
@@ -46,7 +49,7 @@ func (s *Finder) FindProducts(
 		return nil, err
 	}
 
-	count, err := s.Repository.CountProducts((*product_repository.ProductMetricsFilter)(&filters), nil)
+	count, err := s.MetricsRepository.CountProducts((*product_repository.ProductMetricsFilter)(&filters), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -58,4 +61,33 @@ func (s *Finder) FindProducts(
 		paginatedQuery.Page, paginatedQuery.PageSize, count,
 		paginatedQuery.SortField, paginatedQuery.SortDirection,
 	), nil
+}
+
+func (s *Finder) FindProductByUrl(url string) (*product_repository.Product, error) {
+	return s.ProductRepository.FindProductByUrl(url, nil)
+}
+
+func (s *Finder) FindProductIdByStoreSlugAndSKUs(storeSlug string, skus []string) (int64, error) {
+	productId, err := s.ProductMetaRepository.FindProductIdByStoreSlugAndSKUs(storeSlug, skus, nil)
+
+	if err != nil && !errors.Is(err, sql.ErrNoRows) {
+		return 0, err
+	}
+
+	return productId, nil
+}
+
+func (s *Finder) FindProductIdByStoreSlugAndEANs(storeSlug string, eans []string) (int64, error) {
+	validEANs := filterNumbers(eans)
+
+	if len(validEANs) > 0 {
+		productId, err := s.ProductMetaRepository.FindProductIdByStoreSlugAndEANs(storeSlug, validEANs, nil)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			return 0, err
+		} else if err == nil {
+			return productId, nil
+		}
+	}
+
+	return 0, nil
 }

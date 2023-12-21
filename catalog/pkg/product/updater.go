@@ -118,7 +118,7 @@ func (s *Updater) updateEans(productId int64, storeProduct MqStoreProduct, tx *s
 		return err
 	}
 
-	currentEans := filterEANs(storeProduct)
+	currentEans := filterNumbers(storeProduct.EAN)
 
 	if err == nil {
 		// update

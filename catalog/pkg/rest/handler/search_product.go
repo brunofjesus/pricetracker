@@ -23,7 +23,7 @@ func SearchProduct(finder *product.Finder) http.HandlerFunc {
 			return
 		}
 
-		products, err := finder.FindProducts(
+		products, err := finder.FindDetailedProducts(
 			*paginationQuery, *filters,
 		)
 
