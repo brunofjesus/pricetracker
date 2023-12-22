@@ -23,6 +23,10 @@ func SearchProduct(finder *product.Finder) http.HandlerFunc {
 			return
 		}
 
+    if !paginationQuery.HasSortField() {
+      paginationQuery.SortField = "discount_percent"
+    }
+
 		products, err := finder.FindDetailedProducts(
 			*paginationQuery, *filters,
 		)
@@ -32,7 +36,12 @@ func SearchProduct(finder *product.Finder) http.HandlerFunc {
 			return
 		}
 
-		err = view.ProductsView(*products).Render(r.Context(), w)
+    viewProps := view.ProductsViewProps{
+      Page: *products,
+      Filters: *filters,
+    }
+
+		err = view.ProductsView(viewProps).Render(r.Context(), w)
 		if err != nil {
 			writeInternalError(w)
 			return

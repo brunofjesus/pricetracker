@@ -1,29 +1,49 @@
 package view
 
 import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/ui"
-import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+import db_product "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
+import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import "strconv"
+import "fmt"
 
-templ ProductsView(products pagination.PaginatedData[[]product.ProductWithMetrics]) {
-    @Base() {
-       <div>
-        Page: { strconv.Itoa(products.CurrentPage) } of { strconv.FormatInt(products.TotalPages, 10) }
-       </div>
-       <div>
-         Results: { strconv.Itoa(products.ItemCount) } of { strconv.FormatInt(products.TotalResults, 10) }
-       </div>
-       <div>
-        Sort: { products.SortField } / { products.SortDirection }
-       </div>
+type ProductsViewProps struct {
+	Page    pagination.PaginatedData[[]db_product.ProductWithMetrics]
+	Filters product.FinderFilters
+}
 
-       <br/><br/>
+templ ProductsView(p ProductsViewProps) {
+	@Base() {
+		<div>
+			Page: { strconv.Itoa(p.Page.CurrentPage) } of { strconv.FormatInt(p.Page.TotalPages, 10) }
+		</div>
+		<div>
+			Results: { strconv.Itoa(p.Page.ItemCount) } of { strconv.FormatInt(p.Page.TotalResults, 10) }
+		</div>
+		<div>
+			Filters:
+      if (p.Filters.StoreId > 0) {
+        @property("StoreId", strconv.Itoa(p.Filters.StoreId))
+      }
+      { fmt.Sprintf("%+v", p.Filters) } 
+		</div>
+		<div>
+			Sort: { p.Page.SortField } / { p.Page.SortDirection }
+		</div>
+		<br/>
+		<br/>
+		<div class="products">
+			for _, item := range p.Page.Items {
+				<hr/>
+				@ui.ProductComponent(item)
+			}
+		</div>
+	}
+}
 
-        <div class="products">
-            for _, item := range products.Items {
-                <hr />
-                @ui.ProductComponent(item)
-            }
-        </div>
-    }
+
+templ property(label string, value string) {
+    <li>
+        <label><b>{label}</b></label>: {value}
+    </li>
 }

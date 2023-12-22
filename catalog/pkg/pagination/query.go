@@ -22,7 +22,7 @@ func NewPaginatedQuery(page, pageSize int, sortField, sortDirection string) (*Pa
 	}
 
 	if sortDirection == "" {
-		sortDirection = "asc"
+		sortDirection = "desc"
 	} else if sortDirection != "asc" && sortDirection != "desc" {
 		return nil, errors.New("sort direction can be either 'asc' or 'desc'")
 	}
