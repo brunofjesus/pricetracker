@@ -40,8 +40,10 @@ func main() {
 			ProductFinder: environment.Product.Finder,
 			PriceFinder:   environment.Price.Finder,
 		},
-		FrontendProps: &frontend.V1FrontendProps{},
-		Port:          8080,
+		FrontendProps: &frontend.V1FrontendProps{
+			ProductFinder: environment.Product.Finder,
+		},
+		Port: 8080,
 	}
 	err := httpserver.ListenAndServe(httpServerProps)
 	if err != nil {

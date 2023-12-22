@@ -1,0 +1,29 @@
+package view
+
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/ui"
+import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
+import "strconv"
+
+templ ProductsView(products pagination.PaginatedData[[]product.ProductWithMetrics]) {
+    @Base() {
+       <div>
+        Page: { strconv.Itoa(products.CurrentPage) } of { strconv.FormatInt(products.TotalPages, 10) }
+       </div>
+       <div>
+         Results: { strconv.Itoa(products.ItemCount) } of { strconv.FormatInt(products.TotalResults, 10) }
+       </div>
+       <div>
+        Sort: { products.SortField } / { products.SortDirection }
+       </div>
+
+       <br/><br/>
+
+        <div class="products">
+            for _, item := range products.Items {
+                <hr />
+                @ui.ProductComponent(item)
+            }
+        </div>
+    }
+}

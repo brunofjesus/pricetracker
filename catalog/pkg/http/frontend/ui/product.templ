@@ -1,0 +1,29 @@
+package ui
+
+import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+import "fmt"
+import "github.com/shopspring/decimal"
+
+templ ProductComponent(p product.ProductWithMetrics) {
+    <div>
+        <img src={p.ImageUrl}/>
+        <ul>
+            @property("ID", fmt.Sprintf("%d", p.ProductId))
+            @property("Name", fmt.Sprintf("%s - %s", p.Brand, p.Name))
+            @property("Store", p.StoreName)
+            @property("Current Price", fmt.Sprintf("%.2f", float32(p.Price) / 100))
+            @property("Average Price", p.Average.Div(decimal.NewFromInt(100)).StringFixed(2))
+            @property("Lowest Price", p.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2))
+            @property("Highest Price", p.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2))
+            @property("Discount Percent", p.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0))
+            @property("Url", p.ProductUrl)
+        </ul>
+    </div>
+}
+
+
+templ property(label string, value string) {
+    <li>
+        <label><b>{label}</b></label>: {value}
+    </li>
+}
