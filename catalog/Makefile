@@ -36,7 +36,4 @@ build:
 	fi
 
 run:
-	air \
-		--build.cmd "make templ && sleep 2 && go build -o ./.bin/app github.com/brunofjesus/pricetracker/catalog/cmd/app" \
-		--build.bin "./.bin/app" \
-		--build.exclude_dir=".bin"
+	air
