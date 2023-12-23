@@ -23,9 +23,9 @@ func SearchProduct(finder *product.Finder) http.HandlerFunc {
 			return
 		}
 
-    if !paginationQuery.HasSortField() {
-      paginationQuery.SortField = "discount_percent"
-    }
+		if !paginationQuery.HasSortField() {
+			paginationQuery.SortField = "discount_percent"
+		}
 
 		products, err := finder.FindDetailedProducts(
 			*paginationQuery, *filters,
@@ -36,10 +36,10 @@ func SearchProduct(finder *product.Finder) http.HandlerFunc {
 			return
 		}
 
-    viewProps := view.ProductsViewProps{
-      Page: *products,
-      Filters: *filters,
-    }
+		viewProps := view.ProductsViewProps{
+			Page:    *products,
+			Filters: *filters,
+		}
 
 		err = view.ProductsView(viewProps).Render(r.Context(), w)
 		if err != nil {
@@ -50,7 +50,6 @@ func SearchProduct(finder *product.Finder) http.HandlerFunc {
 
 }
 
-// TODO: duplicate from rest package
 func getProductSearchFilters(r *http.Request) (*product.FinderFilters, error) {
 	productId, err := utils.GetQueryParamInt64Slice(r, "productId")
 	if err != nil {
@@ -87,7 +86,7 @@ func getProductSearchFilters(r *http.Request) (*product.FinderFilters, error) {
 		return nil, fmt.Errorf("invalid max difference: %w", err)
 	}
 
-	minDiscountPercent, err := utils.GetQueryParamFloat64(r, "minDiscountPercent")
+	minDiscountPercent, err := utils.GetQueryParamFloat64Fallback(r, "minDiscountPercent", 0)
 	if err != nil {
 		return nil, fmt.Errorf("invalid min discount: %w", err)
 	}

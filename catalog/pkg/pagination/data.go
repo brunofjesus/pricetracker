@@ -6,7 +6,7 @@ import (
 
 type PaginatedData[R any] struct {
 	CurrentPage   int    `json:"current_page"`
-	TotalPages    int64  `json:"total_pages"`
+	TotalPages    int    `json:"total_pages"`
 	PageSize      int    `json:"page_size"`
 	ItemCount     int    `json:"item_count"`
 	TotalResults  int64  `json:"total_results"`
@@ -28,7 +28,7 @@ func NewPaginatedData[R any](items R, itemLen int, currentPage int, pageSize int
 	}
 }
 
-func calculateTotalPages(totalResults int64, pageSize int) int64 {
+func calculateTotalPages(totalResults int64, pageSize int) int {
 	pages := float64(totalResults) / float64(pageSize)
-	return int64(math.Ceil(pages))
+	return int(math.Ceil(pages))
 }

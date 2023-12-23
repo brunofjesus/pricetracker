@@ -57,10 +57,14 @@ func GetQueryParamInt64Slice(r *http.Request, key string) ([]int64, error) {
 }
 
 func GetQueryParamFloat64(r *http.Request, key string) (float64, error) {
+	return GetQueryParamFloat64Fallback(r, key, -1)
+}
+
+func GetQueryParamFloat64Fallback(r *http.Request, key string, fallback float64) (float64, error) {
 	strVal := GetQueryParam(r, key)
 
 	if len(strVal) == 0 {
-		return -1, nil
+		return fallback, nil
 	}
 
 	return strconv.ParseFloat(strVal, 64)
