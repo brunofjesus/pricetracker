@@ -43,6 +43,7 @@ func main() {
 		FrontendProps: &frontend.V1FrontendProps{
 			ProductFinder: environment.Product.Finder,
 		},
+		Host: "localhost",
 		Port: 8080,
 	}
 	err := httpserver.ListenAndServe(httpServerProps)

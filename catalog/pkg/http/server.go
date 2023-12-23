@@ -13,6 +13,7 @@ import (
 type ServerProps struct {
 	ApiProps      *rest.V1ApiProps
 	FrontendProps *frontend.V1FrontendProps
+	Host          string
 	Port          int
 }
 
@@ -32,5 +33,5 @@ func ListenAndServe(props ServerProps) error {
 		frontend.AddRoutes(r, *props.FrontendProps)
 	}
 
-	return http.ListenAndServe(fmt.Sprintf(":%d", props.Port), r)
+	return http.ListenAndServe(fmt.Sprintf("%s:%d", props.Host, props.Port), r)
 }

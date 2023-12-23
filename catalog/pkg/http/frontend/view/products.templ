@@ -12,8 +12,27 @@ type ProductsViewProps struct {
 	Filters product.FinderFilters
 }
 
+// https://mdbootstrap.com/snippets/standard/mdbootstrap/4852169?view=project#html-tab-view
+
 templ ProductsView(p ProductsViewProps) {
 	@Base() {
+        <!-- New stuff -->
+        <section class="">
+        <div class="container">
+            <div class="row">
+              <!-- sidebar -->
+              <div class="col-lg-3">
+                @ui.Sidebar()
+              </div>
+              <!-- content -->
+              <div class="col-lg-9">
+                @ui.ProductGridComponent(p.Page)
+              </div>
+            </div>
+        </div>
+        </section>
+
+        <!-- Old stuff -->
 		<div>
 			Page: { strconv.Itoa(p.Page.CurrentPage) } of { strconv.FormatInt(p.Page.TotalPages, 10) }
 		</div>
@@ -33,10 +52,7 @@ templ ProductsView(p ProductsViewProps) {
 		<br/>
 		<br/>
 		<div class="products">
-			for _, item := range p.Page.Items {
-				<hr/>
-				@ui.ProductComponent(item)
-			}
+
 		</div>
 	}
 }

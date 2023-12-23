@@ -27,7 +27,7 @@ func ProductComponent(p product.ProductWithMetrics) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div><img src=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"col-lg-4 col-md-6 col-sm-6 d-flex\"><div class=\"card w-100 my-2 shadow-2-strong\"><img src=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -35,47 +35,120 @@ func ProductComponent(p product.ProductWithMetrics) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\"><ul>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"mt-2 mx-2\"><div class=\"card-body d-flex flex-column\"><div class=\"d-flex flex-row gap-1\"><h5 class=\"mb-1 me-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = property("ID", fmt.Sprintf("%d", p.ProductId)).Render(ctx, templ_7745c5c3_Buffer)
+		var templ_7745c5c3_Var2 string = fmt.Sprintf("%.2f", float32(p.Price)/100)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var2))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = property("Name", fmt.Sprintf("%s - %s", p.Brand, p.Name)).Render(ctx, templ_7745c5c3_Buffer)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h5><span class=\"text-danger\"><s>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = property("Store", p.StoreName).Render(ctx, templ_7745c5c3_Buffer)
+		var templ_7745c5c3_Var3 string = p.Average.Div(decimal.NewFromInt(100)).StringFixed(2)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = property("Current Price", fmt.Sprintf("%.2f", float32(p.Price)/100)).Render(ctx, templ_7745c5c3_Buffer)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</s></span> <span>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = property("Average Price", p.Average.Div(decimal.NewFromInt(100)).StringFixed(2)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Var4 := `(`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = property("Lowest Price", p.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2)).Render(ctx, templ_7745c5c3_Buffer)
+		var templ_7745c5c3_Var5 string = p.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = property("Highest Price", p.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2)).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Var6 := `%)`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var6)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = property("Discount Percent", p.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0)).Render(ctx, templ_7745c5c3_Buffer)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div><div class=\"d-flex flex-row gap-1\"><span class=\"text-danger\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = property("Url", p.ProductUrl).Render(ctx, templ_7745c5c3_Buffer)
+		var templ_7745c5c3_Var7 string = p.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span> ")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var8 := `/`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var8)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <span class=\"text-success\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var9 string = p.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</span></div><p class=\"card-text\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		var templ_7745c5c3_Var10 string = p.StoreName
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</p><div class=\"card-footer d-flex align-items-end pt-3 px-0 pb-0 mt-auto\"><a href=\"#!\" class=\"btn btn-primary shadow-0 me-1\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var11 := `Chart`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var11)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a> <a href=\"#!\" class=\"btn btn-light border icon-hover px-2 pt-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var12 := `View in Store`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var12)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></div></div></div></div><!--")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Var13 := `<div>
+        <img src={p.ImageUrl}/>
+        <ul>
+            @property("ID", fmt.Sprintf("%d", p.ProductId))
+            @property("Name", fmt.Sprintf("%s - %s", p.Brand, p.Name))
+            @property("Store", p.StoreName)
+            @property("Current Price", fmt.Sprintf("%.2f", float32(p.Price) / 100))
+            @property("Average Price", p.Average.Div(decimal.NewFromInt(100)).StringFixed(2))
+            @property("Lowest Price", p.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2))
+            @property("Highest Price", p.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2))
+            @property("Discount Percent", p.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0))
+            @property("Url", p.ProductUrl)
+        </ul>
+    </div>`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var13)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("-->")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -94,17 +167,17 @@ func property(label string, value string) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var2 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var2 == nil {
-			templ_7745c5c3_Var2 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li><label><b>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 string = label
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var3))
+		var templ_7745c5c3_Var15 string = label
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var15))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -112,13 +185,13 @@ func property(label string, value string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var4 := `: `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var4)
+		templ_7745c5c3_Var16 := `: `
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var16)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var5 string = value
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var5))
+		var templ_7745c5c3_Var17 string = value
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var17))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
