@@ -35,6 +35,12 @@ func main() {
 	}
 
 	// select {}
+	host := ""
+	if os.Getenv("IS_DEV") == "true" {
+		host = "localhost"
+		logger.Info("Running in development mode", slog.Any("is_dev", os.Getenv("IS_DEV")))
+	}
+
 	httpServerProps := httpserver.ServerProps{
 		ApiProps: &rest.V1ApiProps{
 			ProductFinder: environment.Product.Finder,
@@ -43,7 +49,7 @@ func main() {
 		FrontendProps: &frontend.V1FrontendProps{
 			ProductFinder: environment.Product.Finder,
 		},
-		Host: "localhost",
+		Host: host,
 		Port: 8080,
 	}
 	err := httpserver.ListenAndServe(httpServerProps)

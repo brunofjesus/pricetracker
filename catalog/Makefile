@@ -36,4 +36,4 @@ build:
 	fi
 
 run:
-	air
+	IS_DEV=true air
