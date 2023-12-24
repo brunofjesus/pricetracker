@@ -5,10 +5,11 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/view"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/store"
 	"net/http"
 )
 
-func SearchProduct(finder *product.Finder) http.HandlerFunc {
+func SearchProduct(productFinder *product.Finder, storeFinder *store.Finder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		filters, err := util.GetProductSearchFilters(r)
 		if err != nil {
@@ -26,7 +27,7 @@ func SearchProduct(finder *product.Finder) http.HandlerFunc {
 			paginationQuery.SortField = "discount_percent"
 		}
 
-		products, err := finder.FindDetailedProducts(
+		products, err := productFinder.FindDetailedProducts(
 			*paginationQuery, *filters,
 		)
 
@@ -35,10 +36,18 @@ func SearchProduct(finder *product.Finder) http.HandlerFunc {
 			return
 		}
 
+		stores, err := storeFinder.FindStores()
+
+		if err != nil {
+			writeInternalError(w)
+			return
+		}
+
 		viewProps := view.ProductsViewProps{
 			Page:      *products,
 			PageQuery: *paginationQuery,
 			Filters:   *filters,
+			Stores:    stores,
 		}
 
 		err = view.ProductsView(viewProps).Render(r.Context(), w)

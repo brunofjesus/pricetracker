@@ -10,10 +10,10 @@ import "context"
 import "io"
 import "bytes"
 
-import db_product "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
-import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
+import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
+import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 
-func ProductGridComponent(page pagination.PaginatedData[[]db_product.ProductWithMetrics]) templ.Component {
+func FiltersComponent(filters product.FinderFilters, stores []db_store.Store) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -26,15 +26,14 @@ func ProductGridComponent(page pagination.PaginatedData[[]db_product.ProductWith
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"row\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for _, item := range page.Items {
-			templ_7745c5c3_Err = ProductComponent(item).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		templ_7745c5c3_Var2 := `Filters`
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 		if templ_7745c5c3_Err != nil {

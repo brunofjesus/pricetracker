@@ -1,0 +1,8 @@
+package ui
+
+import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
+import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
+
+templ FiltersComponent(filters product.FinderFilters, stores []db_store.Store) {
+    <div>Filters</div>
+}

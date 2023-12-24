@@ -14,6 +14,7 @@ import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/ui"
 import db_product "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
+import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 import "strconv"
 import "fmt"
 import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
@@ -23,6 +24,7 @@ type ProductsViewProps struct {
 	Page      pagination.PaginatedData[[]db_product.ProductWithMetrics]
 	PageQuery pagination.PaginatedQuery
 	Filters   product.FinderFilters
+	Stores    []db_store.Store
 }
 
 // https://mdbootstrap.com/snippets/standard/mdbootstrap/4852169?view=project#html-tab-view
@@ -87,6 +89,14 @@ func ProductsView(p ProductsViewProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("--><div class=\"col-lg-12\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ui.FiltersComponent(p.Filters, p.Stores).Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			templ_7745c5c3_Err = ui.GridHeader(p.Page.TotalResults).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

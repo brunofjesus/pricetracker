@@ -4,6 +4,7 @@ import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/ui"
 import db_product "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
+import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 import "strconv"
 import "fmt"
 import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
@@ -13,6 +14,7 @@ type ProductsViewProps struct {
 	Page    pagination.PaginatedData[[]db_product.ProductWithMetrics]
 	PageQuery pagination.PaginatedQuery
 	Filters product.FinderFilters
+	Stores  []db_store.Store
 }
 
 // https://mdbootstrap.com/snippets/standard/mdbootstrap/4852169?view=project#html-tab-view
@@ -31,6 +33,8 @@ templ ProductsView(p ProductsViewProps) {
               <!-- content -->
               <!-- <div class="col-lg-9"> -->
               <div class="col-lg-12">
+                @ui.FiltersComponent(p.Filters, p.Stores)
+                @ui.GridHeader(p.Page.TotalResults)
                 @ui.ProductGridComponent(p.Page)
 
                  <!-- Pagination -->
