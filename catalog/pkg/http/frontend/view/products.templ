@@ -6,9 +6,12 @@ import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import "strconv"
 import "fmt"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
+import "strings"
 
 type ProductsViewProps struct {
 	Page    pagination.PaginatedData[[]db_product.ProductWithMetrics]
+	PageQuery pagination.PaginatedQuery
 	Filters product.FinderFilters
 }
 
@@ -20,19 +23,21 @@ templ ProductsView(p ProductsViewProps) {
         <section class="">
         <div class="container">
             <div class="row">
-              <!-- sidebar -->
+              <!-- sidebar
               <div class="col-lg-3">
                 @ui.Sidebar()
               </div>
+              -->
               <!-- content -->
-              <div class="col-lg-9">
+              <!-- <div class="col-lg-9"> -->
+              <div class="col-lg-12">
                 @ui.ProductGridComponent(p.Page)
 
                  <!-- Pagination -->
                 @ui.PaginatorComponent(ui.PaginatorProps{
                     CurrentPage: p.Page.CurrentPage,
                     TotalPages: p.Page.TotalPages,
-                    UrlExpression: "/?page=%d",
+                    UrlExpression: paginationUrlExpression(p),
                 })
               </div>
             </div>
@@ -69,4 +74,13 @@ templ property(label string, value string) {
     <li>
         <label><b>{label}</b></label>: {value}
     </li>
+}
+
+func paginationUrlExpression(p ProductsViewProps) string {
+   return strings.Replace(
+    util.QueryParamString(p.PageQuery, p.Filters),
+    fmt.Sprintf("page=%d", p.PageQuery.Page),
+    "page=%d",
+    1,
+   )
 }
