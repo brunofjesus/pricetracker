@@ -29,6 +29,42 @@ func NewRepository(db *sql.DB) *Repository {
 	}
 }
 
+func (r *Repository) FindStores() ([]Store, error) {
+	qb := r.qb
+
+	q := qb.Select("store_id", "slug", "name", "website", "active").
+		From(StoreTableName)
+
+	var stores []Store
+
+	rows, err := q.Query()
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var store Store
+		err := rows.Scan(
+			&store.StoreId,
+			&store.Slug,
+			&store.Name,
+			&store.Website,
+			&store.Active,
+		)
+
+		if err != nil {
+			return nil, err
+		}
+
+		stores = append(stores, store)
+	}
+
+	return stores, nil
+}
+
 func (r *Repository) FindStoreBySlug(slug string, tx *sql.Tx) (*Store, error) {
 	qb := r.qb
 	if tx != nil {
