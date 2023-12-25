@@ -31,6 +31,11 @@ func FilterBadgeComponent(label string, value string, target string) templ.Compo
         .filter-badge {
             font-size: 1em;
             text-decoration: unset;
+            cursor: pointer;
+        }
+
+        .filter-badge > * {
+            cursor: pointer;
         }
 
         .filter-badge:hover {

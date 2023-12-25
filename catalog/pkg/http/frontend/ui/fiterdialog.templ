@@ -1,0 +1,51 @@
+package ui
+
+templ FilterDialogComponent() {
+   <style type="text/css">
+         .more-filter {
+             font-size: 1em;
+             text-decoration: unset;
+             cursor: pointer;
+         }
+
+         .more-filter > * {
+             cursor: pointer;
+         }
+
+         .more-filter:hover {
+             background-color: #14a085 !important;
+         }
+
+         .more-install span {
+             font-weight: 400;
+         }
+   </style>
+   <span class={"badge", "rounded-pill", "bg-success", "more-filter"} data-bs-toggle="modal" data-bs-target="#filterDialogModal">
+        <i class="bi bi-toggles2"></i>
+        <label>More Filters</label>
+   </span>
+
+   @FilterDialogModalComponent()
+}
+
+templ FilterDialogModalComponent() {
+  <div class="modal" id="filterDialogModal">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Modal title</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true"></span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Modal body text goes here.</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-primary">Save changes</button>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

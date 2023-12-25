@@ -76,6 +76,8 @@ templ FiltersComponent(page pagination.PaginatedQuery, filters product.FinderFil
 	if filters.MaxMaximumPrice > -1 {
         @FilterBadgeComponent("Max. Highest Price", float64ToString(filters.MaxMaximumPrice / 100), generateUrl(page, filters, "MaxMaximumPrice"))
 	}
+
+	@FilterDialogComponent()
     </div>
 }
 
