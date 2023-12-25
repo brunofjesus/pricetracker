@@ -7,17 +7,20 @@ templ GridHeader(totalItems int64) {
       <strong class="d-block py-2">{ strconv.FormatInt(totalItems, 10) } Items found </strong>
       <div class="ms-auto">
         <select class="form-select d-inline-block w-auto border pt-1">
-          <option value="0">Best match</option>
-          <option value="1">Recommended</option>
-          <option value="2">High rated</option>
-          <option value="3">Randomly</option>
+          <option value="discount_percent">Discount (%)</option>
+          <option value="diff">Difference</option>
+          <option value="price">Current Price</option>
+          <option value="minimum">Lowest Price</option>
+          <option value="maximum">Higher Price</option>
+          <option value="name">Name</option>
+          <option value="brand">Brand</option>
         </select>
         <div class="btn-group shadow-0 border">
           <a href="#" class="btn btn-light" title="List view">
-            <i class="fa fa-bars fa-lg"></i>
+            <i class="bi bi-sort-numeric-down"></i>
           </a>
           <a href="#" class="btn btn-light active" title="Grid view">
-            <i class="fa fa-th fa-lg"></i>
+            <i class="bi bi-sort-numeric-up"></i>
           </a>
         </div>
       </div>
