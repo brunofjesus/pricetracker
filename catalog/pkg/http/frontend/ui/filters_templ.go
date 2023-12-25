@@ -26,13 +26,25 @@ func FiltersComponent(filters product.FinderFilters, stores []db_store.Store) te
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = FilterBadgeComponent("Store", "Worten", "#").Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
+		if filters.StoreId > 0 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Store", findStoreName(filters.StoreId, stores), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
 		}
 		if !templ_7745c5c3_IsBuffer {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func findStoreName(id int, stores []db_store.Store) string {
+	for _, store := range stores {
+		if store.StoreId == int64(id) {
+			return store.Name
+		}
+	}
+
+	return ""
 }

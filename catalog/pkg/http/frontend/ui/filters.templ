@@ -4,5 +4,17 @@ import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 
 templ FiltersComponent(filters product.FinderFilters, stores []db_store.Store) {
-    @FilterBadgeComponent("Store", "Worten", "#")
+    if filters.StoreId > 0 {
+        @FilterBadgeComponent("Store", findStoreName(filters.StoreId, stores), "#")
+    }
+}
+
+func findStoreName(id int, stores []db_store.Store) string {
+   for _, store := range stores {
+     if store.StoreId == int64(id) {
+        return store.Name
+     }
+   }
+
+   return ""
 }
