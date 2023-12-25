@@ -3,6 +3,27 @@ package ui
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 
+css filterBadge() {
+    font-size: 1em;
+}
+
+css textContent() {
+    font-weight: 400;
+}
+
 templ FiltersComponent(filters product.FinderFilters, stores []db_store.Store) {
-    <div>Filters</div>
+    <style type="text/css">
+        .badge:hover {
+            background-color: #14a085 !important;
+        }
+
+        .badge:hover .bi {
+            color: #F1948AFF;
+        }
+    </style>
+    <span class={"badge", "rounded-pill", "bg-success", filterBadge(), templ.KV("badge:hover", true)}>
+        <label>Store:</label>
+        <span class={textContent()}>Pingo Doce</span>
+        <i class="bi bi-x-circle-fill"></i>
+    </span>
 }
