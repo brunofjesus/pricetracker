@@ -1,5 +1,7 @@
 package ui
 
+import "fmt"
+
 templ FilterDialogComponent() {
    <style type="text/css">
          .more-filter {
@@ -29,23 +31,70 @@ templ FilterDialogComponent() {
 }
 
 templ FilterDialogModalComponent() {
-  <div class="modal" id="filterDialogModal">
-    <div class="modal-dialog" role="document">
+  <div class="modal modal-lg" id="filterDialogModal">
+    <div class="modal-dialog modal-dialog-scrollable" role="document">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Modal title</h5>
+          <h5 class="modal-title">Filters</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
             <span aria-hidden="true"></span>
           </button>
         </div>
         <div class="modal-body">
-          <p>Modal body text goes here.</p>
+          <form>
+           <div class="row mb-3">
+              <div class="col-lg-4">
+                <label for="brandInput" class="form-label">Product</label>
+              </div>
+              <div class="col-lg-4">
+                <input type="text" class="form-control" id="nameInput" placeholder="Name" aria-describedby="nameHelp"/>
+                <div id="nameHelp" class="form-text">Product name to search for.</div>
+              </div>
+              <div class="col-lg-4">
+                <input type="text" class="form-control" id="brandInput" placeholder="Brand" aria-describedby="brandHelp"/>
+                <div id="brandHelp" class="form-text">Product brand to search for.</div>
+              </div>
+            </div>
+            <div class="row mb-3">
+                <div class="col-lg-4">
+                    <label for="storeSelect" class="form-label">Store</label>
+                </div>
+                <div class="col-lg-8">
+                    <select id="storeSelect" class="form-select" aria-label="Store">
+                      <option selected>All</option>
+                      <option value="1">Worten</option>
+                      <option value="2">Pingo Doce</option>
+                    </select>
+                </div>
+            </div>
+            @rangeFormControl("discountPercent", "Discount (%)", "Product price difference from average (%).")
+            @rangeFormControl("priceDifference", "Price Difference", "Product price difference from average (in currency).")
+            @rangeFormControl("currentPrice", "Current Price", "Product current price.")
+            @rangeFormControl("averagePrice", "Average Price", "Average price from last 30 days.")
+            @rangeFormControl("lowestPrice", "Lowest Price", "Lowest price from last 30 days.")
+            @rangeFormControl("higherPrice", "Higher Price", "Higher price from last 30 days.")
+         </form>
         </div>
         <div class="modal-footer">
-          <button type="button" class="btn btn-primary">Save changes</button>
+          <button type="button" class="btn btn-primary">Search</button>
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
         </div>
       </div>
     </div>
+  </div>
+}
+
+templ rangeFormControl(id string, label string, help string) {
+  <div class="row mb-3">
+    <div class="col-lg-4">
+        <label class="form-label">{ label }</label>
+    </div>
+    <div class="col-lg-4">
+      <input type="number" class="form-control" placeholder="From" id={fmt.Sprintf("%sFrom", id)} aria-describedby={fmt.Sprintf("%sHelp", id)}/>
+    </div>
+    <div class="col-lg-4">
+      <input type="number" class="form-control" placeholder="To" id={fmt.Sprintf("%sTo", id)} aria-describedby={fmt.Sprintf("%sHelp", id)}/>
+    </div>
+    <div id={fmt.Sprintf("%sHelp", id)} class="col-lg-8 offset-lg-4 form-text">{help}</div>
   </div>
 }
