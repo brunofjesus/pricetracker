@@ -25,13 +25,6 @@ templ ProductsView(p ProductsViewProps) {
         <section class="">
         <div class="container">
             <div class="row">
-              <!-- sidebar
-              <div class="col-lg-3">
-                @ui.Sidebar()
-              </div>
-              -->
-              <!-- content -->
-              <!-- <div class="col-lg-9"> -->
               <div class="col-lg-12">
                 @ui.FiltersComponent(p.PageQuery, p.Filters, p.Stores)
                 @ui.GridHeader(p.Page.TotalResults)
@@ -56,19 +49,7 @@ templ ProductsView(p ProductsViewProps) {
 			Results: { strconv.Itoa(p.Page.ItemCount) } of { strconv.FormatInt(p.Page.TotalResults, 10) }
 		</div>
 		<div>
-			Filters:
-      if (p.Filters.StoreId > 0) {
-        @property("StoreId", strconv.Itoa(p.Filters.StoreId))
-      }
-      { fmt.Sprintf("%+v", p.Filters) } 
-		</div>
-		<div>
 			Sort: { p.Page.SortField } / { p.Page.SortDirection }
-		</div>
-		<br/>
-		<br/>
-		<div class="products">
-
 		</div>
 	}
 }
