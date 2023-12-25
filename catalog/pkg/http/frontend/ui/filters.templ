@@ -14,11 +14,11 @@ templ FiltersComponent(page pagination.PaginatedQuery, filters product.FinderFil
     }
 
     if filters.MinPrice > -1 {
-        @FilterBadgeComponent("Min. Price", float64ToString(filters.MinPrice), generateUrl(page, filters, "MinPrice"))
+        @FilterBadgeComponent("Min. Price", float64ToString(filters.MinPrice / 100), generateUrl(page, filters, "MinPrice"))
     }
 
     if filters.MaxPrice > -1 {
-        @FilterBadgeComponent("Max. Price", float64ToString(filters.MaxPrice), generateUrl(page, filters, "MaxPrice"))
+        @FilterBadgeComponent("Max. Price", float64ToString(filters.MaxPrice / 100), generateUrl(page, filters, "MaxPrice"))
     }
 
     if len(filters.NameLike) > 0 {
@@ -38,11 +38,11 @@ templ FiltersComponent(page pagination.PaginatedQuery, filters product.FinderFil
 	}
 
 	if filters.MinDifference > -1 {
-        @FilterBadgeComponent("Min. Difference", float64ToString(filters.MinDifference), generateUrl(page, filters, "MinDifference"))
+        @FilterBadgeComponent("Min. Difference", float64ToString(filters.MinDifference / 100), generateUrl(page, filters, "MinDifference"))
 	}
 
 	if filters.MaxDifference > -1 {
-        @FilterBadgeComponent("Max. Difference", float64ToString(filters.MaxDifference), generateUrl(page, filters, "MaxDifference"))
+        @FilterBadgeComponent("Max. Difference", float64ToString(filters.MaxDifference / 100), generateUrl(page, filters, "MaxDifference"))
 	}
 
 	if filters.MinDiscountPercent > -1 {
@@ -54,27 +54,27 @@ templ FiltersComponent(page pagination.PaginatedQuery, filters product.FinderFil
 	}
 
 	if filters.MinAveragePrice > -1 {
-        @FilterBadgeComponent("Min. Average Price", float64ToString(filters.MinAveragePrice), generateUrl(page, filters, "MinAveragePrice"))
+        @FilterBadgeComponent("Min. Average Price", float64ToString(filters.MinAveragePrice / 100), generateUrl(page, filters, "MinAveragePrice"))
 	}
 
 	if filters.MaxAveragePrice > -1 {
-        @FilterBadgeComponent("Max. Average Price", float64ToString(filters.MaxAveragePrice), generateUrl(page, filters, "MaxAveragePrice"))
+        @FilterBadgeComponent("Max. Average Price", float64ToString(filters.MaxAveragePrice / 100), generateUrl(page, filters, "MaxAveragePrice"))
 	}
 
 	if filters.MinMinimumPrice > -1 {
-        @FilterBadgeComponent("Min. Lower Price", float64ToString(filters.MinMinimumPrice), generateUrl(page, filters, "MinMinimumPrice"))
+        @FilterBadgeComponent("Min. Lower Price", float64ToString(filters.MinMinimumPrice / 100), generateUrl(page, filters, "MinMinimumPrice"))
 	}
 
 	if filters.MaxMinimumPrice > -1 {
-        @FilterBadgeComponent("Max. Lower Price", float64ToString(filters.MaxMinimumPrice), generateUrl(page, filters, "MaxMinimumPrice"))
+        @FilterBadgeComponent("Max. Lower Price", float64ToString(filters.MaxMinimumPrice / 100), generateUrl(page, filters, "MaxMinimumPrice"))
 	}
 
 	if filters.MinMaximumPrice > -1 {
-        @FilterBadgeComponent("Min. Highest Price", float64ToString(filters.MinMaximumPrice), generateUrl(page, filters, "MinMaximumPrice"))
+        @FilterBadgeComponent("Min. Highest Price", float64ToString(filters.MinMaximumPrice / 100), generateUrl(page, filters, "MinMaximumPrice"))
 	}
 
 	if filters.MaxMaximumPrice > -1 {
-        @FilterBadgeComponent("Max. Highest Price", float64ToString(filters.MaxMaximumPrice), generateUrl(page, filters, "MaxMaximumPrice"))
+        @FilterBadgeComponent("Max. Highest Price", float64ToString(filters.MaxMaximumPrice / 100), generateUrl(page, filters, "MaxMaximumPrice"))
 	}
     </div>
 }

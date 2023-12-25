@@ -41,13 +41,13 @@ func FiltersComponent(page pagination.PaginatedQuery, filters product.FinderFilt
 			}
 		}
 		if filters.MinPrice > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Min. Price", float64ToString(filters.MinPrice), generateUrl(page, filters, "MinPrice")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Price", float64ToString(filters.MinPrice/100), generateUrl(page, filters, "MinPrice")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if filters.MaxPrice > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Max. Price", float64ToString(filters.MaxPrice), generateUrl(page, filters, "MaxPrice")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Price", float64ToString(filters.MaxPrice/100), generateUrl(page, filters, "MaxPrice")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -77,13 +77,13 @@ func FiltersComponent(page pagination.PaginatedQuery, filters product.FinderFilt
 			}
 		}
 		if filters.MinDifference > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Min. Difference", float64ToString(filters.MinDifference), generateUrl(page, filters, "MinDifference")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Difference", float64ToString(filters.MinDifference/100), generateUrl(page, filters, "MinDifference")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if filters.MaxDifference > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Max. Difference", float64ToString(filters.MaxDifference), generateUrl(page, filters, "MaxDifference")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Difference", float64ToString(filters.MaxDifference/100), generateUrl(page, filters, "MaxDifference")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -101,37 +101,37 @@ func FiltersComponent(page pagination.PaginatedQuery, filters product.FinderFilt
 			}
 		}
 		if filters.MinAveragePrice > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Min. Average Price", float64ToString(filters.MinAveragePrice), generateUrl(page, filters, "MinAveragePrice")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Average Price", float64ToString(filters.MinAveragePrice/100), generateUrl(page, filters, "MinAveragePrice")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if filters.MaxAveragePrice > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Max. Average Price", float64ToString(filters.MaxAveragePrice), generateUrl(page, filters, "MaxAveragePrice")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Average Price", float64ToString(filters.MaxAveragePrice/100), generateUrl(page, filters, "MaxAveragePrice")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if filters.MinMinimumPrice > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Min. Lower Price", float64ToString(filters.MinMinimumPrice), generateUrl(page, filters, "MinMinimumPrice")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Lower Price", float64ToString(filters.MinMinimumPrice/100), generateUrl(page, filters, "MinMinimumPrice")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if filters.MaxMinimumPrice > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Max. Lower Price", float64ToString(filters.MaxMinimumPrice), generateUrl(page, filters, "MaxMinimumPrice")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Lower Price", float64ToString(filters.MaxMinimumPrice/100), generateUrl(page, filters, "MaxMinimumPrice")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if filters.MinMaximumPrice > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Min. Highest Price", float64ToString(filters.MinMaximumPrice), generateUrl(page, filters, "MinMaximumPrice")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Highest Price", float64ToString(filters.MinMaximumPrice/100), generateUrl(page, filters, "MinMaximumPrice")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if filters.MaxMaximumPrice > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Max. Highest Price", float64ToString(filters.MaxMaximumPrice), generateUrl(page, filters, "MaxMaximumPrice")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Highest Price", float64ToString(filters.MaxMaximumPrice/100), generateUrl(page, filters, "MaxMaximumPrice")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
