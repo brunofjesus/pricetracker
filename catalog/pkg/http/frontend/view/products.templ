@@ -33,7 +33,7 @@ templ ProductsView(p ProductsViewProps) {
               <!-- content -->
               <!-- <div class="col-lg-9"> -->
               <div class="col-lg-12">
-                @ui.FiltersComponent(p.Filters, p.Stores)
+                @ui.FiltersComponent(p.PageQuery, p.Filters, p.Stores)
                 @ui.GridHeader(p.Page.TotalResults)
                 @ui.ProductGridComponent(p.Page)
 
