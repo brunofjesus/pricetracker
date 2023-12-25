@@ -2,11 +2,78 @@ package ui
 
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
+import "github.com/brunofjesus/pricetracker/catalog/util/nulltype"
+import "fmt"
 
 templ FiltersComponent(filters product.FinderFilters, stores []db_store.Store) {
+    <div class="d-flex gap-2">
     if filters.StoreId > 0 {
         @FilterBadgeComponent("Store", findStoreName(filters.StoreId, stores), "#")
     }
+
+    if filters.MinPrice > -1 {
+        @FilterBadgeComponent("Min. Price", float64ToString(filters.MinPrice), "#")
+    }
+
+    if filters.MaxPrice > -1 {
+        @FilterBadgeComponent("Max. Price", float64ToString(filters.MaxPrice), "#")
+    }
+
+    if len(filters.NameLike) > 0 {
+        @FilterBadgeComponent("Name", filters.NameLike, "#")
+    }
+
+    if len(filters.BrandLike) > 0 {
+        @FilterBadgeComponent("Brand", filters.BrandLike, "#")
+    }
+
+	if nulltype.IsUndefined(filters.Available) == false {
+        @FilterBadgeComponent("Available", nulltype.ToString(filters.Available), "#")
+	}
+
+	if len(filters.ProductUrl) > 0 {
+        @FilterBadgeComponent("Product URL", "Yes", "#")
+	}
+
+	if filters.MinDifference > -1 {
+        @FilterBadgeComponent("Min. Difference", float64ToString(filters.MinDifference), "#")
+	}
+
+	if filters.MaxDifference > -1 {
+        @FilterBadgeComponent("Max. Difference", float64ToString(filters.MaxDifference), "#")
+	}
+
+	if filters.MinDiscountPercent > -1 {
+        @FilterBadgeComponent("Min. Difference (%)", float64ToString(filters.MinDiscountPercent), "#")
+	}
+
+	if filters.MaxDiscountPercent > -1 {
+        @FilterBadgeComponent("Max. Difference (%)", float64ToString(filters.MaxDiscountPercent), "#")
+	}
+
+	if filters.MinAveragePrice > -1 {
+        @FilterBadgeComponent("Min. Average Price", float64ToString(filters.MinAveragePrice), "#")
+	}
+
+	if filters.MaxAveragePrice > -1 {
+        @FilterBadgeComponent("Max. Average Price", float64ToString(filters.MaxAveragePrice), "#")
+	}
+
+	if filters.MinMinimumPrice > -1 {
+        @FilterBadgeComponent("Min. Lower Price", float64ToString(filters.MinMinimumPrice), "#")
+	}
+
+	if filters.MaxMinimumPrice > -1 {
+        @FilterBadgeComponent("Max. Lower Price", float64ToString(filters.MaxMinimumPrice), "#")
+	}
+
+	if filters.MinMaximumPrice > -1 {
+        @FilterBadgeComponent("Min. Highest Price", float64ToString(filters.MinMaximumPrice), "#")
+	}
+	if filters.MaxMaximumPrice > -1 {
+        @FilterBadgeComponent("Max. Highest Price", float64ToString(filters.MaxMaximumPrice), "#")
+	}
+    </div>
 }
 
 func findStoreName(id int, stores []db_store.Store) string {
@@ -17,4 +84,8 @@ func findStoreName(id int, stores []db_store.Store) string {
    }
 
    return ""
+}
+
+func float64ToString(n float64) string {
+    return fmt.Sprintf("%.2f", n)
 }

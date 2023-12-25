@@ -30,3 +30,14 @@ func FromInt(value int) NullBoolean {
 		return NullBoolean(UndefinedValue)
 	}
 }
+
+func ToString(n NullBoolean) string {
+	switch n {
+	case TrueValue:
+		return "true"
+	case FalseValue:
+		return "false"
+	default:
+		return "undefined"
+	}
+}

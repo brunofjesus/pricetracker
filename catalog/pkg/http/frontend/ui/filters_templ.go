@@ -12,6 +12,8 @@ import "bytes"
 
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
+import "github.com/brunofjesus/pricetracker/catalog/util/nulltype"
+import "fmt"
 
 func FiltersComponent(filters product.FinderFilters, stores []db_store.Store) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
@@ -26,11 +28,115 @@ func FiltersComponent(filters product.FinderFilters, stores []db_store.Store) te
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"d-flex gap-2\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		if filters.StoreId > 0 {
 			templ_7745c5c3_Err = FilterBadgeComponent("Store", findStoreName(filters.StoreId, stores), "#").Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
+		}
+		if filters.MinPrice > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Price", float64ToString(filters.MinPrice), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MaxPrice > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Price", float64ToString(filters.MaxPrice), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if len(filters.NameLike) > 0 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Name", filters.NameLike, "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if len(filters.BrandLike) > 0 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Brand", filters.BrandLike, "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if nulltype.IsUndefined(filters.Available) == false {
+			templ_7745c5c3_Err = FilterBadgeComponent("Available", nulltype.ToString(filters.Available), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if len(filters.ProductUrl) > 0 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Product URL", "Yes", "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MinDifference > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Difference", float64ToString(filters.MinDifference), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MaxDifference > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Difference", float64ToString(filters.MaxDifference), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MinDiscountPercent > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Difference (%)", float64ToString(filters.MinDiscountPercent), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MaxDiscountPercent > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Difference (%)", float64ToString(filters.MaxDiscountPercent), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MinAveragePrice > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Average Price", float64ToString(filters.MinAveragePrice), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MaxAveragePrice > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Average Price", float64ToString(filters.MaxAveragePrice), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MinMinimumPrice > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Lower Price", float64ToString(filters.MinMinimumPrice), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MaxMinimumPrice > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Lower Price", float64ToString(filters.MaxMinimumPrice), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MinMaximumPrice > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Highest Price", float64ToString(filters.MinMaximumPrice), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if filters.MaxMaximumPrice > -1 {
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Highest Price", float64ToString(filters.MaxMaximumPrice), "#").Render(ctx, templ_7745c5c3_Buffer)
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
 		if !templ_7745c5c3_IsBuffer {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
@@ -47,4 +153,8 @@ func findStoreName(id int, stores []db_store.Store) string {
 	}
 
 	return ""
+}
+
+func float64ToString(n float64) string {
+	return fmt.Sprintf("%.2f", n)
 }

@@ -83,6 +83,10 @@ func QueryParamString(page pagination.PaginatedQuery, filters product.FinderFilt
 		result += fmt.Sprintf("minMaximumPrice=%f&", filters.MinMaximumPrice)
 	}
 
+	if filters.MinMaximumPrice > -1 {
+		result += fmt.Sprintf("minMaximumPrice=%f&", filters.MaxMaximumPrice)
+	}
+
 	if filters.MaxMaximumPrice > -1 {
 		result += fmt.Sprintf("maxMaximumPrice=%f&", filters.MaxMaximumPrice)
 	}
