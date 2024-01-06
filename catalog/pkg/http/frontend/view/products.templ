@@ -27,7 +27,7 @@ templ ProductsView(p ProductsViewProps) {
             <div class="row">
               <div class="col-lg-12">
                 @ui.FiltersComponent(p.PageQuery, p.Filters, p.Stores)
-                @ui.GridHeader(p.Page)
+                @ui.GridHeader(p.Page, p.PageQuery, p.Filters)
                 @ui.ProductGridComponent(p.Page)
 
                  <!-- Pagination -->
