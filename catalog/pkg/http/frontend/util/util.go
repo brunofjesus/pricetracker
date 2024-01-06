@@ -192,3 +192,7 @@ func GetProductSearchFilters(r *http.Request) (*product.FinderFilters, error) {
 		MaxMaximumPrice:    maxMaxPrice,
 	}, nil
 }
+
+func Float64ToString(n float64) string {
+	return fmt.Sprintf("%.2f", n)
+}

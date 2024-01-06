@@ -1,8 +1,11 @@
 package ui
 
+import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
+import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
 import "fmt"
 
-templ FilterDialogComponent() {
+templ FilterDialogComponent(filters product.FinderFilters, stores []db_store.Store) {
    <style type="text/css">
          .more-filter {
              font-size: 1em;
@@ -27,10 +30,10 @@ templ FilterDialogComponent() {
         <label>More Filters</label>
    </span>
 
-   @FilterDialogModalComponent()
+   @FilterDialogModalComponent(filters, stores)
 }
 
-templ FilterDialogModalComponent() {
+templ FilterDialogModalComponent(filters product.FinderFilters, stores []db_store.Store) {
   <div class="modal modal-lg" id="filterDialogModal">
     <div class="modal-dialog modal-dialog-scrollable" role="document">
       <div class="modal-content">
@@ -47,11 +50,11 @@ templ FilterDialogModalComponent() {
                 <label for="brandInput" class="form-label">Product</label>
               </div>
               <div class="col-lg-4">
-                <input type="text" class="form-control" id="nameInput" placeholder="Name" aria-describedby="nameHelp"/>
+                <input type="text" class="form-control" id="nameInput" placeholder="Name" aria-describedby="nameHelp" value={filters.NameLike}/>
                 <div id="nameHelp" class="form-text">Product name to search for.</div>
               </div>
               <div class="col-lg-4">
-                <input type="text" class="form-control" id="brandInput" placeholder="Brand" aria-describedby="brandHelp"/>
+                <input type="text" class="form-control" id="brandInput" placeholder="Brand" aria-describedby="brandHelp" value={filters.BrandLike}/>
                 <div id="brandHelp" class="form-text">Product brand to search for.</div>
               </div>
             </div>
@@ -61,18 +64,27 @@ templ FilterDialogModalComponent() {
                 </div>
                 <div class="col-lg-8">
                     <select id="storeSelect" class="form-select" aria-label="Store">
+                    if filters.StoreId == -1 {
                       <option selected>All</option>
-                      <option value="1">Worten</option>
-                      <option value="2">Pingo Doce</option>
+                    } else {
+                      <option>All</option>
+                    }
+                    for _, store := range stores {
+                        if int64(filters.StoreId) == store.StoreId {
+                            <option selected value={fmt.Sprintf("%d",store.StoreId)}>{store.Name}</option>
+                        } else {
+                            <option value={fmt.Sprintf("%d",store.StoreId)}>{store.Name}</option>
+                        }
+                    }
                     </select>
                 </div>
             </div>
-            @rangeFormControl("discountPercent", "Discount (%)", "Product price difference from average (%).")
-            @rangeFormControl("priceDifference", "Price Difference", "Product price difference from average (in currency).")
-            @rangeFormControl("currentPrice", "Current Price", "Product current price.")
-            @rangeFormControl("averagePrice", "Average Price", "Average price from last 30 days.")
-            @rangeFormControl("lowestPrice", "Lowest Price", "Lowest price from last 30 days.")
-            @rangeFormControl("higherPrice", "Higher Price", "Higher price from last 30 days.")
+            @rangeFormControl("discountPercent", "Discount (%)", "Product price difference from average (%).", filters.MinDiscountPercent, filters.MaxDiscountPercent)
+            @rangeFormControl("priceDifference", "Price Difference", "Product price difference from average (in currency).", filters.MinDifference, filters.MaxDifference)
+            @rangeFormControl("currentPrice", "Current Price", "Product current price.", filters.MinPrice, filters.MaxPrice)
+            @rangeFormControl("averagePrice", "Average Price", "Average price from last 30 days.", filters.MinAveragePrice, filters.MaxAveragePrice)
+            @rangeFormControl("lowestPrice", "Lowest Price", "Lowest price from last 30 days.", filters.MinMinimumPrice, filters.MaxMinimumPrice)
+            @rangeFormControl("higherPrice", "Higher Price", "Higher price from last 30 days.", filters.MinMaximumPrice, filters.MaxMaximumPrice)
          </form>
         </div>
         <div class="modal-footer">
@@ -84,16 +96,24 @@ templ FilterDialogModalComponent() {
   </div>
 }
 
-templ rangeFormControl(id string, label string, help string) {
+templ rangeFormControl(id string, label string, help string, fromValue float64, toValue float64) {
   <div class="row mb-3">
     <div class="col-lg-4">
         <label class="form-label">{ label }</label>
     </div>
     <div class="col-lg-4">
-      <input type="number" class="form-control" placeholder="From" id={fmt.Sprintf("%sFrom", id)} aria-describedby={fmt.Sprintf("%sHelp", id)}/>
+      if fromValue > -1 {
+        <input type="number" class="form-control" placeholder="From" id={fmt.Sprintf("%sFrom", id)} aria-describedby={fmt.Sprintf("%sHelp", id)} value={util.Float64ToString(fromValue)}/>
+      } else {
+        <input type="number" class="form-control" placeholder="From" id={fmt.Sprintf("%sFrom", id)} aria-describedby={fmt.Sprintf("%sHelp", id)}/>
+      }
     </div>
     <div class="col-lg-4">
-      <input type="number" class="form-control" placeholder="To" id={fmt.Sprintf("%sTo", id)} aria-describedby={fmt.Sprintf("%sHelp", id)}/>
+      if toValue > -1 {
+        <input type="number" class="form-control" placeholder="To" id={fmt.Sprintf("%sTo", id)} aria-describedby={fmt.Sprintf("%sHelp", id)} value={util.Float64ToString(toValue)}/>
+      } else {
+        <input type="number" class="form-control" placeholder="To" id={fmt.Sprintf("%sTo", id)} aria-describedby={fmt.Sprintf("%sHelp", id)}/>
+      }
     </div>
     <div id={fmt.Sprintf("%sHelp", id)} class="col-lg-8 offset-lg-4 form-text">{help}</div>
   </div>
