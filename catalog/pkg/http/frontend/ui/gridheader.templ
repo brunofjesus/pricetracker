@@ -1,28 +1,39 @@
 package ui
 
+import db_product "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 import "strconv"
 
-templ GridHeader(totalItems int64) {
+templ GridHeader(page pagination.PaginatedData[[]db_product.ProductWithMetrics]) {
     <header class="d-sm-flex align-items-center border-bottom mb-4 pb-3">
-      <strong class="d-block py-2">{ strconv.FormatInt(totalItems, 10) } Items found </strong>
+      <strong class="d-block py-2">{ strconv.FormatInt(page.TotalResults, 10) } Items found </strong>
       <div class="ms-auto">
         <select class="form-select d-inline-block w-auto border pt-1">
-          <option value="discount_percent">Discount (%)</option>
-          <option value="diff">Difference</option>
-          <option value="price">Current Price</option>
-          <option value="minimum">Lowest Price</option>
-          <option value="maximum">Higher Price</option>
-          <option value="name">Name</option>
-          <option value="brand">Brand</option>
+          @sortOption("discount_percent", "Discount (%)", page.SortField == "discount_percent")
+          @sortOption("diff", "Difference", page.SortField == "diff")
+          @sortOption("price", "Current Price", page.SortField == "price")
+          @sortOption("minimum", "Lowest Price", page.SortField == "minimum")
+          @sortOption("maximum", "Higher Price", page.SortField == "maximum")
+          @sortOption("name", "Name", page.SortField == "name")
+          @sortOption("brand", "Brand", page.SortField == "brand")
         </select>
         <div class="btn-group shadow-0 border">
-          <a href="#" class="btn btn-light" title="List view">
+          <a href="#" class={"btn", "btn-light", templ.KV("active", page.SortDirection == "asc")} title="Sort Ascending">
             <i class="bi bi-sort-numeric-down"></i>
           </a>
-          <a href="#" class="btn btn-light active" title="Grid view">
+          <a href="#" class={"btn", "btn-light", templ.KV("active", page.SortDirection == "desc")} title="Sort Descending">
             <i class="bi bi-sort-numeric-up"></i>
           </a>
         </div>
       </div>
     </header>
+}
+
+
+templ sortOption(value string, text string, selected bool) {
+    if selected {
+        <option selected value={value}>{text}</option>
+    } else {
+        <option value={value}>{text}</option>
+    }
 }
