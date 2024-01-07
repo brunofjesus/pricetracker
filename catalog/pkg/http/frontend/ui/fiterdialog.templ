@@ -18,14 +18,14 @@ templ FilterDialogComponent(filters product.FinderFilters, stores []db_store.Sto
          }
 
          .more-filter:hover {
-             background-color: #14a085 !important;
+             background-color: #7f8c8d !important;
          }
 
          .more-install span {
              font-weight: 400;
          }
    </style>
-   <span class={"badge", "rounded-pill", "bg-success", "more-filter"} data-bs-toggle="modal" data-bs-target="#filterDialogModal">
+   <span class={"badge", "rounded-pill", "bg-secondary", "more-filter"} data-bs-toggle="modal" data-bs-target="#filterDialogModal">
         <i class="bi bi-toggles2"></i>
         <label>More Filters</label>
    </span>
@@ -43,7 +43,7 @@ templ FilterDialogModalComponent(filters product.FinderFilters, stores []db_stor
             <span aria-hidden="true"></span>
           </button>
         </div>
-        <form action="/">
+        <form action="/" id="searchForm">
             <div class="modal-body">
                <div class="row mb-3">
                   <div class="col-lg-4">
@@ -79,12 +79,12 @@ templ FilterDialogModalComponent(filters product.FinderFilters, stores []db_stor
                         </select>
                     </div>
                 </div>
-                @rangeFormControl("DiscountPercent", "Discount (%)", "Product price difference from average (%).", filters.MinDiscountPercent, filters.MaxDiscountPercent)
-                @rangeFormControl("Difference", "Price Difference", "Product price difference from average (in currency).", filters.MinDifference, filters.MaxDifference)
-                @rangeFormControl("Price", "Current Price", "Product current price.", filters.MinPrice, filters.MaxPrice)
-                @rangeFormControl("AveragePrice", "Average Price", "Average price from last 30 days.", filters.MinAveragePrice, filters.MaxAveragePrice)
-                @rangeFormControl("MinimumPrice", "Lowest Price", "Lowest price from last 30 days.", filters.MinMinimumPrice, filters.MaxMinimumPrice)
-                @rangeFormControl("MaximumPrice", "Higher Price", "Higher price from last 30 days.", filters.MinMaximumPrice, filters.MaxMaximumPrice)
+                @rangeFormControl("DiscountPercent", "Discount (%)", "Product price difference from average (%).", filters.MinDiscountPercent * 100, filters.MaxDiscountPercent * 100)
+                @rangeFormControl("Difference", "Price Difference", "Product price difference from average (in currency).", filters.MinDifference / 100, filters.MaxDifference / 100)
+                @rangeFormControl("Price", "Current Price", "Product current price.", filters.MinPrice / 100, filters.MaxPrice / 100)
+                @rangeFormControl("AveragePrice", "Average Price", "Average price from last 30 days.", filters.MinAveragePrice / 100, filters.MaxAveragePrice / 100)
+                @rangeFormControl("MinimumPrice", "Lowest Price", "Lowest price from last 30 days.", filters.MinMinimumPrice / 100, filters.MaxMinimumPrice / 100)
+                @rangeFormControl("MaximumPrice", "Higher Price", "Higher price from last 30 days.", filters.MinMaximumPrice / 100, filters.MaxMaximumPrice / 100)
             </div>
             <div class="modal-footer">
               <button type="submit" class="btn btn-primary">Search</button>
@@ -94,6 +94,40 @@ templ FilterDialogModalComponent(filters product.FinderFilters, stores []db_stor
       </div>
     </div>
   </div>
+
+  <script>
+    const form = document.getElementById("searchForm")
+    form.addEventListener("submit", (event) => {
+        ["Difference", "Price", "AveragePrice", "MinimumPrice", "MaximumPrice"].forEach(convertRangeToCents)
+        convertPercentToDecimal("DiscountPercent")
+        return true
+      }
+    )
+
+    function convertPercentToDecimal(itemName) {
+        const minInput = document.getElementById(`min${itemName}`)
+        if (minInput.value) {
+            minInput.value = parseInt(minInput.value) / 100
+        }
+
+        const maxInput = document.getElementById(`max${itemName}`)
+        if (maxInput.value) {
+            maxInput.value = parseInt(maxInput.value) / 100
+        }
+    }
+
+    function convertRangeToCents(itemName) {
+        const minInput = document.getElementById(`min${itemName}`)
+        if (minInput.value) {
+            minInput.value = parseInt(minInput.value) * 100
+        }
+
+        const maxInput = document.getElementById(`max${itemName}`)
+        if (maxInput.value) {
+            maxInput.value = parseInt(maxInput.value) * 100
+        }
+    }
+  </script>
 }
 
 templ rangeFormControl(id string, label string, help string, fromValue float64, toValue float64) {
@@ -102,14 +136,14 @@ templ rangeFormControl(id string, label string, help string, fromValue float64, 
         <label class="form-label">{ label }</label>
     </div>
     <div class="col-lg-4">
-      if fromValue > -1 {
+      if fromValue > -0.01 {
         <input type="number" step="any" name={fmt.Sprintf("min%s",id)} id={fmt.Sprintf("min%s",id)} class="form-control" placeholder="From" aria-describedby={fmt.Sprintf("%sHelp", id)} value={util.Float64ToString(fromValue)}/>
       } else {
         <input type="number" step="any" name={fmt.Sprintf("min%s",id)} id={fmt.Sprintf("min%s",id)} class="form-control" placeholder="From" aria-describedby={fmt.Sprintf("%sHelp", id)}/>
       }
     </div>
     <div class="col-lg-4">
-      if toValue > -1 {
+      if toValue > -0.01 {
         <input type="number" step="any" name={fmt.Sprintf("max%s",id)} id={fmt.Sprintf("max%s",id)} class="form-control" placeholder="To" aria-describedby={fmt.Sprintf("%sHelp", id)} value={util.Float64ToString(toValue)}/>
       } else {
         <input type="number" step="any" name={fmt.Sprintf("max%s",id)} id={fmt.Sprintf("max%s",id)} class="form-control" placeholder="To" aria-describedby={fmt.Sprintf("%sHelp", id)}/>

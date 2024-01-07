@@ -29,7 +29,7 @@ func FiltersComponent(page pagination.PaginatedQuery, filters product.FinderFilt
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"d-flex gap-2\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"d-flex flex-wrap gap-2\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -88,13 +88,13 @@ func FiltersComponent(page pagination.PaginatedQuery, filters product.FinderFilt
 			}
 		}
 		if filters.MinDiscountPercent > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Min. Discount (%)", util.Float64ToString(filters.MinDiscountPercent), generateUrl(page, filters, "MinDiscountPercent")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Min. Discount (%)", util.Float64ToString(filters.MinDiscountPercent*100), generateUrl(page, filters, "MinDiscountPercent")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
 		if filters.MaxDiscountPercent > -1 {
-			templ_7745c5c3_Err = FilterBadgeComponent("Max. Discount (%)", util.Float64ToString(filters.MaxDiscountPercent), generateUrl(page, filters, "MaxDiscountPercent")).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = FilterBadgeComponent("Max. Discount (%)", util.Float64ToString(filters.MaxDiscountPercent*100), generateUrl(page, filters, "MaxDiscountPercent")).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

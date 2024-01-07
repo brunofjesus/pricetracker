@@ -13,18 +13,18 @@ templ FilterBadgeComponent(label string, value string, target string) {
         }
 
         .filter-badge:hover {
-            background-color: #14a085 !important;
+            background-color: #7f8c8d !important;
         }
 
         .filter-badge:hover .bi {
-            color: #F1948AFF;
+            color: #e74c3c;
         }
 
         .filter-badge span {
             font-weight: 400;
         }
     </style>
-    <a class={"badge", "rounded-pill", "bg-success", "filter-badge"} href={templ.URL(target)}>
+    <a class={"badge", "rounded-pill", "bg-secondary", "filter-badge"} href={templ.URL(target)}>
         <label>{label}</label>
         <span>{value}</span>
         <i class="bi bi-x-circle-fill"></i>

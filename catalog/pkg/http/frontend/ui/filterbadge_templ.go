@@ -39,11 +39,11 @@ func FilterBadgeComponent(label string, value string, target string) templ.Compo
         }
 
         .filter-badge:hover {
-            background-color: #14a085 !important;
+            background-color: #7f8c8d !important;
         }
 
         .filter-badge:hover .bi {
-            color: #F1948AFF;
+            color: #e74c3c;
         }
 
         .filter-badge span {
@@ -58,7 +58,7 @@ func FilterBadgeComponent(label string, value string, target string) templ.Compo
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var3 = []any{"badge", "rounded-pill", "bg-success", "filter-badge"}
+		var templ_7745c5c3_Var3 = []any{"badge", "rounded-pill", "bg-secondary", "filter-badge"}
 		templ_7745c5c3_Err = templ.RenderCSSItems(ctx, templ_7745c5c3_Buffer, templ_7745c5c3_Var3...)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
