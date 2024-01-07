@@ -43,54 +43,54 @@ templ FilterDialogModalComponent(filters product.FinderFilters, stores []db_stor
             <span aria-hidden="true"></span>
           </button>
         </div>
-        <div class="modal-body">
-          <form>
-           <div class="row mb-3">
-              <div class="col-lg-4">
-                <label for="brandInput" class="form-label">Product</label>
-              </div>
-              <div class="col-lg-4">
-                <input type="text" class="form-control" id="nameInput" placeholder="Name" aria-describedby="nameHelp" value={filters.NameLike}/>
-                <div id="nameHelp" class="form-text">Product name to search for.</div>
-              </div>
-              <div class="col-lg-4">
-                <input type="text" class="form-control" id="brandInput" placeholder="Brand" aria-describedby="brandHelp" value={filters.BrandLike}/>
-                <div id="brandHelp" class="form-text">Product brand to search for.</div>
-              </div>
-            </div>
-            <div class="row mb-3">
-                <div class="col-lg-4">
-                    <label for="storeSelect" class="form-label">Store</label>
+        <form action="/">
+            <div class="modal-body">
+               <div class="row mb-3">
+                  <div class="col-lg-4">
+                    <label for="nameInput" class="form-label">Product</label>
+                  </div>
+                  <div class="col-lg-4">
+                    <input type="text" class="form-control" name="name" id="nameInput" placeholder="Name" aria-describedby="nameHelp" value={filters.NameLike}/>
+                    <div id="nameHelp" class="form-text">Product name to search for.</div>
+                  </div>
+                  <div class="col-lg-4">
+                    <input type="text" class="form-control" name="brand" id="brandInput" placeholder="Brand" aria-describedby="brandHelp" value={filters.BrandLike}/>
+                    <div id="brandHelp" class="form-text">Product brand to search for.</div>
+                  </div>
                 </div>
-                <div class="col-lg-8">
-                    <select id="storeSelect" class="form-select" aria-label="Store">
-                    if filters.StoreId == -1 {
-                      <option selected>All</option>
-                    } else {
-                      <option>All</option>
-                    }
-                    for _, store := range stores {
-                        if int64(filters.StoreId) == store.StoreId {
-                            <option selected value={fmt.Sprintf("%d",store.StoreId)}>{store.Name}</option>
+                <div class="row mb-3">
+                    <div class="col-lg-4">
+                        <label for="storeSelect" class="form-label">Store</label>
+                    </div>
+                    <div class="col-lg-8">
+                        <select name="storeId" id="storeSelect" class="form-select" aria-label="Store">
+                        if filters.StoreId == -1 {
+                          <option selected value="">All</option>
                         } else {
-                            <option value={fmt.Sprintf("%d",store.StoreId)}>{store.Name}</option>
+                          <option value="">All</option>
                         }
-                    }
-                    </select>
+                        for _, store := range stores {
+                            if int64(filters.StoreId) == store.StoreId {
+                                <option selected value={fmt.Sprintf("%d",store.StoreId)}>{store.Name}</option>
+                            } else {
+                                <option value={fmt.Sprintf("%d",store.StoreId)}>{store.Name}</option>
+                            }
+                        }
+                        </select>
+                    </div>
                 </div>
+                @rangeFormControl("DiscountPercent", "Discount (%)", "Product price difference from average (%).", filters.MinDiscountPercent, filters.MaxDiscountPercent)
+                @rangeFormControl("Difference", "Price Difference", "Product price difference from average (in currency).", filters.MinDifference, filters.MaxDifference)
+                @rangeFormControl("Price", "Current Price", "Product current price.", filters.MinPrice, filters.MaxPrice)
+                @rangeFormControl("AveragePrice", "Average Price", "Average price from last 30 days.", filters.MinAveragePrice, filters.MaxAveragePrice)
+                @rangeFormControl("MinimumPrice", "Lowest Price", "Lowest price from last 30 days.", filters.MinMinimumPrice, filters.MaxMinimumPrice)
+                @rangeFormControl("MaximumPrice", "Higher Price", "Higher price from last 30 days.", filters.MinMaximumPrice, filters.MaxMaximumPrice)
             </div>
-            @rangeFormControl("discountPercent", "Discount (%)", "Product price difference from average (%).", filters.MinDiscountPercent, filters.MaxDiscountPercent)
-            @rangeFormControl("priceDifference", "Price Difference", "Product price difference from average (in currency).", filters.MinDifference, filters.MaxDifference)
-            @rangeFormControl("currentPrice", "Current Price", "Product current price.", filters.MinPrice, filters.MaxPrice)
-            @rangeFormControl("averagePrice", "Average Price", "Average price from last 30 days.", filters.MinAveragePrice, filters.MaxAveragePrice)
-            @rangeFormControl("lowestPrice", "Lowest Price", "Lowest price from last 30 days.", filters.MinMinimumPrice, filters.MaxMinimumPrice)
-            @rangeFormControl("higherPrice", "Higher Price", "Higher price from last 30 days.", filters.MinMaximumPrice, filters.MaxMaximumPrice)
-         </form>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-primary">Search</button>
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-        </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-primary">Search</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </form>
       </div>
     </div>
   </div>
@@ -103,16 +103,16 @@ templ rangeFormControl(id string, label string, help string, fromValue float64, 
     </div>
     <div class="col-lg-4">
       if fromValue > -1 {
-        <input type="number" class="form-control" placeholder="From" id={fmt.Sprintf("%sFrom", id)} aria-describedby={fmt.Sprintf("%sHelp", id)} value={util.Float64ToString(fromValue)}/>
+        <input type="number" step="any" name={fmt.Sprintf("min%s",id)} id={fmt.Sprintf("min%s",id)} class="form-control" placeholder="From" aria-describedby={fmt.Sprintf("%sHelp", id)} value={util.Float64ToString(fromValue)}/>
       } else {
-        <input type="number" class="form-control" placeholder="From" id={fmt.Sprintf("%sFrom", id)} aria-describedby={fmt.Sprintf("%sHelp", id)}/>
+        <input type="number" step="any" name={fmt.Sprintf("min%s",id)} id={fmt.Sprintf("min%s",id)} class="form-control" placeholder="From" aria-describedby={fmt.Sprintf("%sHelp", id)}/>
       }
     </div>
     <div class="col-lg-4">
       if toValue > -1 {
-        <input type="number" class="form-control" placeholder="To" id={fmt.Sprintf("%sTo", id)} aria-describedby={fmt.Sprintf("%sHelp", id)} value={util.Float64ToString(toValue)}/>
+        <input type="number" step="any" name={fmt.Sprintf("max%s",id)} id={fmt.Sprintf("max%s",id)} class="form-control" placeholder="To" aria-describedby={fmt.Sprintf("%sHelp", id)} value={util.Float64ToString(toValue)}/>
       } else {
-        <input type="number" class="form-control" placeholder="To" id={fmt.Sprintf("%sTo", id)} aria-describedby={fmt.Sprintf("%sHelp", id)}/>
+        <input type="number" step="any" name={fmt.Sprintf("max%s",id)} id={fmt.Sprintf("max%s",id)} class="form-control" placeholder="To" aria-describedby={fmt.Sprintf("%sHelp", id)}/>
       }
     </div>
     <div id={fmt.Sprintf("%sHelp", id)} class="col-lg-8 offset-lg-4 form-text">{help}</div>

@@ -118,7 +118,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button></div><div class=\"modal-body\"><form><div class=\"row mb-3\"><div class=\"col-lg-4\"><label for=\"brandInput\" class=\"form-label\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button></div><form action=\"/\"><div class=\"modal-body\"><div class=\"row mb-3\"><div class=\"col-lg-4\"><label for=\"nameInput\" class=\"form-label\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -127,7 +127,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</label></div><div class=\"col-lg-4\"><input type=\"text\" class=\"form-control\" id=\"nameInput\" placeholder=\"Name\" aria-describedby=\"nameHelp\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</label></div><div class=\"col-lg-4\"><input type=\"text\" class=\"form-control\" name=\"name\" id=\"nameInput\" placeholder=\"Name\" aria-describedby=\"nameHelp\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -144,7 +144,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"col-lg-4\"><input type=\"text\" class=\"form-control\" id=\"brandInput\" placeholder=\"Brand\" aria-describedby=\"brandHelp\" value=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div><div class=\"col-lg-4\"><input type=\"text\" class=\"form-control\" name=\"brand\" id=\"brandInput\" placeholder=\"Brand\" aria-describedby=\"brandHelp\" value=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -170,12 +170,12 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</label></div><div class=\"col-lg-8\"><select id=\"storeSelect\" class=\"form-select\" aria-label=\"Store\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</label></div><div class=\"col-lg-8\"><select name=\"storeId\" id=\"storeSelect\" class=\"form-select\" aria-label=\"Store\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		if filters.StoreId == -1 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<option selected>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<option selected value=\"\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -189,7 +189,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<option>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<option value=\"\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -254,31 +254,31 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("discountPercent", "Discount (%)", "Product price difference from average (%).", filters.MinDiscountPercent, filters.MaxDiscountPercent).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("DiscountPercent", "Discount (%)", "Product price difference from average (%).", filters.MinDiscountPercent, filters.MaxDiscountPercent).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("priceDifference", "Price Difference", "Product price difference from average (in currency).", filters.MinDifference, filters.MaxDifference).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("Difference", "Price Difference", "Product price difference from average (in currency).", filters.MinDifference, filters.MaxDifference).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("currentPrice", "Current Price", "Product current price.", filters.MinPrice, filters.MaxPrice).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("Price", "Current Price", "Product current price.", filters.MinPrice, filters.MaxPrice).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("averagePrice", "Average Price", "Average price from last 30 days.", filters.MinAveragePrice, filters.MaxAveragePrice).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("AveragePrice", "Average Price", "Average price from last 30 days.", filters.MinAveragePrice, filters.MaxAveragePrice).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("lowestPrice", "Lowest Price", "Lowest price from last 30 days.", filters.MinMinimumPrice, filters.MaxMinimumPrice).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("MinimumPrice", "Lowest Price", "Lowest price from last 30 days.", filters.MinMinimumPrice, filters.MaxMinimumPrice).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("higherPrice", "Higher Price", "Higher price from last 30 days.", filters.MinMaximumPrice, filters.MaxMaximumPrice).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("MaximumPrice", "Higher Price", "Higher price from last 30 days.", filters.MinMaximumPrice, filters.MaxMaximumPrice).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</form></div><div class=\"modal-footer\"><button type=\"button\" class=\"btn btn-primary\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"modal-footer\"><button type=\"submit\" class=\"btn btn-primary\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -296,7 +296,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></div></div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></div></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -334,15 +334,23 @@ func rangeFormControl(id string, label string, help string, fromValue float64, t
 			return templ_7745c5c3_Err
 		}
 		if fromValue > -1 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"number\" class=\"form-control\" placeholder=\"From\" id=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"number\" step=\"any\" name=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("%sFrom", id)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("min%s", id)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" aria-describedby=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("min%s", id)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"form-control\" placeholder=\"From\" aria-describedby=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -363,15 +371,23 @@ func rangeFormControl(id string, label string, help string, fromValue float64, t
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"number\" class=\"form-control\" placeholder=\"From\" id=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"number\" step=\"any\" name=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("%sFrom", id)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("min%s", id)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" aria-describedby=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("min%s", id)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"form-control\" placeholder=\"From\" aria-describedby=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -389,15 +405,23 @@ func rangeFormControl(id string, label string, help string, fromValue float64, t
 			return templ_7745c5c3_Err
 		}
 		if toValue > -1 {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"number\" class=\"form-control\" placeholder=\"To\" id=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"number\" step=\"any\" name=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("%sTo", id)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("max%s", id)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" aria-describedby=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("max%s", id)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"form-control\" placeholder=\"To\" aria-describedby=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -418,15 +442,23 @@ func rangeFormControl(id string, label string, help string, fromValue float64, t
 				return templ_7745c5c3_Err
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"number\" class=\"form-control\" placeholder=\"To\" id=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"number\" step=\"any\" name=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("%sTo", id)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("max%s", id)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" aria-describedby=\"")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" id=\"")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(fmt.Sprintf("max%s", id)))
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"form-control\" placeholder=\"To\" aria-describedby=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
