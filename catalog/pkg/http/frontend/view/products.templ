@@ -40,17 +40,6 @@ templ ProductsView(p ProductsViewProps) {
             </div>
         </div>
         </section>
-
-        <!-- Old stuff -->
-		<div>
-			Page: { strconv.Itoa(p.Page.CurrentPage) } of { strconv.Itoa(p.Page.TotalPages) }
-		</div>
-		<div>
-			Results: { strconv.Itoa(p.Page.ItemCount) } of { strconv.FormatInt(p.Page.TotalResults, 10) }
-		</div>
-		<div>
-			Sort: { p.Page.SortField } / { p.Page.SortDirection }
-		</div>
 	}
 }
 
