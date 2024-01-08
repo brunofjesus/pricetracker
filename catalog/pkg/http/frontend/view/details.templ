@@ -1,0 +1,16 @@
+package view
+
+import "github.com/brunofjesus/pricetracker/catalog/pkg/price"
+import "fmt"
+
+type DetailsViewProps struct {
+    Prices []price.Price
+}
+
+templ DetailsView(d DetailsViewProps) {
+    @Base() {
+        <div>
+            { fmt.Sprintf("%v", d) }
+        </div>
+    }
+}

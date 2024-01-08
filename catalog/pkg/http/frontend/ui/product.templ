@@ -31,7 +31,7 @@ templ ProductComponent(p product.ProductWithMetrics) {
                {p.StoreName}
             </p>
             <div class="d-flex align-items-end pt-3 px-0 pb-0 mt-auto">
-              <a href="#" class="btn btn-primary shadow-0 me-1">Chart</a>
+              <a href={templ.URL(fmt.Sprintf("/%d", p.ProductId))} class="btn btn-primary shadow-0 me-1">Chart</a>
               <a href={templ.URL(p.ProductUrl)} target="_blank" class="btn btn-light border">Buy</a>
             </div>
           </div>

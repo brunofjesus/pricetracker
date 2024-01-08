@@ -1,10 +1,12 @@
 package utils
 
 import (
+	"fmt"
 	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 	"net/http"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func GetQueryParam(r *http.Request, key string) string {
@@ -78,4 +80,21 @@ func GetQueryParamNullBoolean(r *http.Request, key string) nulltype.NullBoolean 
 	}
 
 	return nulltype.FromInt(intQueryParam)
+}
+
+func GetTimestampFromQueryParam(r *http.Request, key string, fallback time.Time) (time.Time, error) {
+	seconds, err := GetQueryParamInt64(r, key)
+
+	if err != nil {
+		return fallback, fmt.Errorf(
+			"invalid timestamp `%s` value `%s`: %w",
+			key, GetQueryParam(r, key), err,
+		)
+	}
+
+	if seconds == -1 {
+		return fallback, nil
+	}
+
+	return time.Unix(seconds, 0), nil
 }

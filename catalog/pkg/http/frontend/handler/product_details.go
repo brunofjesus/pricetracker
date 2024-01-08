@@ -1,6 +1,7 @@
 package handler
 
 import (
+	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/view"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest/utils"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/price"
 	"github.com/go-chi/chi/v5"
@@ -9,9 +10,13 @@ import (
 	"time"
 )
 
-func GetHistory(finder *price.Finder) http.HandlerFunc {
+func ProductDetails(finder *price.Finder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		productId, err := strconv.ParseInt(chi.URLParam(r, "productId"), 10, 64)
+		if err != nil {
+			writeBadRequest(w)
+			return
+		}
 
 		from, err := utils.GetTimestampFromQueryParam(
 			r, "from",
@@ -19,7 +24,7 @@ func GetHistory(finder *price.Finder) http.HandlerFunc {
 		)
 
 		if err != nil {
-			utils.ErrorJSON(w, err, http.StatusBadRequest)
+			writeBadRequest(w)
 			return
 		}
 
@@ -28,16 +33,24 @@ func GetHistory(finder *price.Finder) http.HandlerFunc {
 		)
 
 		if err != nil {
-			utils.ErrorJSON(w, err, http.StatusBadRequest)
+			writeBadRequest(w)
 			return
 		}
 
-		result, err := finder.FindPriceHistoryBetween(productId, from, to, nil)
+		prices, err := finder.FindPriceHistoryBetween(productId, from, to, nil)
 		if err != nil {
-			utils.ErrorJSON(w, err, http.StatusInternalServerError)
+			writeInternalError(w)
 			return
 		}
 
-		utils.WriteJSON(w, http.StatusOK, result)
+		viewProps := view.DetailsViewProps{
+			Prices: prices,
+		}
+
+		err = view.DetailsView(viewProps).Render(r.Context(), w)
+		if err != nil {
+			writeInternalError(w)
+			return
+		}
 	}
 }

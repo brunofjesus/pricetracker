@@ -49,6 +49,7 @@ func main() {
 		FrontendProps: &frontend.V1FrontendProps{
 			ProductFinder: environment.Product.Finder,
 			StoreFinder:   environment.Store.Finder,
+			PriceFinder:   environment.Price.Finder,
 		},
 		Host: host,
 		Port: 8080,

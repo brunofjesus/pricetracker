@@ -3,6 +3,7 @@ package frontend
 import (
 	"embed"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/handler"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/price"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/store"
 	"github.com/go-chi/chi/v5"
@@ -14,6 +15,7 @@ import (
 type V1FrontendProps struct {
 	ProductFinder *product.Finder
 	StoreFinder   *store.Finder
+	PriceFinder   *price.Finder
 }
 
 //go:embed static
@@ -21,6 +23,7 @@ var static embed.FS
 
 func AddRoutes(r chi.Router, p V1FrontendProps) {
 	r.Get("/", handler.SearchProduct(p.ProductFinder, p.StoreFinder))
+	r.Get("/{productId}", handler.ProductDetails(p.PriceFinder))
 	r.Handle("/*", serveStatic())
 }
 
