@@ -11,7 +11,6 @@ import "io"
 import "bytes"
 
 import "github.com/brunofjesus/pricetracker/catalog/pkg/price"
-import "fmt"
 import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/shopspring/decimal"
 
