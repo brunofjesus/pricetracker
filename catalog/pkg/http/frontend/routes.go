@@ -23,7 +23,7 @@ var static embed.FS
 
 func AddRoutes(r chi.Router, p V1FrontendProps) {
 	r.Get("/", handler.SearchProduct(p.ProductFinder, p.StoreFinder))
-	r.Get("/{productId}", handler.ProductDetails(p.PriceFinder))
+	r.Get("/{productId}", handler.ProductDetails(p.ProductFinder, p.PriceFinder))
 	r.Handle("/*", serveStatic())
 }
 

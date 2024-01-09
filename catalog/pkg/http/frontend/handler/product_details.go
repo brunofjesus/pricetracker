@@ -4,13 +4,14 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/view"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest/utils"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/price"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"strconv"
 	"time"
 )
 
-func ProductDetails(finder *price.Finder) http.HandlerFunc {
+func ProductDetails(productFinder *product.Finder, priceFinder *price.Finder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		productId, err := strconv.ParseInt(chi.URLParam(r, "productId"), 10, 64)
 		if err != nil {
@@ -37,14 +38,21 @@ func ProductDetails(finder *price.Finder) http.HandlerFunc {
 			return
 		}
 
-		prices, err := finder.FindPriceHistoryBetween(productId, from, to, nil)
+		item, err := productFinder.FindProductById(productId)
+		if err != nil || item == nil {
+			writeInternalError(w)
+			return
+		}
+
+		prices, err := priceFinder.FindPriceHistoryBetween(productId, from, to, nil)
 		if err != nil {
 			writeInternalError(w)
 			return
 		}
 
 		viewProps := view.DetailsViewProps{
-			Prices: prices,
+			Product: *item,
+			Prices:  prices,
 		}
 
 		err = view.DetailsView(viewProps).Render(r.Context(), w)

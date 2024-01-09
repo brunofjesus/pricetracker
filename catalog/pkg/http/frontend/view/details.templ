@@ -2,15 +2,124 @@ package view
 
 import "github.com/brunofjesus/pricetracker/catalog/pkg/price"
 import "fmt"
+import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+import "github.com/shopspring/decimal"
 
 type DetailsViewProps struct {
+    Product product.ProductWithMetrics
     Prices []price.Price
+}
+
+type TimeValue struct {
+	Time  int64  `json:"time"`
+	Value float64 `json:"value"`
 }
 
 templ DetailsView(d DetailsViewProps) {
     @Base() {
-        <div>
-            { fmt.Sprintf("%v", d) }
+        <div id="chart">
         </div>
+
+        @graph(pricesToTimeValues(d.Prices),centsToPrice(d.Product.Minimum),centsToPrice(d.Product.Average),centsToPrice(d.Product.Maximum))
+
+        <script src="/js/lightweight-charts.standalone.production.js"/>
     }
+}
+
+func centsToPrice(val decimal.Decimal) float64 {
+    result, _ := val.DivRound(decimal.NewFromInt(100), 2).Float64()
+    return result
+}
+
+func pricesToTimeValues(prices []price.Price) []TimeValue {
+    result := []TimeValue{}
+    for _, p := range prices {
+        result = append(result, TimeValue{
+            Time: p.DateTime.Unix(),
+            Value: float64(p.Value) / 100,
+        })
+    }
+
+    return result
+}
+
+script graph(data []TimeValue, minimum float64, average float64, maximum float64) {
+    window.addEventListener("load", () => {
+        let chartElement = document.getElementById("chart");
+
+        let chart = LightweightCharts.createChart(chartElement, {
+            width: 600,
+            height: 300,
+            layout: {
+                textColor: '#000',
+                backgroundColor: '#fff',
+            },
+            rightPriceScale: {
+                scaleMargins: {
+                    top: 0.3,
+                    bottom: 0.25,
+                },
+            },
+            timeScale: {
+                timeVisible: true
+            },
+            crosshair: {
+                vertLine: {
+                    width: 4,
+                    color: 'rgba(0, 0, 0, 0.1)',
+                    style: 0,
+                },
+                horzLine: {
+                    visible: false,
+                    labelVisible: false,
+                },
+            },
+
+            handleScroll: {
+                vertTouchDrag: false,
+            },
+        });
+
+        let series = chart.addLineSeries({
+            color: 'rgb(0, 120, 255)',
+            lineWidth: 2,
+            crosshairMarkerVisible: true,
+            lastValueVisible: true,
+            priceLineVisible: true,
+        });
+
+        series.setData(data);
+
+        var lineWidth = 2;
+        var minPriceLine = {
+          price: minimum,
+          color: 'rgba(100, 100, 100, 0.4)',
+          lineWidth: lineWidth,
+          lineStyle: LightweightCharts.LineStyle.Solid,
+          axisLabelVisible: true,
+          title: 'minimum price',
+        };
+        var avgPriceLine = {
+          price: average,
+          color: 'rgba(100, 100, 100, 0.4)',
+          lineWidth: lineWidth,
+          lineStyle: LightweightCharts.LineStyle.Solid,
+          axisLabelVisible: true,
+          title: 'average price',
+        };
+        var maxPriceLine = {
+          price: maximum,
+          color: 'rgba(100, 100, 100, 0.4)',
+          lineWidth: lineWidth,
+          lineStyle: LightweightCharts.LineStyle.Solid,
+          axisLabelVisible: true,
+          title: 'maximum price',
+        }
+
+        series.createPriceLine(minPriceLine);
+        series.createPriceLine(avgPriceLine);
+        series.createPriceLine(maxPriceLine);
+
+        chart.timeScale().fitContent();
+    });
 }
