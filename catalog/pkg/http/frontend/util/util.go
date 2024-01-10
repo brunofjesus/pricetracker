@@ -130,7 +130,7 @@ func GetProductSearchFilters(r *http.Request) (*product.FinderFilters, error) {
 		return nil, fmt.Errorf("invalid max difference: %w", err)
 	}
 
-	minDiscountPercent, err := utils.GetQueryParamFloat64Fallback(r, "minDiscountPercent", 0)
+	minDiscountPercent, err := utils.GetQueryParamFloat64(r, "minDiscountPercent")
 	if err != nil {
 		return nil, fmt.Errorf("invalid min discount: %w", err)
 	}
