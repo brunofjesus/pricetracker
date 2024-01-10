@@ -10,6 +10,7 @@ import "context"
 import "io"
 import "bytes"
 
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/ui"
 import "github.com/brunofjesus/pricetracker/catalog/pkg/price"
 import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/shopspring/decimal"
@@ -17,11 +18,6 @@ import "github.com/shopspring/decimal"
 type DetailsViewProps struct {
 	Product product.ProductWithMetrics
 	Prices  []price.Price
-}
-
-type TimeValue struct {
-	Time  int64   `json:"time"`
-	Value float64 `json:"value"`
 }
 
 func DetailsView(d DetailsViewProps) templ.Component {
@@ -43,15 +39,20 @@ func DetailsView(d DetailsViewProps) templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container\"><div class=\"row\"><div id=\"chart\" class=\"col-lg-12\" style=\"min-height: 500px\"></div></div></div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"container\"><div class=\"row\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			templ_7745c5c3_Err = graph(pricesToTimeValues(d.Prices), centsToPrice(d.Product.Minimum), centsToPrice(d.Product.Average), centsToPrice(d.Product.Maximum)).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = ui.HistoryChartComponent(ui.ChartProps{
+				MinimumPrice: centsToPrice(d.Product.Minimum),
+				MaximumPrice: centsToPrice(d.Product.Maximum),
+				AveragePrice: centsToPrice(d.Product.Average),
+				Prices:       d.Prices,
+			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" <script src=\"/js/lightweight-charts.standalone.production.js\"></script>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -74,102 +75,4 @@ func DetailsView(d DetailsViewProps) templ.Component {
 func centsToPrice(val decimal.Decimal) float64 {
 	result, _ := val.DivRound(decimal.NewFromInt(100), 2).Float64()
 	return result
-}
-
-func pricesToTimeValues(prices []price.Price) []TimeValue {
-	result := []TimeValue{}
-	for _, p := range prices {
-		result = append(result, TimeValue{
-			Time:  p.DateTime.Unix(),
-			Value: float64(p.Value) / 100,
-		})
-	}
-
-	return result
-}
-
-func graph(data []TimeValue, minimum float64, average float64, maximum float64) templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_graph_7be0`,
-		Function: `function __templ_graph_7be0(data, minimum, average, maximum){window.addEventListener("load", () => {
-    const chartElement = document.getElementById("chart");
-    const chart = LightweightCharts.createChart(chartElement, {
-        width: chartElement.offsetWidth,
-        height: chartElement.offsetHeight,
-        layout: {
-            textColor: '#000',
-            backgroundColor: '#fff',
-        },
-        timeScale: {
-            timeVisible: true
-        },
-        crosshair: {
-            vertLine: {
-                width: 4,
-                color: 'rgba(0, 0, 0, 0.1)',
-                style: 0,
-            },
-            horzLine: {
-                visible: false,
-                labelVisible: false,
-            },
-        },
-
-        handleScroll: {
-            vertTouchDrag: false,
-        },
-    });
-
-    window.onresize = function() {
-        chart.applyOptions({
-            width: chartElement.offsetWidth,
-            height: chartElement.offsetHeight
-        });
-    }
-
-    const series = chart.addLineSeries({
-        color: 'rgb(0, 120, 255)',
-        lineWidth: 2,
-        crosshairMarkerVisible: true,
-        lastValueVisible: true,
-        priceLineVisible: true,
-    });
-
-    series.setData(data);
-
-    const lineWidth = 2;
-    const minPriceLine = {
-        price: minimum,
-        color: 'rgba(100, 100, 100, 0.4)',
-        lineWidth: lineWidth,
-        lineStyle: LightweightCharts.LineStyle.Solid,
-        axisLabelVisible: true,
-        title: 'minimum price',
-    };
-    const avgPriceLine = {
-        price: average,
-        color: 'rgba(100, 100, 100, 0.4)',
-        lineWidth: lineWidth,
-        lineStyle: LightweightCharts.LineStyle.Solid,
-        axisLabelVisible: true,
-        title: 'average price',
-    };
-    const maxPriceLine = {
-        price: maximum,
-        color: 'rgba(100, 100, 100, 0.4)',
-        lineWidth: lineWidth,
-        lineStyle: LightweightCharts.LineStyle.Solid,
-        axisLabelVisible: true,
-        title: 'maximum price',
-    };
-
-    series.createPriceLine(minPriceLine);
-    series.createPriceLine(avgPriceLine);
-    series.createPriceLine(maxPriceLine);
-
-    chart.timeScale().fitContent()
-});}`,
-		Call:       templ.SafeScript(`__templ_graph_7be0`, data, minimum, average, maximum),
-		CallInline: templ.SafeScriptInline(`__templ_graph_7be0`, data, minimum, average, maximum),
-	}
 }
