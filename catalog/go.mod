@@ -4,7 +4,7 @@ go 1.21.3
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
-	github.com/a-h/templ v0.2.476
+	github.com/a-h/templ v0.2.513
 	github.com/lib/pq v1.10.9
 	gopkg.in/yaml.v3 v3.0.1
 )
