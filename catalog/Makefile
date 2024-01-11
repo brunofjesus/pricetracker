@@ -1,5 +1,7 @@
-migration_tool_install:
-	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+dev_dependencies:
+	@go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+	@go install github.com/a-h/templ/cmd/templ@latest
+	@go install github.com/cosmtrek/air@latest
 
 migration_create:
 	migrate create -ext sql -dir ./migrations -seq $(name)
