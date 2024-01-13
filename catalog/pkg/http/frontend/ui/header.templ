@@ -16,10 +16,25 @@ templ HeaderComponent() {
 
       <div class="d-flex align-items-center">
         <form class="w-50 me-3" role="search">
-          <input type="search" class="form-control" placeholder="Search..." aria-label="Search"/>
+          <input id="search_input" type="search" class="form-control" placeholder="Search..." aria-label="Search" />
         </form>
       </div>
     </div>
   </header>
+
+@QuickSearchDialogComponent()
+
+<script type="text/javascript">
+  window.addEventListener("DOMContentLoaded", ()=> {
+    document.getElementById("search_input").addEventListener("focus", () => {
+      var myModal = new bootstrap.Modal(document.getElementById('quickSearchDialogModal'), {
+        backdrop: false,
+        keyboard: true,
+        focus: true
+      })
+      myModal.show()
+    })
+  })
+</script>
 }
 

@@ -1,0 +1,45 @@
+package ui
+
+
+templ QuickSearchDialogComponent() {
+  <div class="modal modal-lg" id="quickSearchDialogModal">
+    <div class="modal-dialog modal-dialog-scrollable" role="document">
+      <div class="modal-content">
+          <div class="modal-body px-3 py-3">
+             <div class="d-flex flex-row align-items-center gap-1">
+                  <input id="quick_search_input" type="search" class="form-control" placeholder="Search..." aria-label="Search" />
+                  <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal" aria-label="Close">
+                    <i class="bi bi-x-lg"></i>
+                  </button>
+             </div>
+             <div class="row mt-3">
+               <div class="list-group">
+                 <a href="#" class="list-group-item list-group-item-action">@searchResult()</a>
+                 <a href="#" class="list-group-item list-group-item-action">@searchResult()</a>
+                 <a href="#" class="list-group-item list-group-item-action">@searchResult()</a>
+                 <a href="#" class="list-group-item list-group-item-action">@searchResult()</a>
+                 <a href="#" class="list-group-item list-group-item-action">@searchResult()</a>
+                 <a href="#" class="list-group-item list-group-item-action">@searchResult()</a>
+               </div>
+             </div>
+          </div>
+      </div>
+    </div>
+  </div>
+}
+
+
+templ searchResult() {
+  <div class='row'>
+  <div class='col-md-2'>
+    <img class='d-block' src='https://www.worten.pt/i/4a030be6e92c566baf33e25e8c0c1d2434ec1a67' width='80px'/>
+  </div>
+  <div class='col-md-8'>
+    <strong class="list-group-item-heading">My Product</strong>
+    <p class="list-group-item-text">Worten</p>
+  </div>
+  <div class='col-md-2'>
+    <span class="badge alert-success">100.00 €</span>
+  </div>
+  </div>
+}

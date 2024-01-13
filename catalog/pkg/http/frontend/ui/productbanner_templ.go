@@ -177,3 +177,24 @@ func ProductBannerComponent(p product.ProductWithMetrics) templ.Component {
 		return templ_7745c5c3_Err
 	})
 }
+
+//  <div class='col-md-1'><img class='d-block' src='https://www.worten.pt/i/4a030be6e92c566baf33e25e8c0c1d2434ec1a67' width='95px'/></div>
+//  <div class='col-md-9'>
+//      <div class='container'>
+//          <div class='row search-product'><h2>MyProduct</h2></div>
+//          <div class='row search-price'>
+//              <h3 class="price">
+//                  <span>
+//                      <small>€ </small>
+//                      <span>100,</span><sup>00</sup>
+//                  </span>
+//              </h3>
+//              <h4 class="avg-price text-muted">
+//                  <span>101</span><sup>00</sup>
+//              </h4>
+//          </div>
+//
+//      </div>
+//  </div>
+//
+//  <div class='col-md-2'><img class='img-fluid' src='' height='70px'></img></div>
