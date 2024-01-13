@@ -11,8 +11,8 @@ import "io"
 import "bytes"
 
 import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
-import "fmt"
 import "github.com/shopspring/decimal"
+import "fmt"
 
 func ProductComponent(p product.ProductWithMetrics) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {

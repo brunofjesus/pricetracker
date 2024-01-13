@@ -1,7 +1,42 @@
 package ui
 
 import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+import "github.com/shopspring/decimal"
+import "fmt"
 
 templ ProductBannerComponent(p product.ProductWithMetrics) {
-    <div>Product Banner { p.Name }</div>
+  <div class="row">
+    <div class="col-md-8">
+      <h3>{p.Name}</h3>
+      <h4>{p.Brand}</h4>
+      <b>{p.StoreName}</b>
+      <div class="col-md-12">
+        <div class="d-flex align-items-end pt-3 px-0 pb-0 mt-auto">
+          <h5 class="mb-1 me-1">{fmt.Sprintf("%.2f", float32(p.Price) / 100)}</h5>
+        </div>
+        <div class="d-flex align-items-end pt-1 px-0 pb-0 mt-auto gap-2">
+          <span class="text-danger"><s>{p.Average.Div(decimal.NewFromInt(100)).StringFixed(2)}</s></span>
+          <span>({p.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0)}%)</span>
+        </div>
+        <div class="d-flex align-items-end pt-1 px-0 pb-0 mt-auto gap-2">
+          <span class="text-danger">
+            <i class="bi bi-graph-up-arrow"></i>
+            {p.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2)}
+          </span>
+          <span class="text-success">
+            <i class="bi bi-graph-down-arrow"></i>
+            {p.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2)}
+          </span>
+        </div>
+      </div>
+      <div class="col-md-12">
+        <div class="d-flex align-items-end pt-3 px-0 pb-0 mt-auto">
+          <a href={templ.URL(p.ProductUrl)} target="_blank" class="btn btn-info border">Open</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <img src={p.ImageUrl}/>
+    </div>
+ </div>
 }
