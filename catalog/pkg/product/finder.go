@@ -7,23 +7,23 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 )
 
-type FinderFilters product_repository.ProductMetricsFilter
+type FinderFilters product_repository.ProductWithStatsFilter
 
 type Finder struct {
-	DB                    *sql.DB
-	MetricsRepository     *product_repository.MetricsRepository
-	ProductRepository     *product_repository.Repository
-	ProductMetaRepository *product_repository.MetaRepository
+	DB                         *sql.DB
+	ProductWithStatsRepository *product_repository.ProductWithStatsRepository
+	ProductRepository          *product_repository.Repository
+	ProductMetaRepository      *product_repository.MetaRepository
 }
 
-func (s *Finder) FindProductById(productId int64) (*product_repository.ProductWithMetrics, error) {
-	return s.MetricsRepository.FindProductById(productId, nil)
+func (s *Finder) FindProductById(productId int64) (*product_repository.ProductWithStats, error) {
+	return s.ProductWithStatsRepository.FindProductById(productId, nil)
 }
 
 func (s *Finder) FindDetailedProducts(
 	paginatedQuery pagination.PaginatedQuery,
 	filters FinderFilters,
-) (*pagination.PaginatedData[[]product_repository.ProductWithMetrics], error) {
+) (*pagination.PaginatedData[[]product_repository.ProductWithStats], error) {
 	tx, err := s.DB.Begin()
 	if err != nil {
 		return nil, err
@@ -39,24 +39,24 @@ func (s *Finder) FindDetailedProducts(
 		"name",
 	)
 
-	items, err := s.MetricsRepository.FindProducts(
+	items, err := s.ProductWithStatsRepository.FindProducts(
 		paginatedQuery.Offset(), paginatedQuery.Limit(),
 		sortField, paginatedQuery.SortDirection,
-		(*product_repository.ProductMetricsFilter)(&filters),
+		(*product_repository.ProductWithStatsFilter)(&filters),
 		nil,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	count, err := s.MetricsRepository.CountProducts((*product_repository.ProductMetricsFilter)(&filters), nil)
+	count, err := s.ProductWithStatsRepository.CountProducts((*product_repository.ProductWithStatsFilter)(&filters), nil)
 	if err != nil {
 		return nil, err
 	}
 
 	tx.Commit()
 
-	return pagination.NewPaginatedData[[]product_repository.ProductWithMetrics](
+	return pagination.NewPaginatedData[[]product_repository.ProductWithStats](
 		items, len(items),
 		paginatedQuery.Page, paginatedQuery.PageSize, count,
 		paginatedQuery.SortField, paginatedQuery.SortDirection,

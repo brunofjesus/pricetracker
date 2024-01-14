@@ -4,7 +4,7 @@ import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/shopspring/decimal"
 import "fmt"
 
-templ ProductBannerComponent(p product.ProductWithMetrics) {
+templ ProductBannerComponent(p product.ProductWithStats) {
   <div class="row">
     <div class="col-md-8">
       <h3>{p.Name}</h3>

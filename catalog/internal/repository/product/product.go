@@ -83,10 +83,7 @@ func (r *Repository) UpdateProduct(
 }
 
 func (r *Repository) findOne(tx *sql.Tx, where any, args ...any) (*Product, error) {
-	qb := r.qb
-	if tx != nil {
-		qb = repository.QueryBuilder(tx)
-	}
+	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select("product_id", "store_id", "name", "brand", "price", "available", "image_url", "product_url").
 		From(ProductTableName).

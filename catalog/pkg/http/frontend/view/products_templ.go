@@ -20,7 +20,7 @@ import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
 import "strings"
 
 type ProductsViewProps struct {
-	Page      pagination.PaginatedData[[]db_product.ProductWithMetrics]
+	Page      pagination.PaginatedData[[]db_product.ProductWithStats]
 	PageQuery pagination.PaginatedQuery
 	Filters   product.FinderFilters
 	Stores    []db_store.Store

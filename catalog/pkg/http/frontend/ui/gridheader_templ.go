@@ -27,7 +27,7 @@ func setSortOrder(baseUrl string) templ.ComponentScript {
 	}
 }
 
-func GridHeader(page pagination.PaginatedData[[]db_product.ProductWithMetrics], query pagination.PaginatedQuery, filters product.FinderFilters) templ.Component {
+func GridHeader(page pagination.PaginatedData[[]db_product.ProductWithStats], query pagination.PaginatedQuery, filters product.FinderFilters) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {

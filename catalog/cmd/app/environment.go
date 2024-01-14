@@ -5,6 +5,7 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 	price_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+	stats_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/stats"
 	store_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/price"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
@@ -42,6 +43,7 @@ func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
 	productMetaRepository := product_repository.NewMetaRepository(db)
 	priceRepository := price_repository.NewRepository(db)
 	metricsRepository := product_repository.NewMetricsRepository(db)
+	statsRepository := stats_repository.NewRepository(db)
 
 	productCreator := product.Creator{
 		DB:                    db,
@@ -49,6 +51,7 @@ func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
 		ProductRepository:     productRepository,
 		ProductMetaRepository: productMetaRepository,
 		PriceRepository:       priceRepository,
+		StatsRepository:       statsRepository,
 	}
 
 	productUpdater := product.Updater{
@@ -57,13 +60,14 @@ func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
 		ProductRepository:     productRepository,
 		ProductMetaRepository: productMetaRepository,
 		PriceRepository:       priceRepository,
+		StatsRepository:       statsRepository,
 	}
 
 	productFinder := product.Finder{
-		DB:                    db,
-		MetricsRepository:     metricsRepository,
-		ProductRepository:     productRepository,
-		ProductMetaRepository: productMetaRepository,
+		DB:                         db,
+		ProductWithStatsRepository: metricsRepository,
+		ProductRepository:          productRepository,
+		ProductMetaRepository:      productMetaRepository,
 	}
 
 	productHandler := product.Handler{
