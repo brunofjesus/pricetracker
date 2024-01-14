@@ -64,10 +64,10 @@ func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
 	}
 
 	productFinder := product.Finder{
-		DB:                    db,
-		MetricsRepository:     metricsRepository,
-		ProductRepository:     productRepository,
-		ProductMetaRepository: productMetaRepository,
+		DB:                         db,
+		ProductWithStatsRepository: metricsRepository,
+		ProductRepository:          productRepository,
+		ProductMetaRepository:      productMetaRepository,
 	}
 
 	productHandler := product.Handler{

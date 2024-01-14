@@ -12,7 +12,7 @@ script setSortOrder(baseUrl string) {
     window.location = baseUrl + "&sortField=" + select.value
 }
 
-templ GridHeader(page pagination.PaginatedData[[]db_product.ProductWithMetrics], query pagination.PaginatedQuery, filters product.FinderFilters) {
+templ GridHeader(page pagination.PaginatedData[[]db_product.ProductWithStats], query pagination.PaginatedQuery, filters product.FinderFilters) {
     <header class="d-sm-flex align-items-center border-bottom mb-4 pb-3">
       <strong class="d-block py-2">{ strconv.FormatInt(page.TotalResults, 10) } Items found </strong>
       <div class="ms-auto">

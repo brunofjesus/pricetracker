@@ -16,7 +16,7 @@ import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/shopspring/decimal"
 
 type DetailsViewProps struct {
-	Product product.ProductWithMetrics
+	Product product.ProductWithStats
 	Prices  []price.Price
 }
 

@@ -3,17 +3,15 @@ package product
 import (
 	"database/sql"
 	"fmt"
-	"time"
-
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 	"github.com/shopspring/decimal"
 )
 
-const ProductWithMetricsViewName = "product_metrics"
+const ProductWithStatsViewName = "product_with_stats"
 
-type ProductWithMetrics struct {
+type ProductWithStats struct {
 	ProductId    int64  `db:"product_id" json:"product_id"`
 	StoreId      int64  `db:"store_id" json:"store_id"`
 	StoreName    string `db:"store_name" json:"store_name"`
@@ -26,16 +24,15 @@ type ProductWithMetrics struct {
 	ImageUrl     string `db:"image_url" json:"image_url"`
 	ProductUrl   string `db:"product_url" json:"product_url"`
 
-	Difference       decimal.Decimal `db:"diff" json:"diff"`
+	Difference       decimal.Decimal `db:"difference" json:"difference"`
 	DiscountPercent  decimal.Decimal `db:"discount_percent" json:"discount_percent"`
 	Average          decimal.Decimal `db:"average" json:"average"`
 	Minimum          decimal.Decimal `db:"minimum" json:"minimum"`
 	Maximum          decimal.Decimal `db:"maximum" json:"maximum"`
 	MetricEntryCount decimal.Decimal `db:"entries" json:"entries"`
-	MetricDataSince  time.Time       `db:"metrics_since" json:"since"`
 }
 
-type ProductMetricsFilter struct {
+type ProductWithStatsFilter struct {
 	ProductId []int64
 
 	StoreId    int
@@ -60,37 +57,37 @@ type ProductMetricsFilter struct {
 
 var cols = []string{
 	"product_id", "store_id", "store_name", "store_slug", "store_website", "name", "brand", "price", "available",
-	"image_url", "product_url", "diff", "discount_percent", "average", "maximum", "minimum", "entries", "metrics_since",
+	"image_url", "product_url", "difference", "discount_percent", "average", "maximum", "minimum", "entries",
 }
 
-type MetricsRepository struct {
+type ProductWithStatsRepository struct {
 	db *sql.DB
 	qb *squirrel.StatementBuilderType
 }
 
-func NewMetricsRepository(db *sql.DB) *MetricsRepository {
-	return &MetricsRepository{
+func NewMetricsRepository(db *sql.DB) *ProductWithStatsRepository {
+	return &ProductWithStatsRepository{
 		db: db,
 		qb: repository.QueryBuilder(db),
 	}
 }
 
-func (r *MetricsRepository) FindProductById(productId int64, tx *sql.Tx) (*ProductWithMetrics, error) {
+func (r *ProductWithStatsRepository) FindProductById(productId int64, tx *sql.Tx) (*ProductWithStats, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Select(cols...).From(ProductWithMetricsViewName).Where(squirrel.Eq{"product_id": productId})
+	q := qb.Select(cols...).From(ProductWithStatsViewName).Where(squirrel.Eq{"product_id": productId})
 
-	var product ProductWithMetrics
+	var product ProductWithStats
 
 	err := r.scanFullRow(q.QueryRow(), &product)
 
 	return &product, err
 }
 
-func (r *MetricsRepository) FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductMetricsFilter, tx *sql.Tx) ([]ProductWithMetrics, error) {
+func (r *ProductWithStatsRepository) FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductWithStatsFilter, tx *sql.Tx) ([]ProductWithStats, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Select(cols...).From(ProductWithMetricsViewName)
+	q := qb.Select(cols...).From(ProductWithStatsViewName)
 	if filters != nil {
 		q = appendFiltersToQuery(q, *filters)
 	}
@@ -99,7 +96,7 @@ func (r *MetricsRepository) FindProducts(offset int64, limit int, orderBy, direc
 		Offset(uint64(offset)).
 		Limit(uint64(limit))
 
-	var products []ProductWithMetrics
+	var products []ProductWithStats
 	rows, err := q.Query()
 
 	if err != nil {
@@ -109,7 +106,7 @@ func (r *MetricsRepository) FindProducts(offset int64, limit int, orderBy, direc
 	defer rows.Close()
 
 	for rows.Next() {
-		var product ProductWithMetrics
+		var product ProductWithStats
 
 		if err := r.scanFullRow(rows, &product); err != nil {
 			return nil, err
@@ -121,10 +118,10 @@ func (r *MetricsRepository) FindProducts(offset int64, limit int, orderBy, direc
 	return products, nil
 }
 
-func (r *MetricsRepository) CountProducts(filters *ProductMetricsFilter, tx *sql.Tx) (int64, error) {
+func (r *ProductWithStatsRepository) CountProducts(filters *ProductWithStatsFilter, tx *sql.Tx) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Select("COUNT(*)").From(ProductWithMetricsViewName)
+	q := qb.Select("COUNT(*)").From(ProductWithStatsViewName)
 
 	if filters != nil {
 		q = appendFiltersToQuery(q, *filters)
@@ -135,7 +132,7 @@ func (r *MetricsRepository) CountProducts(filters *ProductMetricsFilter, tx *sql
 	return count, err
 }
 
-func (r *MetricsRepository) scanFullRow(row squirrel.RowScanner, product *ProductWithMetrics) error {
+func (r *ProductWithStatsRepository) scanFullRow(row squirrel.RowScanner, product *ProductWithStats) error {
 	return row.Scan(
 		&product.ProductId,
 		&product.StoreId,
@@ -155,11 +152,10 @@ func (r *MetricsRepository) scanFullRow(row squirrel.RowScanner, product *Produc
 		&product.Maximum,
 		&product.Minimum,
 		&product.MetricEntryCount,
-		&product.MetricDataSince,
 	)
 }
 
-func appendFiltersToQuery(q squirrel.SelectBuilder, filters ProductMetricsFilter) squirrel.SelectBuilder {
+func appendFiltersToQuery(q squirrel.SelectBuilder, filters ProductWithStatsFilter) squirrel.SelectBuilder {
 	f := squirrel.And{}
 
 	if len(filters.ProductId) > 0 {

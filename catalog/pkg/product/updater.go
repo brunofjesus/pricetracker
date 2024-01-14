@@ -62,7 +62,7 @@ func (s *Updater) Update(productId int64, storeProduct MqStoreProduct) error {
 	}
 
 	if latestPrice.Price != storeProduct.Price ||
-		time.Since(latestPrice.DateTime) > time.Hour*4 {
+		time.Since(latestPrice.DateTime) > time.Minute {
 
 		// Insert price update
 		err = s.PriceRepository.CreatePrice(
@@ -111,8 +111,8 @@ func (s *Updater) updateStats(productId int64, latestPrice int, tx *sql.Tx) erro
 		)
 	}
 
-	minimum := prices[0].Price
-	maximum := prices[0].Price
+	minimum := latestPrice
+	maximum := latestPrice
 	count := len(prices)
 
 	sum := 0
@@ -121,7 +121,8 @@ func (s *Updater) updateStats(productId int64, latestPrice int, tx *sql.Tx) erro
 		sum += price.Price
 		if price.Price < minimum {
 			minimum = price.Price
-		} else if price.Price > maximum {
+		}
+		if price.Price > maximum {
 			maximum = price.Price
 		}
 	}

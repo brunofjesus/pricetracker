@@ -4,7 +4,7 @@ import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/shopspring/decimal"
 import "fmt"
 
-templ ProductComponent(p product.ProductWithMetrics) {
+templ ProductComponent(p product.ProductWithStats) {
     <div class="col-lg-3 col-md-4 col-sm-6 d-flex" id={fmt.Sprintf("product-%d", p.ProductId)}>
         <div class="card w-100 my-2 shadow-2-strong">
           <img src={p.ImageUrl} class="mt-2 mx-2" />
