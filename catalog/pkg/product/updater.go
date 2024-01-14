@@ -3,12 +3,14 @@ package product
 import (
 	"database/sql"
 	"errors"
+	"github.com/shopspring/decimal"
 	"time"
 
 	"github.com/brunofjesus/pricetracker/catalog/util/list"
 
 	price_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/price"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+	stats_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/stats"
 	store_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 )
 
@@ -18,6 +20,7 @@ type Updater struct {
 	ProductRepository     *product_repository.Repository
 	ProductMetaRepository *product_repository.MetaRepository
 	PriceRepository       *price_repository.Repository
+	StatsRepository       *stats_repository.Repository
 }
 
 func (s *Updater) Update(productId int64, storeProduct MqStoreProduct) error {
@@ -72,9 +75,98 @@ func (s *Updater) Update(productId int64, storeProduct MqStoreProduct) error {
 		if err != nil {
 			return err
 		}
+
+		// Re-calculate the statistics
+		err = s.updateStats(productId, storeProduct.Price, tx)
+		if err != nil {
+			return err
+		}
 	}
 
 	return tx.Commit()
+}
+
+func (s *Updater) updateStats(productId int64, latestPrice int, tx *sql.Tx) error {
+	prices, err := s.PriceRepository.FindPricesBetween(
+		productId,
+		time.Now().AddDate(0, 0, -30),
+		time.Now(),
+		tx,
+	)
+	if err != nil {
+		return err
+	}
+
+	if len(prices) == 0 {
+		return s.StatsRepository.CreateProductStats(
+			productId,
+			latestPrice,
+			latestPrice,
+			latestPrice,
+			1,
+			decimal.NewFromInt(int64(0)),
+			decimal.NewFromInt(int64(0)),
+			decimal.NewFromInt(int64(latestPrice)),
+			tx,
+		)
+	}
+
+	minimum := prices[0].Price
+	maximum := prices[0].Price
+	count := len(prices)
+
+	sum := 0
+
+	for _, price := range prices {
+		sum += price.Price
+		if price.Price < minimum {
+			minimum = price.Price
+		} else if price.Price > maximum {
+			maximum = price.Price
+		}
+	}
+
+	average := decimal.NewFromInt(int64(sum)).Div(decimal.NewFromInt(int64(count)))
+	difference := decimal.NewFromInt(int64(latestPrice)).Sub(average)
+	discountPercent := average.
+		Sub(decimal.NewFromInt(int64(latestPrice))).
+		Div(average)
+
+	exists, err := s.StatsRepository.HasProductStats(productId, tx)
+	if err != nil {
+		return err
+	}
+	if exists {
+		err = s.StatsRepository.UpdateProductStats(
+			productId,
+			latestPrice,
+			minimum,
+			maximum,
+			count,
+			difference,
+			discountPercent,
+			average,
+			tx,
+		)
+	} else {
+		err = s.StatsRepository.CreateProductStats(
+			productId,
+			latestPrice,
+			minimum,
+			maximum,
+			count,
+			difference,
+			discountPercent,
+			average,
+			tx,
+		)
+	}
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Updater) updateSkus(productId int64, storeProduct MqStoreProduct, tx *sql.Tx) error {

@@ -1,5 +1,5 @@
 database:
-  dsn: "host=172.30.1.36 port=5432 user=postgres password=price dbname=postgres sslmode=require timezone=UTC connect_timeout=5"
+  dsn: "host=localhost port=5432 user=postgres password=price dbname=postgres sslmode=disable timezone=UTC connect_timeout=5"
   attempts: 5
 messagequeue:
   url: amqp://user:price@localhost:5672/
