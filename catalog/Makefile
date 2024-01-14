@@ -1,5 +1,7 @@
-migration_tool_install:
-	go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+dev_dependencies:
+	@go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+	@go install github.com/a-h/templ/cmd/templ@latest
+	@go install github.com/cosmtrek/air@latest
 
 migration_create:
 	migrate create -ext sql -dir ./migrations -seq $(name)
@@ -9,6 +11,9 @@ migration_up:
 
 migration_drop:
 	migrate -database postgres://postgres:price@localhost:5432/postgres?sslmode=disable -path ./migration drop
+
+templ:
+	@templ generate
 
 build_sys_arch:
 	mkdir -p ../dist/$(system)_$(arch)/catalog;
@@ -31,3 +36,6 @@ build:
 	else\
 		make build_sys_arch system=$(system) arch=$(arch);\
 	fi
+
+run:
+	IS_DEV=true air

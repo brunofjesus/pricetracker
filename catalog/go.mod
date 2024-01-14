@@ -4,6 +4,7 @@ go 1.21.3
 
 require (
 	github.com/Masterminds/squirrel v1.5.4
+	github.com/a-h/templ v0.2.513
 	github.com/lib/pq v1.10.9
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -11,7 +12,7 @@ require (
 require (
 	github.com/hashicorp/errwrap v1.1.0 // indirect
 	github.com/hashicorp/go-multierror v1.1.1 // indirect
-	go.uber.org/atomic v1.7.0 // indirect
+	go.uber.org/atomic v1.10.0 // indirect
 )
 
 require (

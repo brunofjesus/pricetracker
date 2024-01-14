@@ -1,0 +1,34 @@
+package view
+
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/ui"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/price"
+import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+import "github.com/shopspring/decimal"
+
+type DetailsViewProps struct {
+    Product product.ProductWithMetrics
+    Prices []price.Price
+}
+
+
+templ DetailsView(d DetailsViewProps) {
+    @Base() {
+    <div class="container">
+        @ui.ProductBannerComponent(d.Product)
+        <div class="row">
+            @ui.HistoryChartComponent(ui.ChartProps{
+                MinimumPrice: centsToPrice(d.Product.Minimum),
+                MaximumPrice: centsToPrice(d.Product.Maximum),
+                AveragePrice: centsToPrice(d.Product.Average),
+                Prices: d.Prices,
+            })
+        </div>
+    </div>
+
+    }
+}
+
+func centsToPrice(val decimal.Decimal) float64 {
+    result, _ := val.DivRound(decimal.NewFromInt(100), 2).Float64()
+    return result
+}

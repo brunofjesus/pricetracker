@@ -22,7 +22,7 @@ func NewPaginatedQuery(page, pageSize int, sortField, sortDirection string) (*Pa
 	}
 
 	if sortDirection == "" {
-		sortDirection = "asc"
+		sortDirection = "desc"
 	} else if sortDirection != "asc" && sortDirection != "desc" {
 		return nil, errors.New("sort direction can be either 'asc' or 'desc'")
 	}
@@ -35,13 +35,13 @@ func NewPaginatedQuery(page, pageSize int, sortField, sortDirection string) (*Pa
 	}, nil
 }
 
-func FromHttpRequest(r *http.Request) (*PaginatedQuery, error) {
+func FromHttpRequest(r *http.Request, defaultSize int) (*PaginatedQuery, error) {
 	query := r.URL.Query()
 
 	var err error
 
 	page := 1
-	size := 10
+	size := defaultSize
 
 	if query.Get("page") != "" {
 		page, err = strconv.Atoi(query.Get("page"))

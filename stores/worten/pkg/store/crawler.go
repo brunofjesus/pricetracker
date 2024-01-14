@@ -73,7 +73,7 @@ func Crawl(logger *slog.Logger, handler ProductHandler) {
 				slog.String("id", categoryId),
 				slog.String("slug", slug),
 			),
-			slog.Int("pages", page),
+			slog.Int("view", page),
 		)
 	}
 }

@@ -1,0 +1,132 @@
+package ui
+
+import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
+import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
+import "github.com/brunofjesus/pricetracker/catalog/util/nulltype"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
+
+templ FiltersComponent(page pagination.PaginatedQuery, filters product.FinderFilters, stores []db_store.Store) {
+    <div class="d-flex flex-wrap gap-2">
+    if filters.StoreId > 0 {
+        @FilterBadgeComponent("Store", findStoreName(filters.StoreId, stores), generateUrl(page, filters, "StoreId"))
+    }
+
+    if filters.MinPrice > -1 {
+        @FilterBadgeComponent("Min. Price", util.Float64ToString(filters.MinPrice / 100), generateUrl(page, filters, "MinPrice"))
+    }
+
+    if filters.MaxPrice > -1 {
+        @FilterBadgeComponent("Max. Price", util.Float64ToString(filters.MaxPrice / 100), generateUrl(page, filters, "MaxPrice"))
+    }
+
+    if len(filters.NameLike) > 0 {
+        @FilterBadgeComponent("Name", filters.NameLike, generateUrl(page, filters, "NameLike"))
+    }
+
+    if len(filters.BrandLike) > 0 {
+        @FilterBadgeComponent("Brand", filters.BrandLike, generateUrl(page, filters, "BrandLike"))
+    }
+
+	if nulltype.IsUndefined(filters.Available) == false {
+        @FilterBadgeComponent("Available", nulltype.ToString(filters.Available), generateUrl(page, filters, "Available"))
+	}
+
+	if len(filters.ProductUrl) > 0 {
+        @FilterBadgeComponent("Product URL", "Yes", generateUrl(page, filters, "ProductUrl"))
+	}
+
+	if filters.MinDifference > -1 {
+        @FilterBadgeComponent("Min. Difference", util.Float64ToString(filters.MinDifference / 100), generateUrl(page, filters, "MinDifference"))
+	}
+
+	if filters.MaxDifference > -1 {
+        @FilterBadgeComponent("Max. Difference", util.Float64ToString(filters.MaxDifference / 100), generateUrl(page, filters, "MaxDifference"))
+	}
+
+	if filters.MinDiscountPercent > -1 {
+        @FilterBadgeComponent("Min. Discount (%)", util.Float64ToString(filters.MinDiscountPercent * 100), generateUrl(page, filters, "MinDiscountPercent"))
+	}
+
+	if filters.MaxDiscountPercent > -1 {
+        @FilterBadgeComponent("Max. Discount (%)", util.Float64ToString(filters.MaxDiscountPercent * 100), generateUrl(page, filters, "MaxDiscountPercent"))
+	}
+
+	if filters.MinAveragePrice > -1 {
+        @FilterBadgeComponent("Min. Average Price", util.Float64ToString(filters.MinAveragePrice / 100), generateUrl(page, filters, "MinAveragePrice"))
+	}
+
+	if filters.MaxAveragePrice > -1 {
+        @FilterBadgeComponent("Max. Average Price", util.Float64ToString(filters.MaxAveragePrice / 100), generateUrl(page, filters, "MaxAveragePrice"))
+	}
+
+	if filters.MinMinimumPrice > -1 {
+        @FilterBadgeComponent("Min. Lower Price", util.Float64ToString(filters.MinMinimumPrice / 100), generateUrl(page, filters, "MinMinimumPrice"))
+	}
+
+	if filters.MaxMinimumPrice > -1 {
+        @FilterBadgeComponent("Max. Lower Price", util.Float64ToString(filters.MaxMinimumPrice / 100), generateUrl(page, filters, "MaxMinimumPrice"))
+	}
+
+	if filters.MinMaximumPrice > -1 {
+        @FilterBadgeComponent("Min. Highest Price", util.Float64ToString(filters.MinMaximumPrice / 100), generateUrl(page, filters, "MinMaximumPrice"))
+	}
+
+	if filters.MaxMaximumPrice > -1 {
+        @FilterBadgeComponent("Max. Highest Price", util.Float64ToString(filters.MaxMaximumPrice / 100), generateUrl(page, filters, "MaxMaximumPrice"))
+	}
+
+	@FilterDialogComponent(filters, stores)
+    </div>
+}
+
+func generateUrl(page pagination.PaginatedQuery, filters product.FinderFilters, toRemove string) string {
+    switch (toRemove) {
+        case "StoreId":
+            filters.StoreId = -1
+        case "MinPrice":
+            filters.MinPrice = -1
+        case "MaxPrice":
+            filters.MaxPrice = -1
+        case "NameLike":
+            filters.NameLike = ""
+        case "BrandLike":
+            filters.BrandLike = ""
+        case "Available":
+            filters.Available = -1
+        case "ProductUrl":
+            filters.ProductUrl = ""
+        case "MinDifference":
+            filters.MinDifference = -1
+        case "MaxDifference":
+            filters.MaxDifference = -1
+        case "MinDiscountPercent":
+            filters.MinDiscountPercent = -1
+        case "MaxDiscountPercent":
+            filters.MaxDiscountPercent = -1
+        case "MinAveragePrice":
+            filters.MinAveragePrice = -1
+        case "MaxAveragePrice":
+            filters.MaxAveragePrice = -1
+        case "MinMinimumPrice":
+            filters.MinMinimumPrice = -1
+        case "MaxMinimumPrice":
+            filters.MaxMinimumPrice = -1
+        case "MinMaximumPrice":
+            filters.MinMaximumPrice = -1
+        case "MaxMaximumPrice":
+            filters.MaxMaximumPrice = -1
+    }
+    return util.QueryParamString(page, filters)
+}
+
+func findStoreName(id int, stores []db_store.Store) string {
+   for _, store := range stores {
+     if store.StoreId == int64(id) {
+        return store.Name
+     }
+   }
+
+   return ""
+}
+

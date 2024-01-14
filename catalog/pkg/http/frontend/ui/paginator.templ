@@ -1,0 +1,81 @@
+package ui
+
+import "fmt"
+import "strconv"
+
+type PaginatorProps struct {
+    CurrentPage int
+    TotalPages int
+    UrlExpression string
+}
+
+templ PaginatorComponent(props PaginatorProps) {
+    <nav aria-label="Page navigation example" class="d-flex justify-content-center mt-3">
+      <ul class="pagination">
+        if props.CurrentPage > 1 {
+            @limitPageItem("«", "", props.UrlExpression, 1)
+        } else {
+            @limitPageItem("«", "disabled", props.UrlExpression, 1)
+        }
+
+        for _, item := range createPageItems(props) {
+            @item
+        }
+
+        if props.CurrentPage < props.TotalPages {
+            @limitPageItem("»", "", props.UrlExpression, props.TotalPages)
+        } else {
+            @limitPageItem("»", "disabled", props.UrlExpression, props.TotalPages)
+        }
+      </ul>
+    </nav>
+}
+
+templ limitPageItem(char string, additionalClasses string, urlExpression string, targetPage int) {
+    <li class={fmt.Sprintf("page-item %s", additionalClasses)}>
+      <a class="page-link" href={templ.URL(fmt.Sprintf(urlExpression, targetPage))} aria-label="First">
+        <span aria-hidden="true">{char}</span>
+      </a>
+    </li>
+}
+
+templ pageItem(number int, active bool, expression string) {
+    <li class={pageItemClass(active)}>
+        <a class="page-link" href={templ.URL(fmt.Sprintf(expression, number))}>{strconv.Itoa(number)}</a>
+    </li>
+}
+
+func pageItemClass(active bool) string {
+    if active {
+        return "page-item active"
+    }
+    return "page-item"
+}
+
+func createPageItems(props PaginatorProps) []templ.Component {
+    var components = []templ.Component{}
+
+    var left = props.CurrentPage - 3;
+    var right = props.CurrentPage + 4;
+
+    for (left < 1) {
+        left += 1
+
+        if (right < props.TotalPages + 1) {
+            right += 1
+        }
+    }
+
+    for right > props.TotalPages + 1 {
+        right -= 1;
+        if left > 1 {
+            left -= 1
+        }
+    }
+
+    for i := left; i < right; i++ {
+        components = append(components, pageItem(i, i == props.CurrentPage, props.UrlExpression))
+    }
+
+    return components
+}

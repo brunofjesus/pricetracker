@@ -1,0 +1,21 @@
+package view
+
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/ui"
+
+templ Base() {
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="/css/bootstrap.css" />
+    <link rel="stylesheet" href="/css/bootstrap-grid.css" />
+    <link rel="stylesheet" href="/css/bootstrap-utilities.css" />
+    <link rel="stylesheet" href="/css/bootstrap-icons.css" />
+  </head>
+  <body>
+    @ui.HeaderComponent()
+    { children... }
+
+    <script src="/js/bootstrap.bundle.js" crossorigin="anonymous"></script>
+  </body>
+</html>
+}

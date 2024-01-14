@@ -1,0 +1,59 @@
+package view
+
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/ui"
+import db_product "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
+import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
+import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
+import "fmt"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
+import "strings"
+
+type ProductsViewProps struct {
+	Page    pagination.PaginatedData[[]db_product.ProductWithMetrics]
+	PageQuery pagination.PaginatedQuery
+	Filters product.FinderFilters
+	Stores  []db_store.Store
+}
+
+// https://mdbootstrap.com/snippets/standard/mdbootstrap/4852169?view=project#html-tab-view
+
+templ ProductsView(p ProductsViewProps) {
+	@Base() {
+        <!-- New stuff -->
+        <section class="">
+        <div class="container">
+            <div class="row">
+              <div class="col-lg-12">
+                @ui.FiltersComponent(p.PageQuery, p.Filters, p.Stores)
+                @ui.GridHeader(p.Page, p.PageQuery, p.Filters)
+                @ui.ProductGridComponent(p.Page)
+
+                 <!-- Pagination -->
+                @ui.PaginatorComponent(ui.PaginatorProps{
+                    CurrentPage: p.Page.CurrentPage,
+                    TotalPages: p.Page.TotalPages,
+                    UrlExpression: paginationUrlExpression(p),
+                })
+              </div>
+            </div>
+        </div>
+        </section>
+	}
+}
+
+
+templ property(label string, value string) {
+    <li>
+        <label><b>{label}</b></label>: {value}
+    </li>
+}
+
+func paginationUrlExpression(p ProductsViewProps) string {
+   return strings.Replace(
+    util.QueryParamString(p.PageQuery, p.Filters),
+    fmt.Sprintf("page=%d", p.PageQuery.Page),
+    "page=%d",
+    1,
+   )
+}

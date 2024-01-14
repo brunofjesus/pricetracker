@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"fmt"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest/utils"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/price"
 	"github.com/go-chi/chi/v5"
@@ -14,7 +13,7 @@ func GetHistory(finder *price.Finder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		productId, err := strconv.ParseInt(chi.URLParam(r, "productId"), 10, 64)
 
-		from, err := getTimestampFromQueryParam(
+		from, err := utils.GetTimestampFromQueryParam(
 			r, "from",
 			time.Now().AddDate(0, 0, -30),
 		)
@@ -24,7 +23,7 @@ func GetHistory(finder *price.Finder) http.HandlerFunc {
 			return
 		}
 
-		to, err := getTimestampFromQueryParam(
+		to, err := utils.GetTimestampFromQueryParam(
 			r, "to", time.Now(),
 		)
 
@@ -41,21 +40,4 @@ func GetHistory(finder *price.Finder) http.HandlerFunc {
 
 		utils.WriteJSON(w, http.StatusOK, result)
 	}
-}
-
-func getTimestampFromQueryParam(r *http.Request, key string, fallback time.Time) (time.Time, error) {
-	seconds, err := utils.GetQueryParamInt64(r, key)
-
-	if err != nil {
-		return fallback, fmt.Errorf(
-			"invalid timestamp `%s` value `%s`: %w",
-			key, utils.GetQueryParam(r, key), err,
-		)
-	}
-
-	if seconds == -1 {
-		return fallback, nil
-	}
-
-	return time.Unix(seconds, 0), nil
 }

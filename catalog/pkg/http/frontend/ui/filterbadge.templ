@@ -1,0 +1,32 @@
+package ui
+
+templ FilterBadgeComponent(label string, value string, target string) {
+    <style type="text/css">
+        .filter-badge {
+            font-size: 1em;
+            text-decoration: unset;
+            cursor: pointer;
+        }
+
+        .filter-badge > * {
+            cursor: pointer;
+        }
+
+        .filter-badge:hover {
+            background-color: #7f8c8d !important;
+        }
+
+        .filter-badge:hover .bi {
+            color: #e74c3c;
+        }
+
+        .filter-badge span {
+            font-weight: 400;
+        }
+    </style>
+    <a class={"badge", "rounded-pill", "bg-secondary", "filter-badge"} href={templ.URL(target)}>
+        <label>{label}</label>
+        <span>{value}</span>
+        <i class="bi bi-x-circle-fill"></i>
+    </a>
+}

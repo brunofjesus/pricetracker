@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/brunofjesus/pricetracker/catalog/internal/app"
 	httpserver "github.com/brunofjesus/pricetracker/catalog/pkg/http"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest"
 	"log/slog"
 	"os"
@@ -34,11 +35,23 @@ func main() {
 	}
 
 	// select {}
+	host := ""
+	if os.Getenv("IS_DEV") == "true" {
+		host = "localhost"
+		logger.Info("Running in development mode", slog.Any("is_dev", os.Getenv("IS_DEV")))
+	}
+
 	httpServerProps := httpserver.ServerProps{
 		ApiProps: &rest.V1ApiProps{
 			ProductFinder: environment.Product.Finder,
 			PriceFinder:   environment.Price.Finder,
 		},
+		FrontendProps: &frontend.V1FrontendProps{
+			ProductFinder: environment.Product.Finder,
+			StoreFinder:   environment.Store.Finder,
+			PriceFinder:   environment.Price.Finder,
+		},
+		Host: host,
 		Port: 8080,
 	}
 	err := httpserver.ListenAndServe(httpServerProps)

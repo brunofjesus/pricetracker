@@ -2,6 +2,7 @@ package http
 
 import (
 	"fmt"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -10,8 +11,10 @@ import (
 )
 
 type ServerProps struct {
-	ApiProps *rest.V1ApiProps
-	Port     int
+	ApiProps      *rest.V1ApiProps
+	FrontendProps *frontend.V1FrontendProps
+	Host          string
+	Port          int
 }
 
 func ListenAndServe(props ServerProps) error {
@@ -26,5 +29,9 @@ func ListenAndServe(props ServerProps) error {
 		rest.AddRoutes(r, *props.ApiProps)
 	}
 
-	return http.ListenAndServe(fmt.Sprintf(":%d", props.Port), r)
+	if props.FrontendProps != nil {
+		frontend.AddRoutes(r, *props.FrontendProps)
+	}
+
+	return http.ListenAndServe(fmt.Sprintf("%s:%d", props.Host, props.Port), r)
 }

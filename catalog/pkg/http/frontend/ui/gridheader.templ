@@ -1,0 +1,57 @@
+package ui
+
+import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
+import db_product "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
+import "strconv"
+import "strings"
+
+script setSortOrder(baseUrl string) {
+    const select = document.getElementById("sortOrderSelect");
+    window.location = baseUrl + "&sortField=" + select.value
+}
+
+templ GridHeader(page pagination.PaginatedData[[]db_product.ProductWithMetrics], query pagination.PaginatedQuery, filters product.FinderFilters) {
+    <header class="d-sm-flex align-items-center border-bottom mb-4 pb-3">
+      <strong class="d-block py-2">{ strconv.FormatInt(page.TotalResults, 10) } Items found </strong>
+      <div class="ms-auto">
+        <select id="sortOrderSelect" class="form-select d-inline-block w-auto border pt-1" onchange={setSortOrder(getUrlWithoutSortField(query, filters))}>
+          @sortOption("discount_percent", "Discount (%)", page.SortField == "discount_percent")
+          @sortOption("diff", "Difference", page.SortField == "diff")
+          @sortOption("price", "Current Price", page.SortField == "price")
+          @sortOption("minimum", "Lowest Price", page.SortField == "minimum")
+          @sortOption("maximum", "Higher Price", page.SortField == "maximum")
+          @sortOption("name", "Name", page.SortField == "name")
+          @sortOption("brand", "Brand", page.SortField == "brand")
+        </select>
+        <div class="btn-group shadow-0 border">
+          <a href={templ.SafeURL(getSortDirectionUrl(query, filters, "asc"))} class={"btn", "btn-light", templ.KV("active", page.SortDirection == "asc")} title="Sort Ascending">
+            <i class="bi bi-sort-numeric-down"></i>
+          </a>
+          <a href={templ.SafeURL(getSortDirectionUrl(query, filters, "desc"))} class={"btn", "btn-light", templ.KV("active", page.SortDirection == "desc")} title="Sort Descending">
+            <i class="bi bi-sort-numeric-up"></i>
+          </a>
+        </div>
+      </div>
+    </header>
+}
+
+
+templ sortOption(value string, text string, selected bool) {
+    if selected {
+        <option selected value={value}>{text}</option>
+    } else {
+        <option value={value}>{text}</option>
+    }
+}
+
+func getUrlWithoutSortField(query pagination.PaginatedQuery, filters product.FinderFilters) string {
+    query.SortField = ""
+    return strings.Replace(util.QueryParamString(query, filters), "&sortField=", "", 1);
+}
+
+func getSortDirectionUrl(query pagination.PaginatedQuery, filters product.FinderFilters, direction string) string {
+    query.SortDirection = direction
+    return util.QueryParamString(query, filters)
+}

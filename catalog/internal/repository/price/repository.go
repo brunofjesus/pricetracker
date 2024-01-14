@@ -62,7 +62,7 @@ func (r *Repository) FindPricesBetween(productId int64, from time.Time, to time.
 					"date_time": to.Format(time.RFC3339),
 				},
 			},
-		)
+		).OrderBy("date_time asc")
 
 	var prices []ProductPrice
 	rows, err := q.Query()

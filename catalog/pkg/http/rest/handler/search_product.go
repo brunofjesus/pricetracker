@@ -17,7 +17,7 @@ func SearchProduct(finder *product.Finder) http.HandlerFunc {
 			return
 		}
 
-		paginationQuery, err := pagination.FromHttpRequest(r)
+		paginationQuery, err := pagination.FromHttpRequest(r, 10)
 		if err != nil {
 			utils.ErrorJSON(w, err, http.StatusBadRequest)
 			return

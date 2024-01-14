@@ -29,6 +29,7 @@ type Price struct {
 
 type Store struct {
 	Handler *store.Handler
+	Finder  *store.Finder
 }
 
 func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
@@ -84,6 +85,10 @@ func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
 		Repository: storeRepository,
 	}
 
+	storeFinder := store.Finder{
+		StoreRepository: storeRepository,
+	}
+
 	env := Environment{
 		Product: Product{
 			Creator: &productCreator,
@@ -95,6 +100,7 @@ func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
 		},
 		Store: Store{
 			Handler: &storeHandler,
+			Finder:  &storeFinder,
 		},
 	}
 
