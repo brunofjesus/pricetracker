@@ -62,7 +62,7 @@ func (s *Updater) Update(productId int64, storeProduct MqStoreProduct) error {
 	}
 
 	if latestPrice.Price != storeProduct.Price ||
-		time.Since(latestPrice.DateTime) > time.Minute {
+		time.Since(latestPrice.DateTime) > time.Hour*4 {
 
 		// Insert price update
 		err = s.PriceRepository.CreatePrice(
