@@ -31,27 +31,7 @@ func HeaderComponent() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<script type=\"text/javascript\">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Var2 := `
-  window.addEventListener("DOMContentLoaded", ()=> {
-    document.getElementById("search_input").addEventListener("focus", () => {
-      var myModal = new bootstrap.Modal(document.getElementById('quickSearchDialogModal'), {
-        backdrop: false,
-        keyboard: true,
-        focus: true
-      })
-      myModal.show()
-    })
-  })
-`
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script>")
+		templ_7745c5c3_Err = quickSearchDialogTrigger().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -60,4 +40,22 @@ func HeaderComponent() templ.Component {
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func quickSearchDialogTrigger() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_quickSearchDialogTrigger_098b`,
+		Function: `function __templ_quickSearchDialogTrigger_098b(){window.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("search_input").addEventListener("focus", () => {
+          var myModal = new bootstrap.Modal(document.getElementById('quickSearchDialogModal'), {
+            backdrop: false,
+            keyboard: true,
+            focus: true
+          })
+          myModal.show()
+        })
+      })}`,
+		Call:       templ.SafeScript(`__templ_quickSearchDialogTrigger_098b`),
+		CallInline: templ.SafeScriptInline(`__templ_quickSearchDialogTrigger_098b`),
+	}
 }

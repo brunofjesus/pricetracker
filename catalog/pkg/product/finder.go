@@ -56,7 +56,7 @@ func (s *Finder) FindDetailedProducts(
 	sortField := paginatedQuery.GetSortFieldIfValid(
 		[]string{
 			"product_id", "store_id", "name", "brand", "price", "available",
-			"diff", "discount_percent", "average", "minimum", "maximum",
+			"difference", "discount_percent", "average", "minimum", "maximum",
 		},
 		"name",
 	)

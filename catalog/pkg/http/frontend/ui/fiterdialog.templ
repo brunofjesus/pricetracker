@@ -20,11 +20,8 @@ templ FilterDialogComponent(filters product.FinderFilters, stores []db_store.Sto
          .more-filter:hover {
              background-color: #7f8c8d !important;
          }
-
-         .more-install span {
-             font-weight: 400;
-         }
    </style>
+
    <span class={"badge", "rounded-pill", "bg-secondary", "more-filter"} data-bs-toggle="modal" data-bs-target="#filterDialogModal">
         <i class="bi bi-toggles2"></i>
         <label>More Filters</label>
@@ -43,7 +40,7 @@ templ FilterDialogModalComponent(filters product.FinderFilters, stores []db_stor
             <span aria-hidden="true"></span>
           </button>
         </div>
-        <form action="/" id="searchForm">
+        <form action="/" id="filtersForms">
             <div class="modal-body">
                <div class="row mb-3">
                   <div class="col-lg-4">
@@ -95,39 +92,44 @@ templ FilterDialogModalComponent(filters product.FinderFilters, stores []db_stor
     </div>
   </div>
 
-  <script>
-    const form = document.getElementById("searchForm")
-    form.addEventListener("submit", (event) => {
-        ["Difference", "Price", "AveragePrice", "MinimumPrice", "MaximumPrice"].forEach(convertRangeToCents)
-        convertPercentToDecimal("DiscountPercent")
-        return true
-      }
+  @formSubmitHandler()
+}
+
+script formSubmitHandler() {
+    const form = document.getElementById("filtersForms")
+        form.addEventListener("submit", (event) => {
+            ["Difference", "Price", "AveragePrice", "MinimumPrice", "MaximumPrice"].forEach(convertRangeToCents)
+            convertPercentToDecimal("DiscountPercent")
+            document.getElementById('filterDialogModal').style = "display: none;"
+            return true
+          }
     )
 
     function convertPercentToDecimal(itemName) {
         const minInput = document.getElementById(`min${itemName}`)
         if (minInput.value) {
-            minInput.value = parseInt(minInput.value) / 100
+            minInput.value = Number(minInput.value) / 100
         }
 
         const maxInput = document.getElementById(`max${itemName}`)
         if (maxInput.value) {
-            maxInput.value = parseInt(maxInput.value) / 100
+            maxInput.value = Number(maxInput.value) / 100
         }
     }
 
     function convertRangeToCents(itemName) {
         const minInput = document.getElementById(`min${itemName}`)
         if (minInput.value) {
-            minInput.value = parseInt(minInput.value) * 100
+            minInput.value = Number(minInput.value) * 100
         }
 
         const maxInput = document.getElementById(`max${itemName}`)
         if (maxInput.value) {
-            maxInput.value = parseInt(maxInput.value) * 100
+            maxInput.value = Number(maxInput.value) * 100
         }
     }
-  </script>
+
+    return true
 }
 
 templ rangeFormControl(id string, label string, help string, fromValue *float64, toValue *float64) {
