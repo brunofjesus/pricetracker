@@ -84,11 +84,11 @@ func QueryParamString(page pagination.PaginatedQuery, filters product.FinderFilt
 	}
 
 	if filters.MaxMinimumPrice != nil {
-		result += fmt.Sprintf("minMaximumPrice=%f&", *filters.MinMaximumPrice)
+		result += fmt.Sprintf("minMaximumPrice=%f&", *filters.MaxMinimumPrice)
 	}
 
 	if filters.MinMaximumPrice != nil {
-		result += fmt.Sprintf("minMaximumPrice=%f&", *filters.MaxMaximumPrice)
+		result += fmt.Sprintf("minMaximumPrice=%f&", *filters.MinMaximumPrice)
 	}
 
 	if filters.MaxMaximumPrice != nil {

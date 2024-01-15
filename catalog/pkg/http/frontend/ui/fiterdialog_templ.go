@@ -46,10 +46,6 @@ func FilterDialogComponent(filters product.FinderFilters, stores []db_store.Stor
          .more-filter:hover {
              background-color: #7f8c8d !important;
          }
-
-         .more-install span {
-             font-weight: 400;
-         }
    `
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var2)
 		if templ_7745c5c3_Err != nil {
@@ -118,7 +114,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button></div><form action=\"/\" id=\"searchForm\"><div class=\"modal-body\"><div class=\"row mb-3\"><div class=\"col-lg-4\"><label for=\"nameInput\" class=\"form-label\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h5><button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"modal\" aria-label=\"Close\"><span aria-hidden=\"true\"></span></button></div><form action=\"/\" id=\"filtersForms\"><div class=\"modal-body\"><div class=\"row mb-3\"><div class=\"col-lg-4\"><label for=\"nameInput\" class=\"form-label\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -220,7 +216,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(store.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 73, Col: 100}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 70, Col: 100}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -246,7 +242,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(store.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 75, Col: 91}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 72, Col: 91}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -304,48 +300,11 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></div></form></div></div></div><script>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</button></div></form></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Var17 := `
-    const form = document.getElementById("searchForm")
-    form.addEventListener("submit", (event) => {
-        ["Difference", "Price", "AveragePrice", "MinimumPrice", "MaximumPrice"].forEach(convertRangeToCents)
-        convertPercentToDecimal("DiscountPercent")
-        return true
-      }
-    )
-
-    function convertPercentToDecimal(itemName) {
-        const minInput = document.getElementById(` + "`" + `min${itemName}` + "`" + `)
-        if (minInput.value) {
-            minInput.value = parseInt(minInput.value) / 100
-        }
-
-        const maxInput = document.getElementById(` + "`" + `max${itemName}` + "`" + `)
-        if (maxInput.value) {
-            maxInput.value = parseInt(maxInput.value) / 100
-        }
-    }
-
-    function convertRangeToCents(itemName) {
-        const minInput = document.getElementById(` + "`" + `min${itemName}` + "`" + `)
-        if (minInput.value) {
-            minInput.value = parseInt(minInput.value) * 100
-        }
-
-        const maxInput = document.getElementById(` + "`" + `max${itemName}` + "`" + `)
-        if (maxInput.value) {
-            maxInput.value = parseInt(maxInput.value) * 100
-        }
-    }
-  `
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ_7745c5c3_Var17)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</script>")
+		templ_7745c5c3_Err = formSubmitHandler().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -356,6 +315,48 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 	})
 }
 
+func formSubmitHandler() templ.ComponentScript {
+	return templ.ComponentScript{
+		Name: `__templ_formSubmitHandler_4e5f`,
+		Function: `function __templ_formSubmitHandler_4e5f(){const form = document.getElementById("filtersForms")
+        form.addEventListener("submit", (event) => {
+            ["Difference", "Price", "AveragePrice", "MinimumPrice", "MaximumPrice"].forEach(convertRangeToCents)
+            convertPercentToDecimal("DiscountPercent")
+            document.getElementById('filterDialogModal').style = "display: none;"
+            return true
+          }
+    )
+
+    function convertPercentToDecimal(itemName) {
+        const minInput = document.getElementById(` + "`" + `min${itemName}` + "`" + `)
+        if (minInput.value) {
+            minInput.value = Number(minInput.value) / 100
+        }
+
+        const maxInput = document.getElementById(` + "`" + `max${itemName}` + "`" + `)
+        if (maxInput.value) {
+            maxInput.value = Number(maxInput.value) / 100
+        }
+    }
+
+    function convertRangeToCents(itemName) {
+        const minInput = document.getElementById(` + "`" + `min${itemName}` + "`" + `)
+        if (minInput.value) {
+            minInput.value = Number(minInput.value) * 100
+        }
+
+        const maxInput = document.getElementById(` + "`" + `max${itemName}` + "`" + `)
+        if (maxInput.value) {
+            maxInput.value = Number(maxInput.value) * 100
+        }
+    }
+
+    return true}`,
+		Call:       templ.SafeScript(`__templ_formSubmitHandler_4e5f`),
+		CallInline: templ.SafeScriptInline(`__templ_formSubmitHandler_4e5f`),
+	}
+}
+
 func rangeFormControl(id string, label string, help string, fromValue *float64, toValue *float64) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
@@ -364,21 +365,21 @@ func rangeFormControl(id string, label string, help string, fromValue *float64, 
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var18 == nil {
-			templ_7745c5c3_Var18 = templ.NopComponent
+		templ_7745c5c3_Var17 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var17 == nil {
+			templ_7745c5c3_Var17 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"row mb-3\"><div class=\"col-lg-4\"><label class=\"form-label\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var19 string
-		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(label)
+		var templ_7745c5c3_Var18 string
+		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 135, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 137, Col: 41}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -536,12 +537,12 @@ func rangeFormControl(id string, label string, help string, fromValue *float64, 
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var20 string
-		templ_7745c5c3_Var20, templ_7745c5c3_Err = templ.JoinStringErrs(help)
+		var templ_7745c5c3_Var19 string
+		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(help)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 151, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 153, Col: 84}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var20))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

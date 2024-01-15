@@ -23,11 +23,34 @@ func QuickSearchDialogComponent() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"modal modal-lg\" id=\"quickSearchDialogModal\"><div class=\"modal-dialog modal-dialog-scrollable\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-body px-3 py-3\"><div class=\"d-flex flex-row align-items-center gap-1\"><input id=\"quick_search_input\" type=\"search\" class=\"form-control\" placeholder=\"Search...\" aria-label=\"Search\"> <button type=\"button\" class=\"btn btn-outline-dark\" data-bs-dismiss=\"modal\" aria-label=\"Close\"><i class=\"bi bi-x-lg\"></i></button></div><div class=\"row mt-3\"><div class=\"list-group\" id=\"quick_search_results\"></div></div></div></div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"modal modal-lg\" id=\"quickSearchDialogModal\"><div class=\"modal-dialog modal-dialog-scrollable\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-body px-3 py-3\"><div class=\"d-flex flex-row align-items-center gap-1\" hx-ext=\"client-side-templates\"><input id=\"quick_search_input\" type=\"search\" class=\"form-control\" placeholder=\"Search...\" aria-label=\"Search\" name=\"name\" hx-get=\"/api/v1/product/search\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#quick_search_results\" handlebars-template=\"quick_search_template\"> <button type=\"button\" class=\"btn btn-outline-dark\" data-bs-dismiss=\"modal\" aria-label=\"Close\"><i class=\"bi bi-x-lg\"></i></button></div><div class=\"row mt-3\"><div class=\"list-group\" id=\"quick_search_results\"></div></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = quickSearchHandler().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = templ.Raw(`
+    <template id="quick_search_template">
+    {{#items}}
+       <a href="/{{product_id}}" class="list-group-item list-group-item-action">
+           <div class="row">
+               <div class="col-md-2">
+                 <img class="d-block" src="{{image_url}}" width="80px"/>
+               </div>
+               <div class="col-md-8">
+                 <strong class="list-group-item-heading">{{name}}</strong>
+                 <p class="list-group-item-text">{{store_name}}</p>
+               </div>
+               <div class="col-md-2">
+                  {{#when discount_percent 'gt' 0}}
+                      <span class="badge alert-success">{{math price '/' 100}} €</span>
+                  {{else}}
+                      <span class="badge alert-danger">{{math price '/' 100}} €</span>
+                  {{/when}}
+               </div>
+           </div>
+       </a>
+    {{/items}}
+    </template>
+    `).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -36,66 +59,4 @@ func QuickSearchDialogComponent() templ.Component {
 		}
 		return templ_7745c5c3_Err
 	})
-}
-
-func quickSearchHandler() templ.ComponentScript {
-	return templ.ComponentScript{
-		Name: `__templ_quickSearchHandler_710a`,
-		Function: `function __templ_quickSearchHandler_710a(){function debounce(func, timeout = 500){
-      let timer;
-      return (...args) => {
-        clearTimeout(timer);
-        timer = setTimeout(() => { func.apply(this, args); }, timeout);
-      };
-    }
-
-
-    // Function to make the HTTP request
-    async function makeHttpRequest(inputValue) {
-      const apiUrl = '/api/v1/product/search?name=' + encodeURIComponent(inputValue);
-
-      const response = await fetch(apiUrl)
-      const jsonResponse = await response.json()
-      return jsonResponse.items;
-    }
-
-    const inputElem = document.getElementById("quick_search_input")
-    inputElem.addEventListener("input", debounce(async () => {
-      if (inputElem.value != "") {
-        const items = await makeHttpRequest(inputElem.value)
-        const resultsContainer = document.getElementById("quick_search_results")
-        resultsContainer.innerText = ""
-        items.forEach(item => {
-          addSearchResult(item.product_id, item.image_url, item.name, item.store_name, item.price / 100, item.discount_percent > 0); 
-        })
-      }
-    }))
-
-    function addSearchResult(productId, imageUrl, productName, storeName, price, isDiscount) {
-      const parent = document.getElementById("quick_search_results")  
-      const className = isDiscount ? "alert-success" : "alert-danger";
-      
-      const a = document.createElement("a")
-      a.href = ` + "`" + `/${productId}` + "`" + `
-      a.className = "list-group-item list-group-item-action"
-    
-      a.innerHTML = ` + "`" + `
-      <div class='row'>
-        <div class='col-md-2'>
-          <img class='d-block' src='${imageUrl}' width='80px'/>
-        </div>
-        <div class='col-md-8'>
-          <strong class="list-group-item-heading">${productName}</strong>
-          <p class="list-group-item-text">${storeName}</p>
-        </div>
-        <div class='col-md-2'>
-          <span class="badge ${className}">${price} €</span>
-        </div>
-        </div>
-      ` + "`" + `
-      parent.appendChild(a)
-    }}`,
-		Call:       templ.SafeScript(`__templ_quickSearchHandler_710a`),
-		CallInline: templ.SafeScriptInline(`__templ_quickSearchHandler_710a`),
-	}
 }

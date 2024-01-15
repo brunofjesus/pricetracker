@@ -23,18 +23,18 @@ templ HeaderComponent() {
   </header>
 
 @QuickSearchDialogComponent()
-
-<script type="text/javascript">
-  window.addEventListener("DOMContentLoaded", ()=> {
-    document.getElementById("search_input").addEventListener("focus", () => {
-      var myModal = new bootstrap.Modal(document.getElementById('quickSearchDialogModal'), {
-        backdrop: false,
-        keyboard: true,
-        focus: true
-      })
-      myModal.show()
-    })
-  })
-</script>
+@quickSearchDialogTrigger()
 }
 
+script quickSearchDialogTrigger() {
+    window.addEventListener("DOMContentLoaded", () => {
+        document.getElementById("search_input").addEventListener("focus", () => {
+          var myModal = new bootstrap.Modal(document.getElementById('quickSearchDialogModal'), {
+            backdrop: false,
+            keyboard: true,
+            focus: true
+          })
+          myModal.show()
+        })
+      })
+}

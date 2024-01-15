@@ -42,13 +42,6 @@ templ ProductsView(p ProductsViewProps) {
 	}
 }
 
-
-templ property(label string, value string) {
-    <li>
-        <label><b>{label}</b></label>: {value}
-    </li>
-}
-
 func paginationUrlExpression(p ProductsViewProps) string {
    return strings.Replace(
     util.QueryParamString(p.PageQuery, p.Filters),

@@ -182,7 +182,7 @@ func appendFiltersToQuery(q squirrel.SelectBuilder, filters ProductWithStatsFilt
 	}
 
 	f = append(f, generateBetween("price", filters.MinPrice, filters.MaxPrice)...)
-	f = append(f, generateBetween("diff", filters.MinDifference, filters.MaxDifference)...)
+	f = append(f, generateBetween("difference", filters.MinDifference, filters.MaxDifference)...)
 	f = append(f, generateBetween("discount_percent", filters.MinDiscountPercent, filters.MaxDiscountPercent)...)
 	f = append(f, generateBetween("average", filters.MinAveragePrice, filters.MaxAveragePrice)...)
 	f = append(f, generateBetween("maximum", filters.MinMaximumPrice, filters.MaxMaximumPrice)...)
