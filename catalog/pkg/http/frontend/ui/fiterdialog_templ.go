@@ -174,7 +174,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if filters.StoreId == -1 {
+		if filters.StoreId == nil {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<option selected value=\"\">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -204,7 +204,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 			}
 		}
 		for _, store := range stores {
-			if int64(filters.StoreId) == store.StoreId {
+			if filters.StoreId != nil && int64(*filters.StoreId) == store.StoreId {
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<option selected value=\"")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
@@ -262,27 +262,27 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("DiscountPercent", "Discount (%)", "Product price difference from average (%).", filters.MinDiscountPercent*100, filters.MaxDiscountPercent*100).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("DiscountPercent", "Discount (%)", "Product price difference from average (%).", mul(filters.MinDiscountPercent, 100), mul(filters.MaxDiscountPercent, 100)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("Difference", "Price Difference", "Product price difference from average (in currency).", filters.MinDifference/100, filters.MaxDifference/100).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("Difference", "Price Difference", "Product price difference from average (in currency).", div(filters.MinDifference, 100), div(filters.MaxDifference, 100)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("Price", "Current Price", "Product current price.", filters.MinPrice/100, filters.MaxPrice/100).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("Price", "Current Price", "Product current price.", div(filters.MinPrice, 100), div(filters.MaxPrice, 100)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("AveragePrice", "Average Price", "Average price from last 30 days.", filters.MinAveragePrice/100, filters.MaxAveragePrice/100).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("AveragePrice", "Average Price", "Average price from last 30 days.", div(filters.MinAveragePrice, 100), div(filters.MaxAveragePrice, 100)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("MinimumPrice", "Lowest Price", "Lowest price from last 30 days.", filters.MinMinimumPrice/100, filters.MaxMinimumPrice/100).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("MinimumPrice", "Lowest Price", "Lowest price from last 30 days.", div(filters.MinMinimumPrice, 100), div(filters.MaxMinimumPrice, 100)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = rangeFormControl("MaximumPrice", "Higher Price", "Higher price from last 30 days.", filters.MinMaximumPrice/100, filters.MaxMaximumPrice/100).Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = rangeFormControl("MaximumPrice", "Higher Price", "Higher price from last 30 days.", div(filters.MinMaximumPrice, 100), div(filters.MaxMaximumPrice, 100)).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -356,7 +356,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 	})
 }
 
-func rangeFormControl(id string, label string, help string, fromValue float64, toValue float64) templ.Component {
+func rangeFormControl(id string, label string, help string, fromValue *float64, toValue *float64) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -386,7 +386,7 @@ func rangeFormControl(id string, label string, help string, fromValue float64, t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if fromValue > -0.01 {
+		if fromValue != nil {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"number\" step=\"any\" name=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -415,7 +415,7 @@ func rangeFormControl(id string, label string, help string, fromValue float64, t
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(util.Float64ToString(fromValue)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(util.Float64ToString(*fromValue)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -457,7 +457,7 @@ func rangeFormControl(id string, label string, help string, fromValue float64, t
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if toValue > -0.01 {
+		if toValue != nil {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input type=\"number\" step=\"any\" name=\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
@@ -486,7 +486,7 @@ func rangeFormControl(id string, label string, help string, fromValue float64, t
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(util.Float64ToString(toValue)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(util.Float64ToString(*toValue)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -554,4 +554,22 @@ func rangeFormControl(id string, label string, help string, fromValue float64, t
 		}
 		return templ_7745c5c3_Err
 	})
+}
+
+func div(v *float64, d int) *float64 {
+	if v == nil {
+		return nil
+	}
+
+	r := *v / float64(d)
+	return &r
+}
+
+func mul(v *float64, m int) *float64 {
+	if v == nil {
+		return nil
+	}
+
+	r := *v * float64(m)
+	return &r
 }

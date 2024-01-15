@@ -2,7 +2,6 @@ package utils
 
 import (
 	"fmt"
-	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 	"net/http"
 	"strconv"
 	"strings"
@@ -13,35 +12,45 @@ func GetQueryParam(r *http.Request, key string) string {
 	return r.URL.Query().Get(key)
 }
 
-func GetQueryParamInt(r *http.Request, key string) (int, error) {
+func GetQueryParamInt(r *http.Request, key string) (*int, error) {
 	strVal := GetQueryParam(r, key)
 
 	if len(strVal) == 0 {
-		return -1, nil
+		return nil, nil
 	}
 
-	return strconv.Atoi(strVal)
+	val, err := strconv.Atoi(strVal)
+	if err != nil {
+		return nil, err
+	}
+
+	return &val, nil
 }
 
-func GetQueryParamInt64(r *http.Request, key string) (int64, error) {
+func GetQueryParamInt64(r *http.Request, key string) (*int64, error) {
 	strVal := GetQueryParam(r, key)
 
 	if len(strVal) == 0 {
-		return -1, nil
+		return nil, nil
 	}
 
-	return strconv.ParseInt(strVal, 10, 64)
+	val, err := strconv.ParseInt(strVal, 10, 64)
+	if err != nil {
+		return nil, err
+	}
+
+	return &val, err
 }
 
 func GetQueryParamInt64Slice(r *http.Request, key string) ([]int64, error) {
 	queryParamValue := GetQueryParam(r, key)
 
 	if !strings.Contains(queryParamValue, ",") {
-		intVal, err := GetQueryParamInt64(r, key)
-		if err != nil || intVal == -1 {
+		intPtr, err := GetQueryParamInt64(r, key)
+		if err != nil || intPtr == nil {
 			return []int64{}, err
 		}
-		return []int64{intVal}, nil
+		return []int64{*intPtr}, nil
 	}
 
 	queryParamValueSlice := strings.Split(queryParamValue, ",")
@@ -58,31 +67,37 @@ func GetQueryParamInt64Slice(r *http.Request, key string) ([]int64, error) {
 	return result, nil
 }
 
-func GetQueryParamFloat64(r *http.Request, key string) (float64, error) {
-	return GetQueryParamFloat64Fallback(r, key, -1)
+func GetQueryParamFloat64(r *http.Request, key string) (*float64, error) {
+	return GetQueryParamFloat64Fallback(r, key, nil)
 }
 
-func GetQueryParamFloat64Fallback(r *http.Request, key string, fallback float64) (float64, error) {
+func GetQueryParamFloat64Fallback(r *http.Request, key string, fallback *float64) (*float64, error) {
 	strVal := GetQueryParam(r, key)
 
 	if len(strVal) == 0 {
 		return fallback, nil
 	}
 
-	return strconv.ParseFloat(strVal, 64)
-}
-
-func GetQueryParamNullBoolean(r *http.Request, key string) nulltype.NullBoolean {
-	intQueryParam, err := GetQueryParamInt(r, key)
-
+	val, err := strconv.ParseFloat(strVal, 64)
 	if err != nil {
-		return nulltype.UndefinedValue
+		return nil, err
 	}
 
-	return nulltype.FromInt(intQueryParam)
+	return &val, err
 }
 
-func GetTimestampFromQueryParam(r *http.Request, key string, fallback time.Time) (time.Time, error) {
+func GetQueryParamNullBoolean(r *http.Request, key string) *bool {
+	intQueryParam, err := GetQueryParamInt(r, key)
+
+	if err != nil || intQueryParam == nil {
+		return nil
+	}
+
+	val := *intQueryParam > 0
+	return &val
+}
+
+func GetTimestampFromQueryParam(r *http.Request, key string, fallback *time.Time) (*time.Time, error) {
 	seconds, err := GetQueryParamInt64(r, key)
 
 	if err != nil {
@@ -92,9 +107,9 @@ func GetTimestampFromQueryParam(r *http.Request, key string, fallback time.Time)
 		)
 	}
 
-	if seconds == -1 {
+	if seconds == nil {
 		return fallback, nil
 	}
-
-	return time.Unix(seconds, 0), nil
+	val := time.Unix(*seconds, 0)
+	return &val, nil
 }

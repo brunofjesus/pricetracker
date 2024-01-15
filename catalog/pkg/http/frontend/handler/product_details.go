@@ -19,9 +19,9 @@ func ProductDetails(productFinder *product.Finder, priceFinder *price.Finder) ht
 			return
 		}
 
+		fromDefault := time.Now().AddDate(0, 0, -30)
 		from, err := utils.GetTimestampFromQueryParam(
-			r, "from",
-			time.Now().AddDate(0, 0, -30),
+			r, "from", &fromDefault,
 		)
 
 		if err != nil {
@@ -29,8 +29,9 @@ func ProductDetails(productFinder *product.Finder, priceFinder *price.Finder) ht
 			return
 		}
 
+		toDefault := time.Now()
 		to, err := utils.GetTimestampFromQueryParam(
-			r, "to", time.Now(),
+			r, "to", &toDefault,
 		)
 
 		if err != nil {
@@ -44,7 +45,7 @@ func ProductDetails(productFinder *product.Finder, priceFinder *price.Finder) ht
 			return
 		}
 
-		prices, err := priceFinder.FindPriceHistoryBetween(productId, from, to, nil)
+		prices, err := priceFinder.FindPriceHistoryBetween(productId, *from, *to, nil)
 		if err != nil {
 			writeInternalError(w)
 			return

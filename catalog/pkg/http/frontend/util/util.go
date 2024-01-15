@@ -5,7 +5,6 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest/utils"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
-	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 	"net/http"
 )
 
@@ -23,16 +22,16 @@ func QueryParamString(page pagination.PaginatedQuery, filters product.FinderFilt
 		result += fmt.Sprintf("productId=%d&", id)
 	}
 
-	if filters.StoreId > -1 {
-		result += fmt.Sprintf("storeId=%d&", filters.StoreId)
+	if filters.StoreId != nil {
+		result += fmt.Sprintf("storeId=%d&", *filters.StoreId)
 	}
 
-	if filters.MinPrice > -1 {
-		result += fmt.Sprintf("minPrice=%f&", filters.MinPrice)
+	if filters.MinPrice != nil {
+		result += fmt.Sprintf("minPrice=%f&", *filters.MinPrice)
 	}
 
-	if filters.MaxPrice > -1 {
-		result += fmt.Sprintf("maxPrice=%f&", filters.MaxPrice)
+	if filters.MaxPrice != nil {
+		result += fmt.Sprintf("maxPrice=%f&", *filters.MaxPrice)
 	}
 
 	if len(filters.NameLike) > 0 {
@@ -43,52 +42,57 @@ func QueryParamString(page pagination.PaginatedQuery, filters product.FinderFilt
 		result += fmt.Sprintf("brand=%s&", filters.BrandLike)
 	}
 
-	if nulltype.IsUndefined(filters.Available) == false {
-		result += fmt.Sprintf("available=%d&", filters.Available)
+	if filters.Available != nil {
+		bAvailable := filters.Available
+		val := 0
+		if *bAvailable {
+			val = 1
+		}
+		result += fmt.Sprintf("available=%d&", val)
 	}
 
 	if len(filters.ProductUrl) > 0 {
 		result += fmt.Sprintf("productUrl=%s&", filters.ProductUrl)
 	}
 
-	if filters.MinDifference > -1 {
-		result += fmt.Sprintf("minDifference=%f&", filters.MinDifference)
+	if filters.MinDifference != nil {
+		result += fmt.Sprintf("minDifference=%f&", *filters.MinDifference)
 	}
 
-	if filters.MaxDifference > -1 {
-		result += fmt.Sprintf("maxDifference=%f&", filters.MaxDifference)
+	if filters.MaxDifference != nil {
+		result += fmt.Sprintf("maxDifference=%f&", *filters.MaxDifference)
 	}
 
-	if filters.MinDiscountPercent > -1 {
-		result += fmt.Sprintf("minDiscountPercent=%f&", filters.MinDiscountPercent)
+	if filters.MinDiscountPercent != nil {
+		result += fmt.Sprintf("minDiscountPercent=%f&", *filters.MinDiscountPercent)
 	}
 
-	if filters.MaxDiscountPercent > -1 {
-		result += fmt.Sprintf("maxDiscountPercent=%f&", filters.MaxDiscountPercent)
+	if filters.MaxDiscountPercent != nil {
+		result += fmt.Sprintf("maxDiscountPercent=%f&", *filters.MaxDiscountPercent)
 	}
 
-	if filters.MinAveragePrice > -1 {
-		result += fmt.Sprintf("minAveragePrice=%f&", filters.MinAveragePrice)
+	if filters.MinAveragePrice != nil {
+		result += fmt.Sprintf("minAveragePrice=%f&", *filters.MinAveragePrice)
 	}
 
-	if filters.MaxAveragePrice > -1 {
-		result += fmt.Sprintf("maxAveragePrice=%f&", filters.MaxAveragePrice)
+	if filters.MaxAveragePrice != nil {
+		result += fmt.Sprintf("maxAveragePrice=%f&", *filters.MaxAveragePrice)
 	}
 
-	if filters.MinMinimumPrice > -1 {
-		result += fmt.Sprintf("minMinimumPrice=%f&", filters.MinMinimumPrice)
+	if filters.MinMinimumPrice != nil {
+		result += fmt.Sprintf("minMinimumPrice=%f&", *filters.MinMinimumPrice)
 	}
 
-	if filters.MaxMinimumPrice > -1 {
-		result += fmt.Sprintf("minMaximumPrice=%f&", filters.MinMaximumPrice)
+	if filters.MaxMinimumPrice != nil {
+		result += fmt.Sprintf("minMaximumPrice=%f&", *filters.MinMaximumPrice)
 	}
 
-	if filters.MinMaximumPrice > -1 {
-		result += fmt.Sprintf("minMaximumPrice=%f&", filters.MaxMaximumPrice)
+	if filters.MinMaximumPrice != nil {
+		result += fmt.Sprintf("minMaximumPrice=%f&", *filters.MaxMaximumPrice)
 	}
 
-	if filters.MaxMaximumPrice > -1 {
-		result += fmt.Sprintf("maxMaximumPrice=%f&", filters.MaxMaximumPrice)
+	if filters.MaxMaximumPrice != nil {
+		result += fmt.Sprintf("maxMaximumPrice=%f&", *filters.MaxMaximumPrice)
 	}
 
 	return result[:len(result)-1]

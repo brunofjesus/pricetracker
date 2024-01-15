@@ -13,9 +13,9 @@ func GetHistory(finder *price.Finder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		productId, err := strconv.ParseInt(chi.URLParam(r, "productId"), 10, 64)
 
+		fromDefault := time.Now().AddDate(0, 0, -30)
 		from, err := utils.GetTimestampFromQueryParam(
-			r, "from",
-			time.Now().AddDate(0, 0, -30),
+			r, "from", &fromDefault,
 		)
 
 		if err != nil {
@@ -23,8 +23,9 @@ func GetHistory(finder *price.Finder) http.HandlerFunc {
 			return
 		}
 
+		toDefault := time.Now()
 		to, err := utils.GetTimestampFromQueryParam(
-			r, "to", time.Now(),
+			r, "to", &toDefault,
 		)
 
 		if err != nil {
@@ -32,7 +33,7 @@ func GetHistory(finder *price.Finder) http.HandlerFunc {
 			return
 		}
 
-		result, err := finder.FindPriceHistoryBetween(productId, from, to, nil)
+		result, err := finder.FindPriceHistoryBetween(productId, *from, *to, nil)
 		if err != nil {
 			utils.ErrorJSON(w, err, http.StatusInternalServerError)
 			return

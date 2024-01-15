@@ -5,9 +5,31 @@ import (
 	"errors"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
+	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 )
 
-type FinderFilters product_repository.ProductWithStatsFilter
+type FinderFilters struct {
+	ProductId []int64
+
+	StoreId    *int
+	MinPrice   *float64
+	MaxPrice   *float64
+	NameLike   string
+	BrandLike  string
+	Available  *bool
+	ProductUrl string
+
+	MinDifference      *float64
+	MaxDifference      *float64
+	MinDiscountPercent *float64
+	MaxDiscountPercent *float64
+	MinAveragePrice    *float64
+	MaxAveragePrice    *float64
+	MinMinimumPrice    *float64
+	MaxMinimumPrice    *float64
+	MinMaximumPrice    *float64
+	MaxMaximumPrice    *float64
+}
 
 type Finder struct {
 	DB                         *sql.DB
@@ -39,17 +61,38 @@ func (s *Finder) FindDetailedProducts(
 		"name",
 	)
 
+	repositoryFilters := product_repository.ProductWithStatsFilter{
+		ProductId:          filters.ProductId,
+		StoreId:            nulltype.IntPtrToSqlNullInt32(filters.StoreId),
+		MinPrice:           nulltype.Float64PtrToSqlNullFloat64(filters.MinPrice),
+		MaxPrice:           nulltype.Float64PtrToSqlNullFloat64(filters.MaxPrice),
+		NameLike:           nulltype.StringToSqlNullString(filters.NameLike),
+		BrandLike:          nulltype.StringToSqlNullString(filters.BrandLike),
+		Available:          nulltype.BooleanPrtToSqlNullBool(filters.Available),
+		ProductUrl:         nulltype.StringToSqlNullString(filters.ProductUrl),
+		MinDifference:      nulltype.Float64PtrToSqlNullFloat64(filters.MinDifference),
+		MaxDifference:      nulltype.Float64PtrToSqlNullFloat64(filters.MaxDifference),
+		MinDiscountPercent: nulltype.Float64PtrToSqlNullFloat64(filters.MinDiscountPercent),
+		MaxDiscountPercent: nulltype.Float64PtrToSqlNullFloat64(filters.MaxDiscountPercent),
+		MinAveragePrice:    nulltype.Float64PtrToSqlNullFloat64(filters.MinAveragePrice),
+		MaxAveragePrice:    nulltype.Float64PtrToSqlNullFloat64(filters.MaxAveragePrice),
+		MinMinimumPrice:    nulltype.Float64PtrToSqlNullFloat64(filters.MinMinimumPrice),
+		MaxMinimumPrice:    nulltype.Float64PtrToSqlNullFloat64(filters.MaxMinimumPrice),
+		MinMaximumPrice:    nulltype.Float64PtrToSqlNullFloat64(filters.MinMaximumPrice),
+		MaxMaximumPrice:    nulltype.Float64PtrToSqlNullFloat64(filters.MaxMaximumPrice),
+	}
+
 	items, err := s.ProductWithStatsRepository.FindProducts(
 		paginatedQuery.Offset(), paginatedQuery.Limit(),
 		sortField, paginatedQuery.SortDirection,
-		(*product_repository.ProductWithStatsFilter)(&filters),
+		&repositoryFilters,
 		nil,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	count, err := s.ProductWithStatsRepository.CountProducts((*product_repository.ProductWithStatsFilter)(&filters), nil)
+	count, err := s.ProductWithStatsRepository.CountProducts(&repositoryFilters, nil)
 	if err != nil {
 		return nil, err
 	}

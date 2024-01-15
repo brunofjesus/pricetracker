@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
-	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 	"github.com/shopspring/decimal"
 )
 
@@ -35,24 +34,24 @@ type ProductWithStats struct {
 type ProductWithStatsFilter struct {
 	ProductId []int64
 
-	StoreId    int
-	MinPrice   float64
-	MaxPrice   float64
-	NameLike   string
-	BrandLike  string
-	Available  nulltype.NullBoolean
-	ProductUrl string
+	StoreId    sql.NullInt32
+	MinPrice   sql.NullFloat64
+	MaxPrice   sql.NullFloat64
+	NameLike   sql.NullString
+	BrandLike  sql.NullString
+	Available  sql.NullBool
+	ProductUrl sql.NullString
 
-	MinDifference      float64
-	MaxDifference      float64
-	MinDiscountPercent float64
-	MaxDiscountPercent float64
-	MinAveragePrice    float64
-	MaxAveragePrice    float64
-	MinMinimumPrice    float64
-	MaxMinimumPrice    float64
-	MinMaximumPrice    float64
-	MaxMaximumPrice    float64
+	MinDifference      sql.NullFloat64
+	MaxDifference      sql.NullFloat64
+	MinDiscountPercent sql.NullFloat64
+	MaxDiscountPercent sql.NullFloat64
+	MinAveragePrice    sql.NullFloat64
+	MaxAveragePrice    sql.NullFloat64
+	MinMinimumPrice    sql.NullFloat64
+	MaxMinimumPrice    sql.NullFloat64
+	MinMaximumPrice    sql.NullFloat64
+	MaxMaximumPrice    sql.NullFloat64
 }
 
 var cols = []string{
@@ -162,23 +161,23 @@ func appendFiltersToQuery(q squirrel.SelectBuilder, filters ProductWithStatsFilt
 		f = append(f, squirrel.Eq{"product_id": filters.ProductId})
 	}
 
-	if filters.StoreId > -1 {
-		f = append(f, squirrel.Eq{"store_id": filters.StoreId})
+	if filters.StoreId.Valid {
+		f = append(f, squirrel.Eq{"store_id": filters.StoreId.Int32})
 	}
 
-	if len(filters.NameLike) > 0 {
-		f = append(f, squirrel.Like{"name": "%" + filters.NameLike + "%"})
+	if filters.NameLike.Valid {
+		f = append(f, squirrel.Like{"name": "%" + filters.NameLike.String + "%"})
 	}
 
-	if len(filters.BrandLike) > 0 {
-		f = append(f, squirrel.Like{"brand": "%" + filters.BrandLike + "%"})
+	if filters.BrandLike.Valid {
+		f = append(f, squirrel.Like{"brand": "%" + filters.BrandLike.String + "%"})
 	}
 
-	if !nulltype.IsUndefined(filters.Available) {
-		f = append(f, squirrel.Eq{"available": nulltype.IsTrue(filters.Available)})
+	if filters.Available.Valid {
+		f = append(f, squirrel.Eq{"available": filters.Available.Bool})
 	}
 
-	if len(filters.ProductUrl) > 0 {
+	if filters.ProductUrl.Valid {
 		f = append(f, squirrel.Eq{"product_url": filters.ProductUrl})
 	}
 
@@ -194,14 +193,14 @@ func appendFiltersToQuery(q squirrel.SelectBuilder, filters ProductWithStatsFilt
 	return q
 }
 
-func generateBetween(col string, minValue float64, maxValue float64) []squirrel.Sqlizer {
+func generateBetween(col string, minValue sql.NullFloat64, maxValue sql.NullFloat64) []squirrel.Sqlizer {
 	var result []squirrel.Sqlizer = make([]squirrel.Sqlizer, 0, 2)
 
-	if minValue > -1 {
-		result = append(result, squirrel.GtOrEq{col: minValue})
+	if minValue.Valid {
+		result = append(result, squirrel.GtOrEq{col: minValue.Float64})
 	}
-	if maxValue > -1 {
-		result = append(result, squirrel.LtOrEq{col: maxValue})
+	if maxValue.Valid {
+		result = append(result, squirrel.LtOrEq{col: maxValue.Float64})
 	}
 
 	return result
