@@ -39,6 +39,7 @@ func (s *Updater) Update(productId int64, storeProduct MqStoreProduct) error {
 		storeProduct.Brand,
 		storeProduct.ImageLink,
 		storeProduct.Link,
+		storeProduct.Currency,
 		storeProduct.Price,
 		storeProduct.Available,
 		tx,

@@ -18,6 +18,7 @@ type Product struct {
 	Available  bool   `db:"available"`
 	ImageUrl   string `db:"image_url"`
 	ProductUrl string `db:"product_url"`
+	Currency   string `db:"string"`
 }
 
 type Repository struct {
@@ -41,14 +42,14 @@ func (r *Repository) FindProductByUrl(url string, tx *sql.Tx) (*Product, error) 
 }
 
 func (r *Repository) CreateProduct(
-	storeId int64, name string, brand string, imageUrl string, productUrl string,
+	storeId int64, name, brand, imageUrl, productUrl, currency string,
 	price int, available bool, tx *sql.Tx,
 ) (int64, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Insert(ProductTableName).
-		Columns("store_id", "name", "brand", "price", "available", "image_url", "product_url").
-		Values(storeId, name, brand, price, available, imageUrl, productUrl).
+		Columns("store_id", "name", "brand", "price", "available", "image_url", "product_url", "currency").
+		Values(storeId, name, brand, price, available, imageUrl, productUrl, currency).
 		Suffix("RETURNING product_id")
 
 	var id int64
@@ -61,7 +62,7 @@ func (r *Repository) CreateProduct(
 }
 
 func (r *Repository) UpdateProduct(
-	productId int64, name string, brand string, imageUrl string, productUrl string,
+	productId int64, name, brand, imageUrl, productUrl, currency string,
 	price int, available bool, tx *sql.Tx,
 ) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
@@ -73,6 +74,7 @@ func (r *Repository) UpdateProduct(
 			"image_url":   imageUrl,
 			"product_url": productUrl,
 			"price":       price,
+			"currency":    currency,
 			"available":   available,
 		}).
 		Where(squirrel.Eq{"product_id": productId})
@@ -85,7 +87,11 @@ func (r *Repository) UpdateProduct(
 func (r *Repository) findOne(tx *sql.Tx, where any, args ...any) (*Product, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Select("product_id", "store_id", "name", "brand", "price", "available", "image_url", "product_url").
+	q := qb.Select(
+		"product_id", "store_id", "name",
+		"brand", "price", "available",
+		"image_url", "product_url", "currency",
+	).
 		From(ProductTableName).
 		Where(where, args...)
 
@@ -99,6 +105,7 @@ func (r *Repository) findOne(tx *sql.Tx, where any, args ...any) (*Product, erro
 		&product.Available,
 		&product.ImageUrl,
 		&product.ProductUrl,
+		&product.Currency,
 	)
 
 	return &product, err

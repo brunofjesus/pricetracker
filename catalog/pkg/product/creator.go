@@ -40,6 +40,7 @@ func (s *Creator) Create(storeProduct MqStoreProduct) error {
 		storeProduct.Brand,
 		storeProduct.ImageLink,
 		storeProduct.Link,
+		storeProduct.Currency,
 		storeProduct.Price,
 		storeProduct.Available,
 		tx,
