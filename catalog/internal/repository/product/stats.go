@@ -19,6 +19,7 @@ type ProductWithStats struct {
 	Name         string `db:"name" json:"name"`
 	Brand        string `db:"brand" json:"brand"`
 	Price        int    `db:"price" json:"price"`
+	Currency     string `db:"currency" json:"currency"`
 	Available    bool   `db:"available" json:"available"`
 	ImageUrl     string `db:"image_url" json:"image_url"`
 	ProductUrl   string `db:"product_url" json:"product_url"`
@@ -55,8 +56,9 @@ type ProductWithStatsFilter struct {
 }
 
 var cols = []string{
-	"product_id", "store_id", "store_name", "store_slug", "store_website", "name", "brand", "price", "available",
-	"image_url", "product_url", "difference", "discount_percent", "average", "maximum", "minimum", "entries",
+	"product_id", "store_id", "store_name", "store_slug", "store_website", "name", "brand", "price", "currency",
+	"available", "image_url", "product_url", "difference", "discount_percent", "average", "maximum", "minimum",
+	"entries",
 }
 
 type ProductWithStatsRepository struct {
@@ -141,6 +143,7 @@ func (r *ProductWithStatsRepository) scanFullRow(row squirrel.RowScanner, produc
 		&product.Name,
 		&product.Brand,
 		&product.Price,
+		&product.Currency,
 		&product.Available,
 		&product.ImageUrl,
 		&product.ProductUrl,

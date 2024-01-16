@@ -17,5 +17,6 @@ func mapPingoDoceProductToStoreProduct(store dto.Store, in definition.PingoDoceP
 		Available: in.OnlineStatus == "AVAILABLE",
 		ImageLink: fmt.Sprintf("https://res.cloudinary.com/fonte-online/image/upload/c_fill,h_600,q_auto,w_600/v1/PDO_PROD/%s_1", in.Sku),
 		Link:      fmt.Sprintf("https://mercadao.pt/store/pingo-doce/product/%s", in.Slug),
+		Currency:  "EUR",
 	}
 }

@@ -40,6 +40,7 @@ func (s *Creator) Create(storeProduct MqStoreProduct) error {
 		storeProduct.Brand,
 		storeProduct.ImageLink,
 		storeProduct.Link,
+		storeProduct.Currency,
 		storeProduct.Price,
 		storeProduct.Available,
 		tx,
@@ -65,7 +66,7 @@ func (s *Creator) Create(storeProduct MqStoreProduct) error {
 		)
 	}
 
-	err = s.PriceRepository.CreatePrice(productId, storeProduct.Price, time.Now(), tx)
+	err = s.PriceRepository.CreatePrice(productId, storeProduct.Currency, storeProduct.Price, time.Now(), tx)
 	if err != nil {
 		return err
 	}
