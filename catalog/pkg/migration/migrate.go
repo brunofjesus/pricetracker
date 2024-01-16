@@ -1,23 +1,13 @@
-package main
+package migration
 
 import (
-	"github.com/brunofjesus/pricetracker/catalog/internal/app"
-	"log"
-
-	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
+	"database/sql"
 	"github.com/golang-migrate/migrate/v4"
 	"github.com/golang-migrate/migrate/v4/database/postgres"
 	_ "github.com/golang-migrate/migrate/v4/source/file"
 )
 
-func main() {
-	doMigration()
-}
-
-func doMigration() {
-	config := app.GetApplicationConfiguration()
-	db := repository.Connect(config.Database.DSN, config.Database.Attempts)
-
+func Migrate(db *sql.DB) error {
 	driver, err := postgres.WithInstance(db, &postgres.Config{})
 
 	if err != nil {
@@ -29,14 +19,14 @@ func doMigration() {
 	)
 
 	if err != nil {
-		panic(err)
+		return err
 	}
 
 	err = migration.Up()
 
 	if err != nil && err.Error() != "no change" {
-		panic(err)
+		return err
 	}
 
-	log.Default().Println("Migration done!")
+	return nil
 }

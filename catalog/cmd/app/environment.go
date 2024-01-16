@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"github.com/brunofjesus/pricetracker/catalog/internal/app"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
 	price_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/price"
@@ -13,6 +14,7 @@ import (
 )
 
 type Environment struct {
+	DB      *sql.DB
 	Product Product
 	Price   Price
 	Store   Store
@@ -94,6 +96,7 @@ func loadEnvironment(appConfig *app.ApplicationConfiguration) Environment {
 	}
 
 	env := Environment{
+		DB: db,
 		Product: Product{
 			Creator: &productCreator,
 			Handler: &productHandler,

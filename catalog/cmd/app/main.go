@@ -6,6 +6,7 @@ import (
 	httpserver "github.com/brunofjesus/pricetracker/catalog/pkg/http"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/migration"
 	"log/slog"
 	"os"
 
@@ -20,6 +21,14 @@ func main() {
 
 	appConfig := app.GetApplicationConfiguration()
 	environment := loadEnvironment(appConfig)
+
+	if appConfig.Database.Migrate {
+		logger.Info("running migrations")
+		if err := migration.Migrate(environment.DB); err != nil {
+			logger.Error("cannot run migration, aborting application startup", slog.Any("error", err))
+			os.Exit(2)
+		}
+	}
 
 	logger.Info("will start workers", "workers", appConfig.MessageQueue.ThreadCount)
 
