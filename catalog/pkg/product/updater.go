@@ -68,6 +68,7 @@ func (s *Updater) Update(productId int64, storeProduct MqStoreProduct) error {
 		// Insert price update
 		err = s.PriceRepository.CreatePrice(
 			productId,
+			storeProduct.Currency,
 			storeProduct.Price,
 			time.Now(),
 			tx,

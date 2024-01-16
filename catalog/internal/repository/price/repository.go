@@ -15,6 +15,7 @@ type ProductPrice struct {
 	ProductId int64     `db:"product_id"`
 	DateTime  time.Time `db:"date_time"`
 	Price     int       `db:"price"`
+	Currency  string    `db:"currency"`
 }
 
 type Repository struct {
@@ -29,7 +30,7 @@ func NewRepository(db *sql.DB) *Repository {
 func (r *Repository) FindLatestPrice(productId int64, tx *sql.Tx) (*ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Select("product_id", "date_time", "price").
+	q := qb.Select("product_id", "date_time", "price", "currency").
 		From(ProductPriceTableName).
 		Where(squirrel.Eq{"product_id": productId}).
 		OrderBy("date_time desc").
@@ -40,6 +41,7 @@ func (r *Repository) FindLatestPrice(productId int64, tx *sql.Tx) (*ProductPrice
 		&productPrice.ProductId,
 		&productPrice.DateTime,
 		&productPrice.Price,
+		&productPrice.Currency,
 	)
 
 	return &productPrice, err
@@ -48,7 +50,7 @@ func (r *Repository) FindLatestPrice(productId int64, tx *sql.Tx) (*ProductPrice
 func (r *Repository) FindPricesBetween(productId int64, from time.Time, to time.Time, tx *sql.Tx) ([]ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Select("product_id", "date_time", "price").
+	q := qb.Select("product_id", "date_time", "price", "currency").
 		From(ProductPriceTableName).
 		Where(
 			squirrel.And{
@@ -79,6 +81,7 @@ func (r *Repository) FindPricesBetween(productId int64, from time.Time, to time.
 			&price.ProductId,
 			&price.DateTime,
 			&price.Price,
+			&price.Currency,
 		)
 		if err != nil {
 			return nil, err
@@ -92,7 +95,7 @@ func (r *Repository) FindPricesBetween(productId int64, from time.Time, to time.
 func (r *Repository) FindPrices(productId int64, offset int64, limit int, orderBy, direction string, tx *sql.Tx) ([]ProductPrice, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
-	q := qb.Select("product_id", "date_time", "price").
+	q := qb.Select("product_id", "date_time", "price", "currency").
 		From(ProductPriceTableName).
 		Where(squirrel.Eq{"product_id": productId}).
 		OrderBy(fmt.Sprintf("%s %s", orderBy, direction)).
@@ -113,6 +116,7 @@ func (r *Repository) FindPrices(productId int64, offset int64, limit int, orderB
 			&price.ProductId,
 			&price.DateTime,
 			&price.Price,
+			&price.Currency,
 		)
 		if err != nil {
 			return nil, err
@@ -134,12 +138,12 @@ func (r *Repository) CountPrices(productId int64, tx *sql.Tx) (int64, error) {
 	return count, err
 }
 
-func (r *Repository) CreatePrice(productId int64, price int, timestamp time.Time, tx *sql.Tx) error {
+func (r *Repository) CreatePrice(productId int64, currency string, price int, timestamp time.Time, tx *sql.Tx) error {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Insert(ProductPriceTableName).
-		Columns("product_id", "date_time", "price").
-		Values(productId, timestamp, price)
+		Columns("product_id", "date_time", "price", "currency").
+		Values(productId, timestamp, price, currency)
 
 	_, err := q.Exec()
 
