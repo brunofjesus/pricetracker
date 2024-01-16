@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS product_stats_product_id_idx ON product_stats (product_id);
