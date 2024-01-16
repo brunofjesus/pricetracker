@@ -13,7 +13,7 @@ templ ProductComponent(p product.ProductWithStats) {
                {p.Brand} {p.Name}
             </p>
             <div class="d-flex flex-row gap-1">
-              <h5 class="mb-1 me-1">{fmt.Sprintf("%.2f", float32(p.Price) / 100)}</h5>
+              <h5 class="mb-1 me-1">{fmt.Sprintf("%.2f", float32(p.Price) / 100)} {p.Currency}</h5>
               <span class="text-danger"><s>{p.Average.Div(decimal.NewFromInt(100)).StringFixed(2)}</s></span>
               <span>({p.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0)}%)</span>
             </div>

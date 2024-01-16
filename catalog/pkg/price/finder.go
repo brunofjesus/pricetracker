@@ -14,6 +14,7 @@ type Finder struct {
 type Price struct {
 	DateTime time.Time `json:"date_time,omitempty"`
 	Value    int       `json:"price,omitempty"`
+	Currency string    `json:"currency,omitempty"`
 }
 
 func (s *Finder) FindPriceHistoryBetween(productId int64, from time.Time, to time.Time, tx *sql.Tx) ([]Price, error) {
@@ -30,6 +31,7 @@ func (s *Finder) FindPriceHistoryBetween(productId int64, from time.Time, to tim
 		result[i] = Price{
 			DateTime: productPrice.DateTime,
 			Value:    productPrice.Price,
+			Currency: productPrice.Currency,
 		}
 	}
 
