@@ -21,8 +21,6 @@ build_sys_arch:
 	cp docker-compose.yml ../dist/$(system)_$(arch)/catalog;
 	cp -r migrations/ ../dist/$(system)_$(arch)/catalog/migrations;
 	GOOS=$(system) GOARCH=$(arch) go build -o ../dist/$(system)_$(arch)/catalog/catalog$(extension) ./cmd/app;
-	GOOS=$(system) GOARCH=$(arch) go build -o ../dist/$(system)_$(arch)/catalog/migrate$(extension) ./cmd/migration;
-
 
 build:
 	@if test -z "$(system)" || test -z "$(arch)"; then\
