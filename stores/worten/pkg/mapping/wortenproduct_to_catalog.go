@@ -22,6 +22,7 @@ func MapWortenProductToCatalogProduct(source definition.WortenProductHit, destin
 	destination.Available = source.WinningOffer.IsInStock
 	destination.ImageLink = source.Product.Image.URL
 	destination.Link = fmt.Sprintf("https://www.worten.pt/%s", source.Product.URL)
+	destination.Currency = "EUR"
 
 	return nil
 }

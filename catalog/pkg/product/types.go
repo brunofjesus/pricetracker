@@ -10,4 +10,5 @@ type MqStoreProduct struct {
 	Available bool
 	ImageLink string
 	Link      string
+	Currency  string
 }
