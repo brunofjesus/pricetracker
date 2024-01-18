@@ -78,7 +78,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap util/index.js
+   * Bootstrap common/index.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -604,7 +604,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap util/config.js
+   * Bootstrap common/config.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -815,7 +815,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap util/component-functions.js
+   * Bootstrap common/component-functions.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -979,7 +979,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap util/swipe.js
+   * Bootstrap common/swipe.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -2074,7 +2074,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap util/backdrop.js
+   * Bootstrap common/backdrop.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -2199,7 +2199,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap util/focustrap.js
+   * Bootstrap common/focustrap.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -2298,7 +2298,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap util/scrollBar.js
+   * Bootstrap common/scrollBar.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -2932,7 +2932,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap util/sanitizer.js
+   * Bootstrap common/sanitizer.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */
@@ -3025,7 +3025,7 @@
 
   /**
    * --------------------------------------------------------------------------
-   * Bootstrap util/template-factory.js
+   * Bootstrap common/template-factory.js
    * Licensed under MIT (https://github.com/twbs/bootstrap/blob/main/LICENSE)
    * --------------------------------------------------------------------------
    */

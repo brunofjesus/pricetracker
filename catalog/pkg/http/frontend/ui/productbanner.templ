@@ -4,28 +4,28 @@ import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/shopspring/decimal"
 import "fmt"
 
-templ ProductBannerComponent(p product.ProductWithStats) {
+templ ProductBannerComponent(p product.Product) {
   <div class="d-flex align-items-end mt-auto justify-content-between">
     <div>
       <h3>{p.Name}</h3>
       <h4>{p.Brand}</h4>
-      <b>{p.StoreName}</b>
+      <b>{p.Store.Name}</b>
       <div class="col-md-12">
         <div class="d-flex align-items-end pt-3 px-0 pb-0 mt-auto">
           <h5 class="mb-1 me-1">{fmt.Sprintf("%.2f", float32(p.Price) / 100)} { p.Currency }</h5>
         </div>
         <div class="d-flex align-items-end pt-1 px-0 pb-0 mt-auto gap-2">
-          <span class="text-danger"><s>{p.Average.Div(decimal.NewFromInt(100)).StringFixed(2)}</s></span>
-          <span>({p.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0)}%)</span>
+          <span class="text-danger"><s>{p.Statistics.Average.Div(decimal.NewFromInt(100)).StringFixed(2)}</s></span>
+          <span>({p.Statistics.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0)}%)</span>
         </div>
         <div class="d-flex align-items-end pt-1 px-0 pb-0 mt-auto gap-2">
           <span class="text-danger">
             <i class="bi bi-graph-up-arrow"></i>
-            {p.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2)}
+            {p.Statistics.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2)}
           </span>
           <span class="text-success">
             <i class="bi bi-graph-down-arrow"></i>
-            {p.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2)}
+            {p.Statistics.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2)}
           </span>
         </div>
       </div>

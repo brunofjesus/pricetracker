@@ -1,4 +1,4 @@
-package utils
+package common
 
 import (
 	"fmt"
@@ -87,14 +87,37 @@ func GetQueryParamFloat64Fallback(r *http.Request, key string, fallback *float64
 }
 
 func GetQueryParamNullBoolean(r *http.Request, key string) *bool {
-	intQueryParam, err := GetQueryParamInt(r, key)
-
-	if err != nil || intQueryParam == nil {
+	queryParam := GetQueryParam(r, key)
+	if len(queryParam) == 0 {
 		return nil
 	}
 
-	val := *intQueryParam > 0
+	switch strings.ToLower(queryParam) {
+	case "true":
+		v := true
+		return &v
+	case "false":
+		v := false
+		return &v
+	}
+
+	intQueryParam, err := strconv.Atoi(queryParam)
+	if err != nil {
+		return nil
+	}
+
+	val := intQueryParam > 0
 	return &val
+}
+
+func GetQueryParamBoolean(r *http.Request, key string, fallback bool) bool {
+	p := GetQueryParamNullBoolean(r, key)
+
+	if p == nil {
+		return fallback
+	}
+
+	return *p
 }
 
 func GetTimestampFromQueryParam(r *http.Request, key string, fallback *time.Time) (*time.Time, error) {

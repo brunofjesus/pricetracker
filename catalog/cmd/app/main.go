@@ -14,7 +14,7 @@ import (
 )
 
 func main() {
-	logger := newLogger()
+	logger := app.GetLogger()
 	slog.SetDefault(logger)
 
 	logger.Info("starting catalog application")
@@ -67,12 +67,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-}
-
-func newLogger() *slog.Logger {
-	return slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}).WithAttrs([]slog.Attr{
-		slog.String("application", "catalog"),
-	}))
 }

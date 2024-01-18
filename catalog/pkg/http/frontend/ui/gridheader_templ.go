@@ -13,7 +13,7 @@ import "bytes"
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import db_product "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
-import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/common/filters"
 import "strconv"
 import "strings"
 
@@ -27,7 +27,7 @@ func setSortOrder(baseUrl string) templ.ComponentScript {
 	}
 }
 
-func GridHeader(page pagination.PaginatedData[[]db_product.ProductWithStats], query pagination.PaginatedQuery, filters product.FinderFilters) templ.Component {
+func GridHeader(page pagination.PaginatedData[[]db_product.Product], query pagination.PaginatedQuery, filters product.FinderFilters) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -247,12 +247,12 @@ func sortOption(value string, text string, selected bool) templ.Component {
 	})
 }
 
-func getUrlWithoutSortField(query pagination.PaginatedQuery, filters product.FinderFilters) string {
+func getUrlWithoutSortField(query pagination.PaginatedQuery, requestFilters product.FinderFilters) string {
 	query.SortField = ""
-	return strings.Replace(util.QueryParamString(query, filters), "&sortField=", "", 1)
+	return strings.Replace(filters.ToQueryParameters(query, requestFilters), "&sortField=", "", 1)
 }
 
-func getSortDirectionUrl(query pagination.PaginatedQuery, filters product.FinderFilters, direction string) string {
+func getSortDirectionUrl(query pagination.PaginatedQuery, requestFilters product.FinderFilters, direction string) string {
 	query.SortDirection = direction
-	return util.QueryParamString(query, filters)
+	return filters.ToQueryParameters(query, requestFilters)
 }

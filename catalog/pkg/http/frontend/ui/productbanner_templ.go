@@ -14,7 +14,7 @@ import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/shopspring/decimal"
 import "fmt"
 
-func ProductBannerComponent(p product.ProductWithStats) templ.Component {
+func ProductBannerComponent(p product.Product) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -58,9 +58,9 @@ func ProductBannerComponent(p product.ProductWithStats) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var4 string
-		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(p.StoreName)
+		templ_7745c5c3_Var4, templ_7745c5c3_Err = templ.JoinStringErrs(p.Store.Name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/productbanner.templ`, Line: 11, Col: 21}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/productbanner.templ`, Line: 11, Col: 22}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var4))
 		if templ_7745c5c3_Err != nil {
@@ -97,9 +97,9 @@ func ProductBannerComponent(p product.ProductWithStats) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(p.Average.Div(decimal.NewFromInt(100)).StringFixed(2))
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(p.Statistics.Average.Div(decimal.NewFromInt(100)).StringFixed(2))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/productbanner.templ`, Line: 17, Col: 93}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/productbanner.templ`, Line: 17, Col: 104}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -115,9 +115,9 @@ func ProductBannerComponent(p product.ProductWithStats) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var9 string
-		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(p.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0))
+		templ_7745c5c3_Var9, templ_7745c5c3_Err = templ.JoinStringErrs(p.Statistics.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/productbanner.templ`, Line: 18, Col: 79}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/productbanner.templ`, Line: 18, Col: 90}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var9))
 		if templ_7745c5c3_Err != nil {
@@ -133,9 +133,9 @@ func ProductBannerComponent(p product.ProductWithStats) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(p.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2))
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(p.Statistics.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/productbanner.templ`, Line: 23, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/productbanner.templ`, Line: 23, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -146,9 +146,9 @@ func ProductBannerComponent(p product.ProductWithStats) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var12 string
-		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(p.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2))
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(p.Statistics.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/productbanner.templ`, Line: 27, Col: 66}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/productbanner.templ`, Line: 27, Col: 77}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {

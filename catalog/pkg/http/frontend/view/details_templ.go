@@ -16,7 +16,7 @@ import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/shopspring/decimal"
 
 type DetailsViewProps struct {
-	Product product.ProductWithStats
+	Product product.Product
 	Prices  []price.Price
 }
 
@@ -52,9 +52,9 @@ func DetailsView(d DetailsViewProps) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			templ_7745c5c3_Err = ui.HistoryChartComponent(ui.ChartProps{
-				MinimumPrice: centsToPrice(d.Product.Minimum),
-				MaximumPrice: centsToPrice(d.Product.Maximum),
-				AveragePrice: centsToPrice(d.Product.Average),
+				MinimumPrice: centsToPrice(d.Product.Statistics.Minimum),
+				MaximumPrice: centsToPrice(d.Product.Statistics.Maximum),
+				AveragePrice: centsToPrice(d.Product.Statistics.Average),
 				Prices:       d.Prices,
 			}).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {

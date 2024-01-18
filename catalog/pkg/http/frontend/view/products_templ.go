@@ -15,12 +15,12 @@ import db_product "github.com/brunofjesus/pricetracker/catalog/internal/reposito
 import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/common/filters"
 import "fmt"
-import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
 import "strings"
 
 type ProductsViewProps struct {
-	Page      pagination.PaginatedData[[]db_product.ProductWithStats]
+	Page      pagination.PaginatedData[[]db_product.Product]
 	PageQuery pagination.PaginatedQuery
 	Filters   product.FinderFilters
 	Stores    []db_store.Store
@@ -114,7 +114,7 @@ func ProductsView(p ProductsViewProps) templ.Component {
 
 func paginationUrlExpression(p ProductsViewProps) string {
 	return strings.Replace(
-		util.QueryParamString(p.PageQuery, p.Filters),
+		filters.ToQueryParameters(p.PageQuery, p.Filters),
 		fmt.Sprintf("page=%d", p.PageQuery.Page),
 		"page=%d",
 		1,

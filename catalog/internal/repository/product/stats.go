@@ -5,32 +5,9 @@ import (
 	"fmt"
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
-	"github.com/shopspring/decimal"
 )
 
 const ProductWithStatsViewName = "product_with_stats"
-
-type ProductWithStats struct {
-	ProductId    int64  `db:"product_id" json:"product_id"`
-	StoreId      int64  `db:"store_id" json:"store_id"`
-	StoreName    string `db:"store_name" json:"store_name"`
-	StoreSlug    string `db:"store_slug" json:"store_slug"`
-	StoreWebsite string `db:"store_website" json:"store_website"`
-	Name         string `db:"name" json:"name"`
-	Brand        string `db:"brand" json:"brand"`
-	Price        int    `db:"price" json:"price"`
-	Currency     string `db:"currency" json:"currency"`
-	Available    bool   `db:"available" json:"available"`
-	ImageUrl     string `db:"image_url" json:"image_url"`
-	ProductUrl   string `db:"product_url" json:"product_url"`
-
-	Difference       decimal.Decimal `db:"difference" json:"difference"`
-	DiscountPercent  decimal.Decimal `db:"discount_percent" json:"discount_percent"`
-	Average          decimal.Decimal `db:"average" json:"average"`
-	Minimum          decimal.Decimal `db:"minimum" json:"minimum"`
-	Maximum          decimal.Decimal `db:"maximum" json:"maximum"`
-	MetricEntryCount decimal.Decimal `db:"entries" json:"entries"`
-}
 
 type ProductWithStatsFilter struct {
 	ProductId []int64
@@ -73,19 +50,19 @@ func NewMetricsRepository(db *sql.DB) *ProductWithStatsRepository {
 	}
 }
 
-func (r *ProductWithStatsRepository) FindProductById(productId int64, tx *sql.Tx) (*ProductWithStats, error) {
+func (r *ProductWithStatsRepository) FindProductById(productId int64, tx *sql.Tx) (*Product, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select(cols...).From(ProductWithStatsViewName).Where(squirrel.Eq{"product_id": productId})
 
-	var product ProductWithStats
+	var product Product
 
 	err := r.scanFullRow(q.QueryRow(), &product)
 
 	return &product, err
 }
 
-func (r *ProductWithStatsRepository) FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductWithStatsFilter, tx *sql.Tx) ([]ProductWithStats, error) {
+func (r *ProductWithStatsRepository) FindProducts(offset int64, limit int, orderBy, direction string, filters *ProductWithStatsFilter, tx *sql.Tx) ([]Product, error) {
 	qb := repository.QueryBuilderOrDefault(tx, r.qb)
 
 	q := qb.Select(cols...).From(ProductWithStatsViewName)
@@ -97,7 +74,7 @@ func (r *ProductWithStatsRepository) FindProducts(offset int64, limit int, order
 		Offset(uint64(offset)).
 		Limit(uint64(limit))
 
-	var products []ProductWithStats
+	var products []Product
 	rows, err := q.Query()
 
 	if err != nil {
@@ -107,7 +84,7 @@ func (r *ProductWithStatsRepository) FindProducts(offset int64, limit int, order
 	defer rows.Close()
 
 	for rows.Next() {
-		var product ProductWithStats
+		var product Product
 
 		if err := r.scanFullRow(rows, &product); err != nil {
 			return nil, err
@@ -133,13 +110,16 @@ func (r *ProductWithStatsRepository) CountProducts(filters *ProductWithStatsFilt
 	return count, err
 }
 
-func (r *ProductWithStatsRepository) scanFullRow(row squirrel.RowScanner, product *ProductWithStats) error {
-	return row.Scan(
+func (r *ProductWithStatsRepository) scanFullRow(row squirrel.RowScanner, product *Product) error {
+	store := Store{}
+	stats := Statistics{}
+
+	err := row.Scan(
 		&product.ProductId,
-		&product.StoreId,
-		&product.StoreName,
-		&product.StoreSlug,
-		&product.StoreWebsite,
+		&store.StoreId,
+		&store.Name,
+		&store.Slug,
+		&store.Website,
 		&product.Name,
 		&product.Brand,
 		&product.Price,
@@ -148,13 +128,22 @@ func (r *ProductWithStatsRepository) scanFullRow(row squirrel.RowScanner, produc
 		&product.ImageUrl,
 		&product.ProductUrl,
 
-		&product.Difference,
-		&product.DiscountPercent,
-		&product.Average,
-		&product.Maximum,
-		&product.Minimum,
-		&product.MetricEntryCount,
+		&stats.Difference,
+		&stats.DiscountPercent,
+		&stats.Average,
+		&stats.Maximum,
+		&stats.Minimum,
+		&stats.MetricEntryCount,
 	)
+
+	if err != nil {
+		return err
+	}
+
+	product.Store = &store
+	product.Statistics = &stats
+
+	return nil
 }
 
 func appendFiltersToQuery(q squirrel.SelectBuilder, filters ProductWithStatsFilter) squirrel.SelectBuilder {

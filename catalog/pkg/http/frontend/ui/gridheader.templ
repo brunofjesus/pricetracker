@@ -3,7 +3,7 @@ package ui
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import db_product "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
-import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
+import "github.com/brunofjesus/pricetracker/catalog/pkg/http/common/filters"
 import "strconv"
 import "strings"
 
@@ -12,7 +12,7 @@ script setSortOrder(baseUrl string) {
     window.location = baseUrl + "&sortField=" + select.value
 }
 
-templ GridHeader(page pagination.PaginatedData[[]db_product.ProductWithStats], query pagination.PaginatedQuery, filters product.FinderFilters) {
+templ GridHeader(page pagination.PaginatedData[[]db_product.Product], query pagination.PaginatedQuery, filters product.FinderFilters) {
     <header class="d-sm-flex align-items-center border-bottom mb-4 pb-3">
       <strong class="d-block py-2">{ strconv.FormatInt(page.TotalResults, 10) } Items found </strong>
       <div class="ms-auto">
@@ -46,12 +46,12 @@ templ sortOption(value string, text string, selected bool) {
     }
 }
 
-func getUrlWithoutSortField(query pagination.PaginatedQuery, filters product.FinderFilters) string {
+func getUrlWithoutSortField(query pagination.PaginatedQuery, requestFilters product.FinderFilters) string {
     query.SortField = ""
-    return strings.Replace(util.QueryParamString(query, filters), "&sortField=", "", 1);
+    return strings.Replace(filters.ToQueryParameters(query, requestFilters), "&sortField=", "", 1);
 }
 
-func getSortDirectionUrl(query pagination.PaginatedQuery, filters product.FinderFilters, direction string) string {
+func getSortDirectionUrl(query pagination.PaginatedQuery, requestFilters product.FinderFilters, direction string) string {
     query.SortDirection = direction
-    return util.QueryParamString(query, filters)
+    return filters.ToQueryParameters(query, requestFilters)
 }

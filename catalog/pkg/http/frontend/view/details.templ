@@ -6,7 +6,7 @@ import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/shopspring/decimal"
 
 type DetailsViewProps struct {
-    Product product.ProductWithStats
+    Product product.Product
     Prices []price.Price
 }
 
@@ -17,9 +17,9 @@ templ DetailsView(d DetailsViewProps) {
         @ui.ProductBannerComponent(d.Product)
         <div class="row">
             @ui.HistoryChartComponent(ui.ChartProps{
-                MinimumPrice: centsToPrice(d.Product.Minimum),
-                MaximumPrice: centsToPrice(d.Product.Maximum),
-                AveragePrice: centsToPrice(d.Product.Average),
+                MinimumPrice: centsToPrice(d.Product.Statistics.Minimum),
+                MaximumPrice: centsToPrice(d.Product.Statistics.Maximum),
+                AveragePrice: centsToPrice(d.Product.Statistics.Average),
                 Prices: d.Prices,
             })
         </div>

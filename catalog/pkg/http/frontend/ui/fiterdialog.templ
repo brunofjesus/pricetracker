@@ -2,7 +2,6 @@ package ui
 
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
-import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
 import "fmt"
 
 templ FilterDialogComponent(filters product.FinderFilters, stores []db_store.Store) {
@@ -139,14 +138,14 @@ templ rangeFormControl(id string, label string, help string, fromValue *float64,
     </div>
     <div class="col-lg-4">
       if fromValue != nil{
-        <input type="number" step="any" name={fmt.Sprintf("min%s",id)} id={fmt.Sprintf("min%s",id)} class="form-control" placeholder="From" aria-describedby={fmt.Sprintf("%sHelp", id)} value={util.Float64ToString(*fromValue)}/>
+        <input type="number" step="any" name={fmt.Sprintf("min%s",id)} id={fmt.Sprintf("min%s",id)} class="form-control" placeholder="From" aria-describedby={fmt.Sprintf("%sHelp", id)} value={float64ToString(*fromValue)}/>
       } else {
         <input type="number" step="any" name={fmt.Sprintf("min%s",id)} id={fmt.Sprintf("min%s",id)} class="form-control" placeholder="From" aria-describedby={fmt.Sprintf("%sHelp", id)}/>
       }
     </div>
     <div class="col-lg-4">
       if toValue != nil {
-        <input type="number" step="any" name={fmt.Sprintf("max%s",id)} id={fmt.Sprintf("max%s",id)} class="form-control" placeholder="To" aria-describedby={fmt.Sprintf("%sHelp", id)} value={util.Float64ToString(*toValue)}/>
+        <input type="number" step="any" name={fmt.Sprintf("max%s",id)} id={fmt.Sprintf("max%s",id)} class="form-control" placeholder="To" aria-describedby={fmt.Sprintf("%sHelp", id)} value={float64ToString(*toValue)}/>
       } else {
         <input type="number" step="any" name={fmt.Sprintf("max%s",id)} id={fmt.Sprintf("max%s",id)} class="form-control" placeholder="To" aria-describedby={fmt.Sprintf("%sHelp", id)}/>
       }

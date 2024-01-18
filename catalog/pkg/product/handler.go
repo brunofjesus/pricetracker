@@ -12,6 +12,19 @@ type Handler struct {
 	Updater  *Updater
 }
 
+type MqStoreProduct struct {
+	StoreSlug string
+	EAN       []string
+	SKU       []string
+	Name      string
+	Brand     string
+	Price     int
+	Available bool
+	ImageLink string
+	Link      string
+	Currency  string
+}
+
 type Matcher interface {
 	Match(storeProduct MqStoreProduct) int64
 }

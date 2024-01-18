@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
+	"github.com/brunofjesus/pricetracker/catalog/pkg/http/common/filters"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/view"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
@@ -11,7 +11,7 @@ import (
 
 func SearchProduct(productFinder *product.Finder, storeFinder *store.Finder) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		filters, err := util.GetProductSearchFilters(r)
+		requestFilters, err := filters.FromHttpRequest(r)
 		if err != nil {
 			writeBadRequest(w)
 			return
@@ -28,7 +28,7 @@ func SearchProduct(productFinder *product.Finder, storeFinder *store.Finder) htt
 		}
 
 		products, err := productFinder.FindDetailedProducts(
-			*paginationQuery, *filters,
+			*paginationQuery, *requestFilters, false, false,
 		)
 
 		if err != nil || products == nil {
@@ -46,7 +46,7 @@ func SearchProduct(productFinder *product.Finder, storeFinder *store.Finder) htt
 		viewProps := view.ProductsViewProps{
 			Page:      *products,
 			PageQuery: *paginationQuery,
-			Filters:   *filters,
+			Filters:   *requestFilters,
 			Stores:    stores,
 		}
 

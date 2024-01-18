@@ -12,16 +12,6 @@ import (
 const ProductEanTableName = "product_ean"
 const ProductSkuTableName = "product_sku"
 
-type ProductEan struct {
-	ProductId int64 `db:"product_id"`
-	Ean       int64 `db:"ean"`
-}
-
-type ProductSku struct {
-	ProductId int64  `db:"product_id"`
-	Sku       string `db:"sku"`
-}
-
 type MetaRepository struct {
 	db *sql.DB
 	qb *squirrel.StatementBuilderType

@@ -1,8 +1,8 @@
 package handler
 
 import (
+	"github.com/brunofjesus/pricetracker/catalog/pkg/http/common"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/view"
-	"github.com/brunofjesus/pricetracker/catalog/pkg/http/rest/utils"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/price"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/product"
 	"github.com/go-chi/chi/v5"
@@ -20,7 +20,7 @@ func ProductDetails(productFinder *product.Finder, priceFinder *price.Finder) ht
 		}
 
 		fromDefault := time.Now().AddDate(0, 0, -30)
-		from, err := utils.GetTimestampFromQueryParam(
+		from, err := common.GetTimestampFromQueryParam(
 			r, "from", &fromDefault,
 		)
 
@@ -30,7 +30,7 @@ func ProductDetails(productFinder *product.Finder, priceFinder *price.Finder) ht
 		}
 
 		toDefault := time.Now()
-		to, err := utils.GetTimestampFromQueryParam(
+		to, err := common.GetTimestampFromQueryParam(
 			r, "to", &toDefault,
 		)
 

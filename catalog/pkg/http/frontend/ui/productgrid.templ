@@ -3,7 +3,7 @@ package ui
 import db_product "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 
-templ ProductGridComponent(page pagination.PaginatedData[[]db_product.ProductWithStats]) {
+templ ProductGridComponent(page pagination.PaginatedData[[]db_product.Product]) {
     <div class="row">
         for _, item := range page.Items {
             @ProductComponent(item)

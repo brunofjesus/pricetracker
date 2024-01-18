@@ -6,8 +6,8 @@ import (
 	"sync"
 )
 
-var once sync.Once
-var instance *ApplicationConfiguration
+var configOnce sync.Once
+var configInstance *ApplicationConfiguration
 
 type ApplicationConfiguration struct {
 	Database struct {
@@ -23,16 +23,16 @@ type ApplicationConfiguration struct {
 }
 
 func GetApplicationConfiguration() *ApplicationConfiguration {
-	once.Do(func() {
+	configOnce.Do(func() {
 		var err error
-		instance, err = loadConfig()
+		configInstance, err = loadConfig()
 
 		if err != nil {
 			panic(err)
 		}
 	})
 
-	return instance
+	return configInstance
 }
 
 func loadConfig() (*ApplicationConfiguration, error) {

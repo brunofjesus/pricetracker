@@ -12,7 +12,6 @@ import "bytes"
 
 import product "github.com/brunofjesus/pricetracker/catalog/pkg/product"
 import db_store "github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
-import "github.com/brunofjesus/pricetracker/catalog/pkg/http/frontend/util"
 import "fmt"
 
 func FilterDialogComponent(filters product.FinderFilters, stores []db_store.Store) templ.Component {
@@ -216,7 +215,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 				var templ_7745c5c3_Var13 string
 				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(store.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 70, Col: 100}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 69, Col: 100}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {
@@ -242,7 +241,7 @@ func FilterDialogModalComponent(filters product.FinderFilters, stores []db_store
 				var templ_7745c5c3_Var14 string
 				templ_7745c5c3_Var14, templ_7745c5c3_Err = templ.JoinStringErrs(store.Name)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 72, Col: 91}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 71, Col: 91}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var14))
 				if templ_7745c5c3_Err != nil {
@@ -377,7 +376,7 @@ func rangeFormControl(id string, label string, help string, fromValue *float64, 
 		var templ_7745c5c3_Var18 string
 		templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(label)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 137, Col: 41}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 136, Col: 41}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 		if templ_7745c5c3_Err != nil {
@@ -416,7 +415,7 @@ func rangeFormControl(id string, label string, help string, fromValue *float64, 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(util.Float64ToString(*fromValue)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(float64ToString(*fromValue)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -487,7 +486,7 @@ func rangeFormControl(id string, label string, help string, fromValue *float64, 
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(util.Float64ToString(*toValue)))
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(float64ToString(*toValue)))
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -540,7 +539,7 @@ func rangeFormControl(id string, label string, help string, fromValue *float64, 
 		var templ_7745c5c3_Var19 string
 		templ_7745c5c3_Var19, templ_7745c5c3_Err = templ.JoinStringErrs(help)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 153, Col: 84}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `pkg/http/frontend/ui/fiterdialog.templ`, Line: 152, Col: 84}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var19))
 		if templ_7745c5c3_Err != nil {

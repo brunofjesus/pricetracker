@@ -4,7 +4,7 @@ import "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 import "github.com/shopspring/decimal"
 import "fmt"
 
-templ ProductComponent(p product.ProductWithStats) {
+templ ProductComponent(p product.Product) {
     <div class="col-lg-3 col-md-4 col-sm-6 d-flex" id={fmt.Sprintf("product-%d", p.ProductId)}>
         <div class="card w-100 my-2 shadow-2-strong">
           <img src={p.ImageUrl} class="mt-2 mx-2" />
@@ -14,21 +14,21 @@ templ ProductComponent(p product.ProductWithStats) {
             </p>
             <div class="d-flex flex-row gap-1">
               <h5 class="mb-1 me-1">{fmt.Sprintf("%.2f", float32(p.Price) / 100)} {p.Currency}</h5>
-              <span class="text-danger"><s>{p.Average.Div(decimal.NewFromInt(100)).StringFixed(2)}</s></span>
-              <span>({p.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0)}%)</span>
+              <span class="text-danger"><s>{p.Statistics.Average.Div(decimal.NewFromInt(100)).StringFixed(2)}</s></span>
+              <span>({p.Statistics.DiscountPercent.Mul(decimal.NewFromInt(100)).StringFixed(0)}%)</span>
             </div>
             <div class="d-flex flex-row gap-3">
               <span class="text-danger">
                 <i class="bi bi-graph-up-arrow"></i>
-                {p.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2)}
+                {p.Statistics.Maximum.Div(decimal.NewFromInt(100)).StringFixed(2)}
               </span>
               <span class="text-success">
                 <i class="bi bi-graph-down-arrow"></i>
-                {p.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2)}
+                {p.Statistics.Minimum.Div(decimal.NewFromInt(100)).StringFixed(2)}
               </span>
             </div>
             <p class="card-text">
-               {p.StoreName}
+               {p.Store.Name}
             </p>
             <div class="d-flex align-items-end pt-3 px-0 pb-0 mt-auto">
               <a href={templ.URL(fmt.Sprintf("/%d", p.ProductId))} class="btn btn-primary shadow-0 me-1">Chart</a>

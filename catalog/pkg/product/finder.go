@@ -3,9 +3,11 @@ package product
 import (
 	"database/sql"
 	"errors"
+	"github.com/brunofjesus/pricetracker/catalog/internal/app"
 	product_repository "github.com/brunofjesus/pricetracker/catalog/internal/repository/product"
 	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
+	"log/slog"
 )
 
 type FinderFilters struct {
@@ -38,14 +40,16 @@ type Finder struct {
 	ProductMetaRepository      *product_repository.MetaRepository
 }
 
-func (s *Finder) FindProductById(productId int64) (*product_repository.ProductWithStats, error) {
+func (s *Finder) FindProductById(productId int64) (*product_repository.Product, error) {
 	return s.ProductWithStatsRepository.FindProductById(productId, nil)
 }
 
 func (s *Finder) FindDetailedProducts(
 	paginatedQuery pagination.PaginatedQuery,
 	filters FinderFilters,
-) (*pagination.PaginatedData[[]product_repository.ProductWithStats], error) {
+	fetchEan bool,
+	fetchSku bool,
+) (*pagination.PaginatedData[[]product_repository.Product], error) {
 	tx, err := s.DB.Begin()
 	if err != nil {
 		return nil, err
@@ -86,20 +90,45 @@ func (s *Finder) FindDetailedProducts(
 		paginatedQuery.Offset(), paginatedQuery.Limit(),
 		sortField, paginatedQuery.SortDirection,
 		&repositoryFilters,
-		nil,
+		tx,
 	)
 	if err != nil {
 		return nil, err
 	}
 
-	count, err := s.ProductWithStatsRepository.CountProducts(&repositoryFilters, nil)
+	if fetchEan || fetchSku {
+		for i, _ := range items {
+			product := &items[i]
+			if fetchEan {
+				if err := s.enrichProductWithEanSlice(product, tx); err != nil {
+					app.GetLogger().Warn(
+						"cannot enrich product with ean",
+						slog.String("service", "product.Finder"),
+						slog.Int64("product", product.ProductId),
+						slog.Any("error", err))
+				}
+			}
+
+			if fetchSku {
+				if err := s.enrichProductWithSkuSlice(product, tx); err != nil {
+					app.GetLogger().Warn(
+						"cannot enrich product with sku",
+						slog.String("service", "product.Finder"),
+						slog.Int64("product", product.ProductId),
+						slog.Any("error", err))
+				}
+			}
+		}
+	}
+
+	count, err := s.ProductWithStatsRepository.CountProducts(&repositoryFilters, tx)
 	if err != nil {
 		return nil, err
 	}
 
 	tx.Commit()
 
-	return pagination.NewPaginatedData[[]product_repository.ProductWithStats](
+	return pagination.NewPaginatedData[[]product_repository.Product](
 		items, len(items),
 		paginatedQuery.Page, paginatedQuery.PageSize, count,
 		paginatedQuery.SortField, paginatedQuery.SortDirection,
@@ -133,4 +162,34 @@ func (s *Finder) FindProductIdByStoreSlugAndEANs(storeSlug string, eans []string
 	}
 
 	return 0, nil
+}
+
+func (s *Finder) enrichProductWithEanSlice(product *product_repository.Product, tx *sql.Tx) error {
+	eanItems, err := s.ProductMetaRepository.GetProductEANs(product.ProductId, tx)
+	if err != nil {
+		return err
+	}
+	var eanSlice = make([]int64, len(eanItems))
+	for x, ean := range eanItems {
+		eanSlice[x] = ean.Ean
+	}
+
+	product.Ean = eanSlice
+
+	return nil
+}
+
+func (s *Finder) enrichProductWithSkuSlice(product *product_repository.Product, tx *sql.Tx) error {
+	skuItems, err := s.ProductMetaRepository.GetProductSKUs(product.ProductId, tx)
+	if err != nil {
+		return err
+	}
+	var skuSlice = make([]string, len(skuItems))
+	for x, sku := range skuItems {
+		skuSlice[x] = sku.Sku
+	}
+
+	product.Sku = skuSlice
+
+	return nil
 }
