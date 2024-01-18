@@ -6,6 +6,7 @@ import (
 	"github.com/rabbitmq/amqp091-go"
 )
 
+// Connect establishes a connection to PriceTracker's RabbitMQ
 func Connect(url string) (*amqp091.Connection, *amqp091.Channel, error) {
 	conn, err := amqp091.Dial(url)
 	if err != nil {

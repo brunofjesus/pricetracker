@@ -5,4 +5,5 @@ use (
 	./stores/connector
 	./stores/pingodoce
 	./stores/worten
+	./stores/example
 )

@@ -1,0 +1,3 @@
+messagequeue:
+  url: amqp://user:price@localhost:5672/
+loopIntervalMinutes: 1

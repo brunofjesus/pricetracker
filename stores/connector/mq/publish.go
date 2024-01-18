@@ -11,6 +11,7 @@ import (
 	"time"
 )
 
+// Publisher handles the MessageQueue connection for publishing Products and Stores into the PriceTracker's catalog
 type Publisher struct {
 	logger          *slog.Logger
 	messageQueueUrl string
@@ -19,6 +20,7 @@ type Publisher struct {
 	closeChan       chan struct{}
 }
 
+// NewPublisher creates a new Publisher instance
 func NewPublisher(logger *slog.Logger, messageQueueUrl string) (*Publisher, error) {
 	conn, ch, err := Connect(messageQueueUrl)
 	if err != nil {
@@ -38,6 +40,7 @@ func NewPublisher(logger *slog.Logger, messageQueueUrl string) (*Publisher, erro
 	return instance, nil
 }
 
+// PublishProduct sends a product update to the catalog
 func (p *Publisher) PublishProduct(product dto.StoreProduct) error {
 	messageBytes, err := json.Marshal(product)
 
@@ -48,6 +51,7 @@ func (p *Publisher) PublishProduct(product dto.StoreProduct) error {
 	return p.publish("product", messageBytes)
 }
 
+// PublishStore registers the store in the catalog
 func (p *Publisher) PublishStore(store dto.Store) error {
 	messageBytes, err := json.Marshal(store)
 
@@ -58,6 +62,7 @@ func (p *Publisher) PublishStore(store dto.Store) error {
 	return p.publish("store", messageBytes)
 }
 
+// Close closes the connection to the Message Queue
 func (p *Publisher) Close() error {
 	err := errors.Join(
 		p.conn.Close(),
