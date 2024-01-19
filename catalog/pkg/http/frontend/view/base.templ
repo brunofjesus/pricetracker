@@ -6,48 +6,20 @@ templ Base() {
 <!DOCTYPE html>
 <html>
   <head>
-    <link rel="stylesheet" href="/css/bootstrap.css" />
-    <link rel="stylesheet" href="/css/bootstrap-grid.css" />
-    <link rel="stylesheet" href="/css/bootstrap-utilities.css" />
-    <link rel="stylesheet" href="/css/bootstrap-icons.css" />
+    <link rel="stylesheet" href="/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/css/bootstrap-grid.min.css" />
+    <link rel="stylesheet" href="/css/bootstrap-utilities.min.css" />
+    <link rel="stylesheet" href="/css/bootstrap-icons.min.css" />
   </head>
   <body>
     @ui.HeaderComponent()
     { children... }
 
-    <script src="/js/bootstrap.bundle.js" crossorigin="anonymous"></script>
+    <script src="/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
     <script src="/js/htmx.min.js"></script>
     <script src="/js/client-side-templates.js"></script>
     <script src="/js/handlebars.js"></script>
-    <script type="text/javascript">
-        Handlebars.registerHelper( "when",function(operand_1, operator, operand_2, options) {
-          var operators = {
-           'eq': function(l,r) { return l == r; },
-           'noteq': function(l,r) { return l != r; },
-           'gt': function(l,r) { return Number(l) > Number(r); },
-           'or': function(l,r) { return l || r; },
-           'and': function(l,r) { return l && r; },
-           '%': function(l,r) { return (l % r) === 0; }
-          }
-          , result = operators[operator](operand_1,operand_2);
-
-          if (result) return options.fn(this);
-          else  return options.inverse(this);
-        });
-
-        Handlebars.registerHelper("math", function(lvalue, operator, rvalue, options) {
-            lvalue = parseFloat(lvalue);
-            rvalue = parseFloat(rvalue);
-
-            return {
-                "+": lvalue + rvalue,
-                "-": lvalue - rvalue,
-                "*": lvalue * rvalue,
-                "/": lvalue / rvalue,
-                "%": lvalue % rvalue
-            }[operator];
-        });
-    </script>
+    <script src="/js/handlebars-helpers.js"></script>
   </body>
 </html>
 }
