@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/Masterminds/squirrel"
 	"github.com/brunofjesus/pricetracker/catalog/internal/repository"
+	"github.com/brunofjesus/pricetracker/catalog/internal/repository/stats"
+	"github.com/brunofjesus/pricetracker/catalog/internal/repository/store"
 )
 
 const ProductWithStatsViewName = "product_with_stats"
@@ -48,6 +50,44 @@ func NewMetricsRepository(db *sql.DB) *ProductWithStatsRepository {
 		db: db,
 		qb: repository.QueryBuilder(db),
 	}
+}
+
+func (r *ProductWithStatsRepository) QuickSearch(tsExpression string) ([]Product, error) {
+	tsQuery := fmt.Sprintf("to_tsquery('english', '%s')", tsExpression)
+
+	q := r.qb.Select(
+		"product_id", "store_id", "store.name", "store.slug", "store.website",
+		"product.name", "brand", "product.price", "currency", "available", "image_url", "product_url",
+		"difference", "discount_percent", "average", "maximum", "minimum",
+		"entries").
+		From(ProductTableName).
+		InnerJoin(fmt.Sprintf("%s USING (product_id)", stats.ProductStatsTableName)).
+		InnerJoin(fmt.Sprintf("%s as store USING (store_id)", store.StoreTableName)).
+		Where(fmt.Sprintf("search_vector @@ %s", tsQuery)).
+		OrderBy(fmt.Sprintf("ts_rank(search_vector, %s)", tsQuery)).
+		Limit(20).
+		Offset(0)
+
+	var products []Product
+	rows, err := q.Query()
+
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	for rows.Next() {
+		var product Product
+
+		if err := r.scanFullRow(rows, &product); err != nil {
+			return nil, err
+		}
+
+		products = append(products, product)
+	}
+
+	return products, nil
 }
 
 func (r *ProductWithStatsRepository) FindProductById(productId int64, tx *sql.Tx) (*Product, error) {
