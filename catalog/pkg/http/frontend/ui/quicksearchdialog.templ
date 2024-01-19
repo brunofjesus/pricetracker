@@ -13,8 +13,8 @@ templ QuickSearchDialogComponent() {
                     class="form-control"
                     placeholder="Search..."
                     aria-label="Search"
-                    name="name"
-                    hx-get="/api/v1/product/search"
+                    name="q"
+                    hx-get="/api/v1/product/quick_search"
                     hx-trigger="keyup changed delay:500ms"
                     hx-target="#quick_search_results"
                     handlebars-template="quick_search_template"
@@ -33,7 +33,7 @@ templ QuickSearchDialogComponent() {
   </div>
 @templ.Raw(`
     <template id="quick_search_template">
-    {{#items}}
+    {{#each this}}
        <a href="/{{product_id}}" class="list-group-item list-group-item-action">
            <div class="row">
                <div class="col-md-2">
@@ -52,7 +52,7 @@ templ QuickSearchDialogComponent() {
                </div>
            </div>
        </a>
-    {{/items}}
+    {{/each}}
     </template>
     `)
 }

@@ -23,13 +23,13 @@ func QuickSearchDialogComponent() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"modal modal-lg\" id=\"quickSearchDialogModal\"><div class=\"modal-dialog modal-dialog-scrollable\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-body px-3 py-3\"><div class=\"d-flex flex-row align-items-center gap-1\" hx-ext=\"client-side-templates\"><input id=\"quick_search_input\" type=\"search\" class=\"form-control\" placeholder=\"Search...\" aria-label=\"Search\" name=\"name\" hx-get=\"/api/v1/product/search\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#quick_search_results\" handlebars-template=\"quick_search_template\"> <button type=\"button\" class=\"btn btn-outline-dark\" data-bs-dismiss=\"modal\" aria-label=\"Close\"><i class=\"bi bi-x-lg\"></i></button></div><div class=\"row mt-3\"><div class=\"list-group\" id=\"quick_search_results\"></div></div></div></div></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"modal modal-lg\" id=\"quickSearchDialogModal\"><div class=\"modal-dialog modal-dialog-scrollable\" role=\"document\"><div class=\"modal-content\"><div class=\"modal-body px-3 py-3\"><div class=\"d-flex flex-row align-items-center gap-1\" hx-ext=\"client-side-templates\"><input id=\"quick_search_input\" type=\"search\" class=\"form-control\" placeholder=\"Search...\" aria-label=\"Search\" name=\"q\" hx-get=\"/api/v1/product/quick_search\" hx-trigger=\"keyup changed delay:500ms\" hx-target=\"#quick_search_results\" handlebars-template=\"quick_search_template\"> <button type=\"button\" class=\"btn btn-outline-dark\" data-bs-dismiss=\"modal\" aria-label=\"Close\"><i class=\"bi bi-x-lg\"></i></button></div><div class=\"row mt-3\"><div class=\"list-group\" id=\"quick_search_results\"></div></div></div></div></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		templ_7745c5c3_Err = templ.Raw(`
     <template id="quick_search_template">
-    {{#items}}
+    {{#each this}}
        <a href="/{{product_id}}" class="list-group-item list-group-item-action">
            <div class="row">
                <div class="col-md-2">
@@ -48,7 +48,7 @@ func QuickSearchDialogComponent() templ.Component {
                </div>
            </div>
        </a>
-    {{/items}}
+    {{/each}}
     </template>
     `).Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
