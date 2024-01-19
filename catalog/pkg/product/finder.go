@@ -8,6 +8,7 @@ import (
 	"github.com/brunofjesus/pricetracker/catalog/pkg/pagination"
 	"github.com/brunofjesus/pricetracker/catalog/util/nulltype"
 	"log/slog"
+	"strings"
 )
 
 type FinderFilters struct {
@@ -133,6 +134,20 @@ func (s *Finder) FindDetailedProducts(
 		paginatedQuery.Page, paginatedQuery.PageSize, count,
 		paginatedQuery.SortField, paginatedQuery.SortDirection,
 	), nil
+}
+
+func (s *Finder) QuickSearch(expression string, andElseOr bool) ([]product_repository.Product, error) {
+	tsExpression := expression
+	if strings.Contains(tsExpression, " ") {
+		separator := "|"
+		if andElseOr {
+			separator = "&"
+		}
+
+		tsExpression = strings.Join(strings.Split(expression, " "), separator)
+	}
+
+	return s.ProductWithStatsRepository.QuickSearch(tsExpression)
 }
 
 func (s *Finder) FindProductByUrl(url string) (*product_repository.Product, error) {
