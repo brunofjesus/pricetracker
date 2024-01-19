@@ -18,6 +18,7 @@ func v1Routes(p V1ApiProps) RouteFunc {
 	return func(r chi.Router) {
 		r.Get("/product/{productId}", handler.GetProduct(p.ProductFinder))
 		r.Get("/product/search", handler.SearchProduct(p.ProductFinder))
+		r.Get("/product/quick_search", handler.QuickSearch(p.ProductFinder))
 		r.Get("/product/{productId}/history", handler.GetHistory(p.PriceFinder))
 	}
 }
