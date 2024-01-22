@@ -6,4 +6,5 @@ use (
 	./stores/pingodoce
 	./stores/worten
 	./stores/example
+	stores/pcdiga
 )
