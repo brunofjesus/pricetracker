@@ -1,8 +1,10 @@
 package main
 
-import "github.com/brunofjesus/pricetracker/stores/pcdiga/pkg/categories"
+import (
+	"github.com/brunofjesus/pricetracker/stores/pcdiga/pkg/crawler"
+)
 
 func main() {
 
-	categories.Parser()
+	crawler.Crawl()
 }
