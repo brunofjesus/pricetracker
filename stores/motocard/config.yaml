@@ -1,0 +1,10 @@
+messagequeue:
+  url: amqp://user:price@localhost:5672/
+store:
+  department: moto
+  country: pt
+  slug: motocard
+  name: Motocard
+userAgent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.3 Safari/605.1.15
+politenessDelayMs: 400
+loopIntervalMinutes: 360 # 6 hours
